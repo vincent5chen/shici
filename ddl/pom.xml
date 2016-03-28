@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>com.itranswarp.shici</groupId>
+		<artifactId>project</artifactId>
+		<version>PROJECT-SNAPSHOT</version>
+		<relativePath>../project/pom.xml</relativePath>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>ddl</artifactId>
+	<version>${project.version}</version>
+	<packaging>jar</packaging>
+
+	<properties>
+		<hibernate.entitymanager.version>4.3.10.Final</hibernate.entitymanager.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.itranswarp.shici</groupId>
+			<artifactId>web</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.itranswarp</groupId>
+			<artifactId>warpdb</artifactId>
+			<type>test-jar</type>
+			<version>${warpdb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>${hibernate.entitymanager.version}</version>
+		</dependency>
+	</dependencies>
+</project>
