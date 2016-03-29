@@ -19,16 +19,40 @@ public class Poem extends BaseEntity {
 	public String dynastyId;
 
 	@Column(length = ID_LENGTH, nullable = false)
+	public String imageId;
+
+	@Column(length = ID_LENGTH, nullable = false)
 	public String poetId;
 
 	@Column(length = VARCHAR_100, nullable = false)
 	public String poetName;
 
 	@Column(length = VARCHAR_100, nullable = false)
+	public String poetNameCht;
+
+	@Column(nullable = false)
+	public int form;
+
+	@Column(length = VARCHAR_100, nullable = false)
+	public String tags;
+
+	@Column(length = VARCHAR_100, nullable = false)
 	public String name;
 
+	@Column(length = VARCHAR_100, nullable = false)
+	public String nameCht;
+
+	@Column(columnDefinition = "text", nullable = false)
+	public String content;
+
+	@Column(columnDefinition = "text", nullable = false)
+	public String contentCht;
+
 	@Column(length = VARCHAR_1000, nullable = false)
-	public String description;
+	public String appreciation;
+
+	@Column(length = VARCHAR_1000, nullable = false)
+	public String appreciationCht;
 
 	@Override
 	public String toString() {

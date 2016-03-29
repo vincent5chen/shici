@@ -13,19 +13,41 @@ import com.itranswarp.warpdb.entity.BaseEntity;
  */
 @Entity
 @Table
-public class Poet extends BaseEntity {
+public class Poet extends BaseEntity implements ChineseSupport {
 
 	@Column(length = ID_LENGTH, nullable = false)
 	public String dynastyId;
 
+	@Column(nullable = false)
+	public int poemCount;
+
+	@Column(length = VARCHAR_100, nullable = false)
+	public String birth;
+
+	@Column(length = VARCHAR_100, nullable = false)
+	public String death;
+
 	@Column(length = VARCHAR_100, nullable = false)
 	public String name;
 
+	@Column(length = VARCHAR_100, nullable = false)
+	public String nameCht;
+
 	@Column(length = VARCHAR_1000, nullable = false)
 	public String description;
+
+	@Column(length = VARCHAR_1000, nullable = false)
+	public String descriptionCht;
+
+	@Override
+	public void updateChinese() {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
 	public String toString() {
 		return "{Poet: name=" + name + "}";
 	}
+
 }

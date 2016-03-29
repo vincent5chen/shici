@@ -48,7 +48,6 @@ public class User extends BaseEntity {
 		sys.role = Role.ADMIN;
 		sys.verified = true;
 		sys.imageUrl = "/static/img/admin.png";
-		sys.salt = "00000000-0000-0000-0000-000000000000";
 		sys.createdBy = ID;
 		sys.updatedBy = ID;
 		SYSTEM = sys;
@@ -74,8 +73,5 @@ public class User extends BaseEntity {
 
 	@Column(nullable = false)
 	public long lockedUntil;
-
-	@Column(length = VARCHAR_100, nullable = false, updatable = false)
-	public String salt;
 
 }

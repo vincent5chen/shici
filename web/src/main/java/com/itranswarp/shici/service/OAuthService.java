@@ -153,7 +153,7 @@ public class OAuthService extends AbstractService {
 
 	void generateCookie(HttpServletResponse response, User user, OAuth oauth) {
 		String cookieValue = cookieAuthHelper
-				.encode(new CookieAuth(user.id, oauth.provider, oauth.id, oauth.accessToken), user.salt);
+				.encode(new CookieAuth(user.id, oauth.provider, oauth.id, oauth.accessToken), user.id);
 		cookieAuthHelper.setSessionCookie(response, cookieValue);
 	}
 
