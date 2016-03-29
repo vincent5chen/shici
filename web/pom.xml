@@ -173,7 +173,7 @@
 					<outputDirectory>${project.basedir}/src/main/webapp/static/css</outputDirectory>
 					<compress>false</compress>
 					<includes>
-						<include>shici.less</include>
+						<include>main.less</include>
 					</includes>
 				</configuration>
 				<executions>
