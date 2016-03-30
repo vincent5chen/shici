@@ -17,9 +17,9 @@ import com.itranswarp.warpdb.entity.BaseEntity;
 public class User extends BaseEntity {
 
 	public static interface Role {
-		static final int ADMIN = 0;
-		static final int EDITOR = 100;
-		static final int USER = 10000;
+		static final long ADMIN = 0;
+		static final long EDITOR = 100;
+		static final long USER = 10000;
 	}
 
 	public static interface Gender {
@@ -54,7 +54,7 @@ public class User extends BaseEntity {
 	}
 
 	@Column(nullable = false, updatable = false)
-	public int role;
+	public long role;
 
 	@Column(length = VARCHAR_100, nullable = false, updatable = false)
 	public String name;

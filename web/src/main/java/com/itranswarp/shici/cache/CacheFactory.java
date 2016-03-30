@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CacheFactory implements FactoryBean<Cache> {
 
-	@Value("${cache.type:null}")
+	@Value("${cache.type:}")
 	String cacheType;
 
 	@Value("${cache.servers:}")
@@ -21,7 +21,7 @@ public class CacheFactory implements FactoryBean<Cache> {
 	@Override
 	public Cache getObject() throws Exception {
 		switch (this.cacheType) {
-		case "null":
+		case "":
 			return new NullCache();
 		case "memcached":
 			return new MemCache(cacheServers, cacheExpires);

@@ -14,7 +14,7 @@ public class ClassUtilTest {
 	@Test
 	public void testScanInDir() throws Exception {
 		ClassUtil cs = new ClassUtil();
-		List<Class<?>> list = cs.scan("com.itranswarp", c -> {
+		List<Class<?>> list = cs.scan("com.itranswarp.shici", c -> {
 			return c.getSimpleName().equals("JsonUtil");
 		});
 		assertEquals(1, list.size());

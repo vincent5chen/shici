@@ -1,6 +1,6 @@
 package com.itranswarp.shici.util;
 
-import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,15 +14,9 @@ public class ValidateUtil {
 
 	static final Pattern ALIAS_PATTERN = Pattern.compile("^[a-z0-9]{1,50}$");
 
-	static final Pattern CODE_PATTERN = Pattern.compile("^[a-z0-9]{4,10}$");
-
 	static final Pattern EMAIL_NAME_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9_.-]*$");
 	static final Pattern EMAIL_DOMAIN_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9-]*$");
 
-	static final Pattern PASSWORD_PATTERN = Pattern.compile("^[a-f0-9]{40}$");
-
-	static final long MAX_PRICE = 10000L;
-	static final long MAX_DIFFICULTY = 4L;
 	static final int MAX_FILE_BASE64_LENGTH = 1026 * 1026 * 4 / 3;
 
 	public static String checkId(String id) {
@@ -76,31 +70,6 @@ public class ValidateUtil {
 		return notes;
 	}
 
-	public static long checkFreeChapters(long freeChapters) {
-		if (freeChapters < 0 || freeChapters > 100) {
-			throw new APIArgumentException("freeChapters");
-		}
-		return freeChapters;
-	}
-
-	public static long checkPrice(long price) {
-		return checkPrice(price, "price");
-	}
-
-	public static long checkPrice(long price, String name) {
-		if (price < 0 || price > MAX_PRICE) {
-			throw new APIArgumentException(name);
-		}
-		return price;
-	}
-
-	public static long checkDifficulty(long difficulty) {
-		if (difficulty < 0 || difficulty > MAX_DIFFICULTY) {
-			throw new APIArgumentException("difficulty");
-		}
-		return difficulty;
-	}
-
 	public static String checkAlias(String alias) {
 		if (alias == null) {
 			throw new APIArgumentException("alias");
@@ -119,7 +88,7 @@ public class ValidateUtil {
 		if (name == null) {
 			throw new APIArgumentException("name");
 		}
-		name = name.trim();
+		name = normalizeChinese(name);
 		if (name.isEmpty() || name.length() > 100) {
 			throw new APIArgumentException("name");
 		}
@@ -130,7 +99,7 @@ public class ValidateUtil {
 		if (description == null) {
 			return "";
 		}
-		description = description.trim();
+		description = normalizeChinese(description);
 		if (description.length() > 1000) {
 			throw new APIArgumentException("description");
 		}
@@ -139,7 +108,7 @@ public class ValidateUtil {
 
 	public static String checkContent(String content) {
 		if (content != null) {
-			content = content.trim();
+			content = normalizeChinese(content);
 		}
 		// max to 512K:
 		if (content == null || content.isEmpty() || content.length() > 524288) {
@@ -194,34 +163,6 @@ public class ValidateUtil {
 		return email;
 	}
 
-	public static long checkDuration(long duration) {
-		if (duration <= 0 || duration > 10000) {
-			throw new APIArgumentException("duration");
-		}
-		return duration;
-	}
-
-	public static String checkPassword(String password) {
-		if (password == null || !PASSWORD_PATTERN.matcher(password).matches()) {
-			throw new APIArgumentException("password");
-		}
-		return password;
-	}
-
-	static final LocalDate MIN_DATE = LocalDate.of(2000, 1, 1);
-	static final LocalDate MAX_DATE = LocalDate.of(2020, 12, 31);
-
-	public static LocalDate checkLocalDate(String name, LocalDate date) {
-		if (date == null || date.isBefore(MIN_DATE) || date.isAfter(MAX_DATE)) {
-			throw new APIArgumentException(name);
-		}
-		return date;
-	}
-
-	public static String checkFileName(String fileName) {
-		return fileName == null ? "" : fileName;
-	}
-
 	public static String checkBase64Data(String data) {
 		if (data == null || data.isEmpty()) {
 			throw new APIArgumentException("data");
@@ -240,16 +181,6 @@ public class ValidateUtil {
 		return checkBase64Data("fileData", fileData);
 	}
 
-	public static String checkCode(String code, String codeName) {
-		if (code == null || code.isEmpty()) {
-			return "";
-		}
-		if (CODE_PATTERN.matcher(code.toLowerCase()).matches()) {
-			return code.toLowerCase();
-		}
-		throw new APIArgumentException(codeName, "invalid code.");
-	}
-
 	static String checkBase64Data(String name, String data) {
 		if (data == null || data.isEmpty()) {
 			throw new APIArgumentException(name);
@@ -260,4 +191,40 @@ public class ValidateUtil {
 		return data;
 	}
 
+	public static String checkDateString(String name, String date) {
+		if (date == null) {
+			return "";
+		}
+		date = date.trim();
+		if (date.length() > 10) {
+			throw new APIArgumentException(name, "Date is too long.");
+		}
+		return date;
+	}
+
+	static final String TRIM_STRING = " " + "［］｛｝（）" + "\"\'“”[](){}0123456789\u00a0\u3000\t\r\n\0"
+			+ "⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽⑾⑿⒀⒁⒂⒃⒄⒅⒆⒇" + "⒈⒉⒊⒋⒌⒍⒎⒏⒐⒑⒒⒓⒔⒕⒖⒗⒘⒙⒚⒛" + "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
+	static final Set<String> SHOULD_REMOVE = new HashSet<String>(Arrays.asList(TRIM_STRING.split("")));
+
+	static final char[][] SHOULD_REPLACE = { { ',', '，' }, { '.', '。' }, { ';', '；' }, { '?', '？' }, { '!', '！' },
+			{ '\u25cf', '\u00b7' }, { '\u25cb', '\u00b7' }, { '\u2299', '\u00b7' }, { '\u00b0', '\u00b7' },
+			{ '\u25aa', '\u00b7' }, { '\u25ab', '\u00b7' }, { '\u2022', '\u00b7' } };
+
+	static String normalizeChinese(String s) {
+		if (s == null) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder(s.length());
+		for (int i = 0; i < s.length(); i++) {
+			String ch = s.substring(i, i + 1);
+			if (!SHOULD_REMOVE.contains(ch)) {
+				sb.append(ch);
+			}
+		}
+		String r = sb.toString();
+		for (char[] repl : SHOULD_REPLACE) {
+			r = r.replace(repl[0], repl[1]);
+		}
+		return r;
+	}
 }

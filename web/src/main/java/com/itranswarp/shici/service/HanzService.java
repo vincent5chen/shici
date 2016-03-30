@@ -1,20 +1,40 @@
 package com.itranswarp.shici.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.itranswarp.warpdb.Database;
+import com.itranswarp.shici.model.Hanz;
 
 @Component
-public class HanzService {
+public class HanzService extends AbstractService {
 
-	@Autowired
-	Database database;
+	static Map<Character, Character> chtMap;
 
 	@PostConstruct
 	public void init() {
 		List<Hanz> all = database.from(Hanz.class).list();
+		Map<Character, Character> map = new HashMap<Character, Character>();
+		for (Hanz hanz : all) {
+			if (hanz.s.isEmpty() || hanz.t.isEmpty()) {
+				log.warn("s or t is empty: " + hanz);
+			}
+			map.put(hanz.s.charAt(0), hanz.t.charAt(0));
+		}
+		chtMap = map;
+	}
+
+	public static String toCht(String chs) {
+		StringBuilder sb = new StringBuilder(chs.length());
+		for (int i = 0; i < chs.length(); i++) {
+			char ch = chs.charAt(i);
+			Character t = chtMap.get(ch);
+			sb.append(t == null ? ch : t);
+		}
+		return sb.toString();
 	}
 }

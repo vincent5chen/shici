@@ -8,7 +8,7 @@ import javax.persistence.UniqueConstraint;
 import com.itranswarp.warpdb.entity.BaseEntity;
 
 /**
- * Category that contains a list of courses.
+ * Category that contains poems.
  * 
  * @author michael
  */

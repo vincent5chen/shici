@@ -9,7 +9,7 @@ import javax.persistence.UniqueConstraint;
 import com.itranswarp.warpdb.entity.BaseEntity;
 
 /**
- * Category that contains a list of courses.
+ * Many-to-many relationship between Category and Poem.
  * 
  * @author michael
  */

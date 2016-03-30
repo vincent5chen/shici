@@ -1,6 +1,5 @@
 package com.itranswarp.shici.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.itranswarp.shici.bean.UserProfileBean;
 import com.itranswarp.shici.cache.Cache;
-import com.itranswarp.shici.exception.APIEntityConflictException;
 import com.itranswarp.shici.exception.APIEntityNotFoundException;
 import com.itranswarp.shici.exception.APIPermissionException;
 import com.itranswarp.shici.model.User;
@@ -51,31 +48,6 @@ public class UserService extends AbstractService {
 		if (user == null) {
 			throw new APIEntityNotFoundException(User.class);
 		}
-		return user;
-	}
-
-	public User updateUserProfile(String userId, UserProfileBean bean) {
-		bean.validate();
-		User user = getUser(userId);
-		List<String> props = new ArrayList<String>();
-		// check email:
-		if (bean.email != null && !user.email.equals(bean.email)) {
-			if (database.from(User.class).where("email=?", bean.email).first() != null) {
-				throw new APIEntityConflictException("email", "email already in use.");
-			}
-			user.email = bean.email;
-			user.verified = false;
-			props.add("email");
-			props.add("verified");
-		}
-		if (!user.gender.equals(bean.gender)) {
-			user.gender = bean.gender;
-			props.add("gender");
-		}
-		if (props.isEmpty()) {
-			return user;
-		}
-		database.updateProperties(user, props.toArray(new String[props.size()]));
 		return user;
 	}
 
