@@ -12,10 +12,6 @@
 	<version>${project.version}</version>
 	<packaging>jar</packaging>
 
-	<properties>
-		<hibernate.entitymanager.version>4.3.10.Final</hibernate.entitymanager.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.itranswarp.shici</groupId>
