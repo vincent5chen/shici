@@ -93,7 +93,23 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIArgumentException.class)
 	public void testCreatePoetFailedForInvalidName() {
-		PoetBean bean = newPoetBean(getTangDynasty(), "   ");
+		PoetBean bean = newPoetBean(getTangDynasty().id, "  \u3000\r\n ");
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			poemService.createPoet(bean);
+		}
+	}
+
+	@Test(expected = APIArgumentException.class)
+	public void testCreatePoetFailedForInvalidDynastyId() {
+		PoetBean bean = newPoetBean("123", "陈子昂");
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			poemService.createPoet(bean);
+		}
+	}
+
+	@Test(expected = EntityNotFoundException.class)
+	public void testCreatePoetFailedForNonExistDynastyId() {
+		PoetBean bean = newPoetBean(IdUtil.next(), "陈子昂");
 		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
 			poemService.createPoet(bean);
 		}
@@ -101,7 +117,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test
 	public void testCreatePoetOK() {
-		PoetBean bean = newPoetBean(getTangDynasty(), "陈子昂 \u3000\r\n");
+		PoetBean bean = newPoetBean(getTangDynasty().id, "陈子昂 \u3000\r\n");
 		bean.birth = "  659  \t";
 		bean.death = "\n 700 \r";
 		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {

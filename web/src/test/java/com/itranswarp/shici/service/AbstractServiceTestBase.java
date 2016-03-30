@@ -57,9 +57,9 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 		return "//" + TestHelper.getProperty("storage.resource.host");
 	}
 
-	protected PoetBean newPoetBean(Dynasty dyn, String name) {
+	protected PoetBean newPoetBean(String dynastyId, String name) {
 		PoetBean bean = new PoetBean();
-		bean.dynastyId = dyn.id;
+		bean.dynastyId = dynastyId;
 		bean.name = name;
 		bean.description = "简介：" + name;
 		return bean;
