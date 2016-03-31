@@ -15,6 +15,9 @@ import com.itranswarp.warpdb.entity.BaseEntity;
 @Table
 public class Resource extends BaseEntity {
 
+	@Column(length = VARCHAR_100, nullable = false, updatable = false)
+	public String refType;
+
 	@Column(length = ID_LENGTH, nullable = false, updatable = false)
 	public String refId;
 
@@ -35,6 +38,9 @@ public class Resource extends BaseEntity {
 
 	@Column(length = VARCHAR_1000, nullable = false)
 	public String url;
+
+	@Column(length = VARCHAR_1000, nullable = false)
+	public String internalUrl;
 
 	@Override
 	public String toString() {

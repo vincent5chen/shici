@@ -6,7 +6,6 @@ import com.itranswarp.shici.DatabaseTestBase;
 import com.itranswarp.shici.TestHelper;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
-import com.itranswarp.shici.model.Dynasty;
 import com.itranswarp.shici.model.Hanz;
 import com.itranswarp.shici.model.User;
 import com.itranswarp.warpdb.IdUtil;

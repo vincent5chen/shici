@@ -134,6 +134,10 @@ public class PoemService extends AbstractService {
 		String oldPoetId = poem.poetId;
 		String newPoetId = bean.poetId;
 		copyToPoem(poem, poet, bean);
+		// update image:
+		if (bean.imageData!=null){
+			//
+		}
 		// update:
 		database.update(poem);
 		if (!oldPoetId.equals(newPoetId)) {

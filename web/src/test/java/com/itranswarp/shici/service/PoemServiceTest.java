@@ -3,7 +3,6 @@ package com.itranswarp.shici.service;
 import static org.junit.Assert.*;
 
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +14,7 @@ import com.itranswarp.shici.model.Dynasty;
 import com.itranswarp.shici.model.Poet;
 import com.itranswarp.shici.model.User;
 import com.itranswarp.warpdb.Database;
+import com.itranswarp.warpdb.EntityConflictException;
 import com.itranswarp.warpdb.EntityNotFoundException;
 import com.itranswarp.warpdb.IdUtil;
 import com.itranswarp.warpdb.context.UserContext;
@@ -227,6 +227,15 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testDeletePoetFailedWithoutPermission() {
 		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
 			poemService.deletePoet(null);
+		}
+	}
+
+	@Test(expected = EntityConflictException.class)
+	public void testDeletePoetFailedForPoemExist() {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
+			poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
+			poemService.deletePoet(poet.id);
 		}
 	}
 
