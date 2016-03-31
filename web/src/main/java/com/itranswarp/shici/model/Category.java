@@ -14,7 +14,7 @@ import com.itranswarp.warpdb.entity.BaseEntity;
  */
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "UK_Category_tag", columnNames = { "tag" }))
-public class Category extends BaseEntity implements ChineseSupport {
+public class Category extends BaseEntity {
 
 	@Column(length = VARCHAR_50, nullable = false, updatable = false)
 	public String tag;
@@ -33,12 +33,6 @@ public class Category extends BaseEntity implements ChineseSupport {
 
 	@Column(length = VARCHAR_1000, nullable = false)
 	public String descriptionCht;
-
-	@Override
-	public void updateChinese() {
-		this.nameCht = this.name;
-
-	}
 
 	@Override
 	public String toString() {

@@ -1,5 +1,6 @@
 package com.itranswarp.shici.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ public class ValidateUtil {
 	static final Pattern EMAIL_NAME_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9_.-]*$");
 	static final Pattern EMAIL_DOMAIN_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9-]*$");
 
+	// 1MB:
 	static final int MAX_FILE_BASE64_LENGTH = 1026 * 1026 * 4 / 3;
 
 	public static String checkId(String id) {
@@ -117,6 +119,17 @@ public class ValidateUtil {
 		return content;
 	}
 
+	public static String checkAppreciation(String appreciation) {
+		if (appreciation == null) {
+			return "";
+		}
+		appreciation = normalizeChinese(appreciation);
+		if (appreciation.length() > 1000) {
+			throw new APIArgumentException("appreciation");
+		}
+		return appreciation;
+	}
+
 	public static String checkGender(String gender) {
 		if (gender == null) {
 			return User.Gender.UNKNOWN;
@@ -161,6 +174,20 @@ public class ValidateUtil {
 			}
 		}
 		return email;
+	}
+
+	public static String checkTags(String tags) {
+		if (tags == null) {
+			return "";
+		}
+		String[] ss = tags.split("[，；\\,\\;\\s\u00a0\u3000]+");
+		List<String> tagList = new ArrayList<String>(ss.length);
+		for (String s : ss) {
+			if (!s.isEmpty()) {
+				tagList.add(s);
+			}
+		}
+		return String.join(",", tagList);
 	}
 
 	public static String checkBase64Data(String data) {
@@ -227,4 +254,5 @@ public class ValidateUtil {
 		}
 		return r;
 	}
+
 }

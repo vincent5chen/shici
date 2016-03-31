@@ -4,17 +4,15 @@ import org.junit.Before;
 
 import com.itranswarp.shici.DatabaseTestBase;
 import com.itranswarp.shici.TestHelper;
+import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
 import com.itranswarp.shici.model.Dynasty;
 import com.itranswarp.shici.model.Hanz;
 import com.itranswarp.shici.model.User;
-import com.itranswarp.shici.util.HashUtil;
 import com.itranswarp.warpdb.IdUtil;
 import com.itranswarp.warpdb.context.UserContext;
 
 public class AbstractServiceTestBase extends DatabaseTestBase {
-
-	protected final String PASSWORD = HashUtil.sha1("password");
 
 	protected HanzService hanzService;
 
@@ -27,7 +25,7 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 		// init hanz:
 		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
 			super.database.save(newHanz('汉', '漢'), newHanz('国', '國'), newHanz('陈', '陳'), newHanz('见', '見'),
-					newHanz('来', '來'), newHanz('还', '還'), newHanz('详', '詳'));
+					newHanz('张', '張'), newHanz('来', '來'), newHanz('还', '還'), newHanz('详', '詳'));
 		}
 		hanzService = new HanzService();
 		hanzService.database = super.database;
@@ -62,6 +60,15 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 		bean.dynastyId = dynastyId;
 		bean.name = name;
 		bean.description = "简介：" + name;
+		return bean;
+	}
+
+	protected PoemBean newPoemBean(String poetId, String name, String content) {
+		PoemBean bean = new PoemBean();
+		bean.poetId = poetId;
+		bean.name = name;
+		bean.content = content;
+		bean.appreciation = "赏析：" + name;
 		return bean;
 	}
 

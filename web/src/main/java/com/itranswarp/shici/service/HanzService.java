@@ -13,7 +13,7 @@ import com.itranswarp.shici.model.Hanz;
 @Component
 public class HanzService extends AbstractService {
 
-	static Map<Character, Character> chtMap;
+	Map<Character, Character> chtMap;
 
 	@PostConstruct
 	public void init() {
@@ -28,7 +28,7 @@ public class HanzService extends AbstractService {
 		chtMap = map;
 	}
 
-	public static String toCht(String chs) {
+	public String toCht(String chs) {
 		StringBuilder sb = new StringBuilder(chs.length());
 		for (int i = 0; i < chs.length(); i++) {
 			char ch = chs.charAt(i);
