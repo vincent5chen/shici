@@ -42,6 +42,15 @@ public class Resource extends BaseEntity {
 	@Column(length = VARCHAR_1000, nullable = false)
 	public String internalUrl;
 
+	@Column(length = VARCHAR_1000, nullable = false)
+	public String largeImageUrl;
+
+	@Column(length = VARCHAR_1000, nullable = false)
+	public String mediumImageUrl;
+
+	@Column(length = VARCHAR_1000, nullable = false)
+	public String smallImageUrl;
+
 	@Override
 	public String toString() {
 		return "{Resource: name=" + name + ", size=" + size + "}";

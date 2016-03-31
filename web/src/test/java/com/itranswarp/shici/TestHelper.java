@@ -1,6 +1,9 @@
 package com.itranswarp.shici;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -18,7 +21,9 @@ public class TestHelper {
 	public static String getProperty(String key, String defaultValue) {
 		try {
 			if (props == null) {
-				props = PropertiesLoaderUtils.loadAllProperties("default.properties");
+				Properties p = PropertiesLoaderUtils.loadAllProperties("default.properties");
+				loadExternalProperties(p);
+				props = p;
 			}
 			String value = props.getProperty(key, defaultValue);
 			if (value != null && value.startsWith("AES:")) {
@@ -27,6 +32,17 @@ public class TestHelper {
 			return value;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	static void loadExternalProperties(Properties p) {
+		File f = new File("/srv/shici/config.properties");
+		if (f.isFile()) {
+			try (InputStream input = new FileInputStream(f)) {
+				p.load(input);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 }

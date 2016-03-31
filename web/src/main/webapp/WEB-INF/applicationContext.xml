@@ -21,7 +21,7 @@
 		<property name="locations">
 			<list>
 				<value>classpath:default.properties</value>
-				<value>file:/srv/shici/www/shici.properties</value>
+				<value>file:/srv/shici/config.properties</value>
 			</list>
 		</property>
 	</bean>
