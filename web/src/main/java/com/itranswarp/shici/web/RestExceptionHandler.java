@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.itranswarp.shici.exception.APIErrorInfo;
 import com.itranswarp.shici.exception.APIException;
+import com.itranswarp.warpdb.EntityNotFoundException;
 
 @ControllerAdvice
 public class RestExceptionHandler {
@@ -26,6 +27,10 @@ public class RestExceptionHandler {
 			if (e instanceof APIException) {
 				log.error("Handle APIException: " + e.getClass().getName());
 				return ((APIException) e).toErrorInfo();
+			}
+			if (e instanceof EntityNotFoundException) {
+				EntityNotFoundException enf = (EntityNotFoundException) e;
+				return new APIErrorInfo("entity:notfound", enf.name, enf.getMessage());
 			}
 			log.error("Handle Non-APIException: " + e.getClass().getName(), e);
 			return new APIException(e).toErrorInfo();
