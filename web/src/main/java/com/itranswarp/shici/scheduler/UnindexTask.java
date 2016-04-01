@@ -1,7 +1,10 @@
 package com.itranswarp.shici.scheduler;
 
+import org.springframework.stereotype.Component;
+
 import com.itranswarp.shici.model.Job;
 
+@Component
 public class UnindexTask extends AbstractTask {
 
 	@Override

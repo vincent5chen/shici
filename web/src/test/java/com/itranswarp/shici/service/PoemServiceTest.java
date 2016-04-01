@@ -469,7 +469,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	}
 
 	@Test
-	public void updatePoemOKWithImageAdded() throws IOException {
+	public void testUpdatePoemOKWithImageAdded() throws IOException {
 		Poet poet = null;
 		Poem poem = null;
 		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {

@@ -25,6 +25,7 @@ public class HanzService extends AbstractService {
 			}
 			map.put(hanz.s.charAt(0), hanz.t.charAt(0));
 		}
+		log.info(all.size() + " characters loaded.");
 		chtMap = map;
 	}
 

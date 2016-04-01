@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.itranswarp.shici.bean.PoemBean;
@@ -70,7 +71,8 @@ public class PoemService extends AbstractService {
 		return poet;
 	}
 
-	public Poet updatePoet(String poetId, PoetBean bean) {
+	@RequestMapping(value = "/api/poets/{id}", method = RequestMethod.POST)
+	public Poet updatePoet(@PathVariable("id") String poetId, @RequestBody PoetBean bean) {
 		// check:
 		assertEditorRole();
 		bean.validate();
@@ -92,7 +94,8 @@ public class PoemService extends AbstractService {
 		poet.death = bean.death;
 	}
 
-	public void deletePoet(String poetId) {
+	@RequestMapping(value = "/api/poets/{id}/delete", method = RequestMethod.POST)
+	public void deletePoet(@PathVariable("id") String poetId) {
 		// check:
 		assertEditorRole();
 		Poet poet = getPoet(poetId);
@@ -102,12 +105,20 @@ public class PoemService extends AbstractService {
 
 	// poem ///////////////////////////////////////////////////////////////////
 
-	public Poem getPoem(String poemId) {
+	@RequestMapping(value = "/api/poems/{id}", method = RequestMethod.GET)
+	public Poem getPoem(@PathVariable("id") String poemId) {
 		return database.get(Poem.class, poemId);
 	}
 
-	public PagedResults<Poem> getPoems(String poetId, int pageIndex) {
+	@RequestMapping(value = "/api/poets/{id}/poems", method = RequestMethod.GET)
+	public PagedResults<Poem> getPoems(@PathVariable("id") String poetId,
+			@RequestParam(value = "page", defaultValue = "1") int pageIndex) {
 		return database.from(Poem.class).where("poetId=?", poetId).orderBy("name").list(pageIndex, 20);
+	}
+
+	@RequestMapping(value = "/api/featured/poem", method = RequestMethod.GET)
+	public Poem getFeaturedPoem() {
+		return getFeaturedPoem(LocalDate.now());
 	}
 
 	public Poem getFeaturedPoem(LocalDate targetDate) {
@@ -119,12 +130,18 @@ public class PoemService extends AbstractService {
 		return getPoem(fp.poemId);
 	}
 
+	@RequestMapping(value = "/api/featured/poems", method = RequestMethod.GET)
+	public Map<String, List<Poem>> restGetFeaturedPoems() {
+		return MapUtil.createMap("results", getFeaturedPoems());
+	}
+
 	public List<Poem> getFeaturedPoems() {
 		return database
 				.list("select p.* from FeaturedPoem fp inner join Poem p on fp.poemId=p.id order by fp.displayOrder");
 	}
 
-	public Poem createPoem(PoemBean bean) {
+	@RequestMapping(value = "/api/poems", method = RequestMethod.POST)
+	public Poem createPoem(@RequestBody PoemBean bean) {
 		// check:
 		assertEditorRole();
 		bean.validate();
@@ -145,7 +162,8 @@ public class PoemService extends AbstractService {
 		return poem;
 	}
 
-	public Poem updatePoem(String poemId, PoemBean bean) {
+	@RequestMapping(value = "/api/poems/{id}", method = RequestMethod.POST)
+	public Poem updatePoem(@PathVariable("id") String poemId, @RequestBody PoemBean bean) {
 		// check:
 		assertEditorRole();
 		bean.validate();
@@ -187,7 +205,8 @@ public class PoemService extends AbstractService {
 		poem.appreciationCht = hanzService.toCht(bean.appreciation);
 	}
 
-	public void deletePoem(String poemId) {
+	@RequestMapping(value = "/api/poems/{id}/delete", method = RequestMethod.POST)
+	public void deletePoem(@PathVariable("id") String poemId) {
 		// check:
 		assertEditorRole();
 		Poem poem = getPoem(poemId);
