@@ -6,15 +6,15 @@ import com.itranswarp.shici.DatabaseTestBase;
 import com.itranswarp.shici.TestHelper;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
+import com.itranswarp.shici.model.Dynasty;
 import com.itranswarp.shici.model.Hanz;
 import com.itranswarp.shici.model.Poem;
 import com.itranswarp.shici.model.User;
+import com.itranswarp.warpdb.Database;
 import com.itranswarp.warpdb.IdUtil;
 import com.itranswarp.warpdb.context.UserContext;
 
 public class AbstractServiceTestBase extends DatabaseTestBase {
-
-	protected HanzService hanzService;
 
 	protected User adminUser;
 	protected User editorUser;
@@ -22,17 +22,6 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 
 	@Before
 	public void initDb() {
-		// init hanz:
-		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
-			char[][] hanzs = new char[][] { { '东', '東' }, { '台', '臺' }, { '张', '張' }, { '来', '來' }, { '后', '後' },
-					{ '汉', '漢' }, { '国', '國' }, { '陈', '陳' }, { '见', '見' }, { '还', '還' }, { '详', '詳' } };
-			for (char[] hanz : hanzs) {
-				super.database.save(newHanz(hanz[0], hanz[1]));
-			}
-		}
-		hanzService = new HanzService();
-		hanzService.database = super.database;
-		hanzService.init();
 		// init users by each role:
 		adminUser = newUser(User.Role.ADMIN, "Admin");
 		editorUser = newUser(User.Role.EDITOR, "Editor");
@@ -41,6 +30,21 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 		for (User user : users) {
 			try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
 				super.database.save(user);
+			}
+		}
+	}
+
+	protected void initDynasties(HanzService hanzService, Database db) {
+		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
+			String[] names = { "先秦", "汉代", "三国两晋", "南北朝", "隋唐", "宋代", "元代", "明代", "清代", "近现代", "不详" };
+			for (int i = 0; i < names.length; i++) {
+				Dynasty dyn = new Dynasty();
+				dyn.name = names[i];
+				dyn.description = "朝代：" + names[i];
+				dyn.nameCht = hanzService.toCht(dyn.name);
+				dyn.descriptionCht = hanzService.toCht(dyn.description);
+				dyn.displayOrder = i;
+				database.save(dyn);
 			}
 		}
 	}
@@ -63,6 +67,8 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 		bean.dynastyId = dynastyId;
 		bean.name = name;
 		bean.description = "简介：" + name;
+		bean.birth = "";
+		bean.death = "";
 		return bean;
 	}
 

@@ -51,20 +51,20 @@ public class UserService extends AbstractService {
 		return user;
 	}
 
-	public List<User> getEditors() {
+	public List<User> doGetEditors() {
 		return database.from(User.class).where("role <= ?", User.Role.EDITOR).orderBy("name").list();
 	}
 
 	@RequestMapping(value = "/api/users", method = RequestMethod.GET)
-	public PagedResults<User> restGetUsers(@RequestParam(value = "page", defaultValue = "1") int pageIndex) {
+	public PagedResults<User> getUsers(@RequestParam(value = "page", defaultValue = "1") int pageIndex) {
 		assertEditorRole();
 		return database.from(User.class).orderBy("createdAt desc").list(pageIndex);
 	}
 
 	@RequestMapping(value = "/api/editors", method = RequestMethod.GET)
-	public Map<String, List<User>> restGetEditors() {
+	public Map<String, List<User>> getEditors() {
 		assertEditorRole();
-		return MapUtil.createMap("results", getEditors());
+		return MapUtil.createMap("results", doGetEditors());
 	}
 
 	@RequestMapping(value = "/api/users/{id}/lock/{seconds}", method = RequestMethod.POST)

@@ -21,7 +21,6 @@ import com.itranswarp.shici.model.User;
 import com.itranswarp.shici.util.Base64Util;
 import com.itranswarp.shici.util.FileUtil;
 import com.itranswarp.warpdb.Database;
-import com.itranswarp.warpdb.EntityConflictException;
 import com.itranswarp.warpdb.EntityNotFoundException;
 import com.itranswarp.warpdb.IdUtil;
 import com.itranswarp.warpdb.context.UserContext;
@@ -33,28 +32,30 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	@Before
 	public void setUp() {
 		poemService = initPoemService(database);
-		poemService.hanzService = hanzService;
+		initDynasties(database);
 	}
 
 	public PoemService initPoemService(Database db) {
 		PoemService s = new PoemService();
 		s.database = db;
-		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
-			initDynasties(db);
-		}
+		s.hanzService = new HanzServiceTest().initHanzService(db);
+
 		return s;
 	}
 
 	void initDynasties(Database db) {
-		String[] names = { "先秦", "汉代", "三国两晋", "南北朝", "隋唐", "宋代", "元代", "明代", "清代", "近现代", "不详" };
-		for (int i = 0; i < names.length; i++) {
-			Dynasty dyn = new Dynasty();
-			dyn.name = names[i];
-			dyn.description = "朝代：" + names[i];
-			dyn.nameCht = hanzService.toCht(dyn.name);
-			dyn.descriptionCht = hanzService.toCht(dyn.description);
-			dyn.displayOrder = i;
-			database.save(dyn);
+		HanzService hanzService = new HanzServiceTest().initHanzService(db);
+		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
+			String[] names = { "先秦", "汉代", "三国两晋", "南北朝", "隋唐", "宋代", "元代", "明代", "清代", "近现代", "不详" };
+			for (int i = 0; i < names.length; i++) {
+				Dynasty dyn = new Dynasty();
+				dyn.name = names[i];
+				dyn.description = "朝代：" + names[i];
+				dyn.nameCht = hanzService.toCht(dyn.name);
+				dyn.descriptionCht = hanzService.toCht(dyn.description);
+				dyn.displayOrder = i;
+				database.save(dyn);
+			}
 		}
 	}
 
@@ -333,7 +334,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		assertEquals("赏析：登·幽州臺歌", p.appreciationCht);
 		assertEquals(Poem.Form.WU_LV, p.form);
 		assertEquals("", p.imageId);
-		assertEquals(1, poet.poemCount);
+		assertEquals(1, poemService.getPoet(poet.id).poemCount);
 	}
 
 	@Test
@@ -464,7 +465,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		assertEquals("赏析：幽州臺歌", p.appreciationCht);
 		assertEquals(Poem.Form.WU_LV, p.form);
 		assertEquals("", p.imageId);
-		assertEquals(1, poet.poemCount);
+		assertEquals(1, poemService.getPoet(poet.id).poemCount);
 	}
 
 	@Test

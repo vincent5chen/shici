@@ -2,9 +2,14 @@ package com.itranswarp.shici.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
@@ -18,8 +23,9 @@ import com.itranswarp.warpdb.EntityNotFoundException;
 import com.itranswarp.warpdb.IdUtil;
 import com.itranswarp.warpdb.PagedResults;
 import com.itranswarp.warpdb.entity.BaseEntity;
+import com.itranswarp.wxapi.util.MapUtil;
 
-@Component
+@RestController
 public class PoemService extends AbstractService {
 
 	@Autowired
@@ -37,15 +43,22 @@ public class PoemService extends AbstractService {
 
 	// poet ///////////////////////////////////////////////////////////////////
 
+	@RequestMapping(value = "/api/{id}/poets", method = RequestMethod.GET)
+	public Map<String, List<Poet>> restGetPoets(@PathVariable("id") String dynastyId) {
+		return MapUtil.createMap("results", getPoets(dynastyId));
+	}
+
 	public List<Poet> getPoets(String dynastyId) {
 		return database.from(Poet.class).where("dynastyId=?", dynastyId).orderBy("name").list();
 	}
 
-	public Poet getPoet(String poetId) {
+	@RequestMapping(value = "/api/poets/{id}", method = RequestMethod.GET)
+	public Poet getPoet(@PathVariable("id") String poetId) {
 		return database.get(Poet.class, poetId);
 	}
 
-	public Poet createPoet(PoetBean bean) {
+	@RequestMapping(value = "/api/poets", method = RequestMethod.POST)
+	public Poet createPoet(@RequestBody PoetBean bean) {
 		// check:
 		assertEditorRole();
 		bean.validate();
@@ -185,8 +198,8 @@ public class PoemService extends AbstractService {
 
 	private void updatePoemCountOfPoet(String... poetIds) {
 		for (String poetId : poetIds) {
-			int count = database.queryForInt("select count(id) from Poem where poetId=?", poetId);
-			database.update("update Poet set poemCount=? where id=?", count, poetId);
+			database.update("update Poet set poemCount=(select count(id) from Poem where poetId=?) where id=?", poetId,
+					poetId);
 		}
 	}
 
