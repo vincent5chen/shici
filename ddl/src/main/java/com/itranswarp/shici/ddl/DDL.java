@@ -1,19 +1,18 @@
 package com.itranswarp.shici.ddl;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.dialect.MySQL5InnoDBDialect;
 
+import com.itranswarp.shici.model.ForeignKeys;
 import com.itranswarp.shici.util.EncryptUtil;
 import com.itranswarp.shici.util.FileUtil;
 import com.itranswarp.warpdb.DDLGenerator;
@@ -25,25 +24,26 @@ public class DDL {
 	public static void main(String[] args) throws Exception {
 		File file = new File(".").getAbsoluteFile();
 		String schemaOutput = file.getCanonicalPath() + File.separator + "target" + File.separator + "ddl.sql";
-		String initOutput = file.getCanonicalPath() + File.separator + "target" + File.separator + "init.sql";
 		DDLGenerator generator = new DDLGenerator();
 		generator.export(Arrays.asList("com.itranswarp.shici"), MySQL5InnoDBDialect.class, schemaOutput);
-		generatePreInitOutput(initOutput);
-		log.info("Database initialize script was successfully exported to file: " + initOutput);
+		String preInitOutput = generatePreInitOutput();
+		String postInitOutput = generatePostInitOutput();
+		log.info("Database initialize script was successfully exported to file: " + preInitOutput);
 		log.info("DDL script was successfully exported to file: " + schemaOutput);
+		String allOutput = file.getCanonicalPath() + File.separator + "target" + File.separator + "all.sql";
+		FileUtil.writeString(allOutput, preInitOutput + "\n" + FileUtil.readAsString(schemaOutput) + "\n"
+				+ postInitOutput + "\n\nselect \'database init ok.\' as \'MESSAGE:\';");
+
 		System.out.println("");
 		System.out.println("------------------------------------------------------------");
 		System.out.println("  WARNING:");
 		System.out.println("  Copy and run the following command to init database.");
 		System.out.println("------------------------------------------------------------");
 		System.out.println("");
-		String allOutput = file.getCanonicalPath() + File.separator + "target" + File.separator + "all.sql";
-		FileUtil.writeString(allOutput, FileUtil.readAsString(initOutput) + "\n" + FileUtil.readAsString(schemaOutput)
-				+ "\n\nselect \'database init ok.\' as \'MESSAGE:\';");
 		System.out.println(String.join(" ", "mysql", "-uroot", "-p", "<", allOutput));
 	}
 
-	static void generatePreInitOutput(String file) throws Exception {
+	static String generatePreInitOutput() throws Exception {
 		String propertyName = "default.properties";
 		URL resource = DDL.class.getClassLoader().getResource(propertyName);
 		if (resource == null) {
@@ -59,16 +59,16 @@ public class DDL {
 		}
 		String database = url.substring(url.lastIndexOf("/") + 1);
 		final String END = ";\n\n";
-		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"))) {
-			writer.write("drop database if exists " + database + END);
-			writer.write("create database " + database + END);
-			writer.write("grant all on " + database + ".* to \'" + user + "\'@\'localhost\' identified by \'" + password
-					+ "\'" + END);
-			writer.write("use " + database + END);
-		}
+		List<String> list = new ArrayList<String>();
+		list.add("drop database if exists " + database + END);
+		list.add("create database " + database + END);
+		list.add("grant all on " + database + ".* to \'" + user + "\'@\'localhost\' identified by \'" + password + "\'"
+				+ END);
+		list.add("use " + database + END);
+		return String.join("", list);
 	}
 
-	static void generatePostInitOutput(String file) throws Exception {
-		add foreign Key ..
+	static String generatePostInitOutput() throws Exception {
+		return String.join("\n\n", ForeignKeys.FOREIGN_KEYS);
 	}
 }
