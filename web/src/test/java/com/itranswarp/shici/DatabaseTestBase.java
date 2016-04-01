@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.junit.Before;
 
+import com.itranswarp.shici.model.ForeignKeys;
 import com.itranswarp.warpdb.Database;
 
 public class DatabaseTestBase {
@@ -16,7 +17,9 @@ public class DatabaseTestBase {
 		database.setBasePackages(Arrays.asList("com.itranswarp.shici.model"));
 		database.setJdbcTemplate(JdbcTemplateHsqldbFactory.createJdbcTemplate());
 		database.init();
-		database.update("alter table Poem add foreign key (poetId) references Poet (id)");
+		for (String fk : ForeignKeys.FOREIGN_KEYS) {
+			database.update(fk);
+		}
 	}
 
 }
