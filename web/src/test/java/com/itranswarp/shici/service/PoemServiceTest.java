@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
@@ -240,7 +241,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		}
 	}
 
-	@Test
+	@Test(expected = DataIntegrityViolationException.class)
 	public void testDeletePoetFailedForPoemExist() {
 		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
