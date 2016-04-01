@@ -28,7 +28,7 @@ public class DDL {
 		String initOutput = file.getCanonicalPath() + File.separator + "target" + File.separator + "init.sql";
 		DDLGenerator generator = new DDLGenerator();
 		generator.export(Arrays.asList("com.itranswarp.shici"), MySQL5InnoDBDialect.class, schemaOutput);
-		generateInitOutput(initOutput);
+		generatePreInitOutput(initOutput);
 		log.info("Database initialize script was successfully exported to file: " + initOutput);
 		log.info("DDL script was successfully exported to file: " + schemaOutput);
 		System.out.println("");
@@ -43,7 +43,7 @@ public class DDL {
 		System.out.println(String.join(" ", "mysql", "-uroot", "-p", "<", allOutput));
 	}
 
-	static void generateInitOutput(String file) throws Exception {
+	static void generatePreInitOutput(String file) throws Exception {
 		String propertyName = "default.properties";
 		URL resource = DDL.class.getClassLoader().getResource(propertyName);
 		if (resource == null) {
@@ -68,4 +68,7 @@ public class DDL {
 		}
 	}
 
+	static void generatePostInitOutput(String file) throws Exception {
+		add foreign Key ..
+	}
 }
