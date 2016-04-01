@@ -25,7 +25,7 @@ public class Resource extends BaseEntity {
 	public boolean deleted;
 
 	@Column(nullable = false)
-	public long size;
+	public int size;
 
 	@Column(length = VARCHAR_100, nullable = false)
 	public String name;
@@ -36,20 +36,8 @@ public class Resource extends BaseEntity {
 	@Column(length = VARCHAR_100, nullable = false)
 	public String mime;
 
-	@Column(length = VARCHAR_1000, nullable = false)
-	public String url;
-
-	@Column(length = VARCHAR_1000, nullable = false)
-	public String internalUrl;
-
-	@Column(length = VARCHAR_1000, nullable = false)
-	public String largeImageUrl;
-
-	@Column(length = VARCHAR_1000, nullable = false)
-	public String mediumImageUrl;
-
-	@Column(length = VARCHAR_1000, nullable = false)
-	public String smallImageUrl;
+	@Column(columnDefinition = COLUMN_TEXT, nullable = false)
+	public String data;
 
 	@Override
 	public String toString() {

@@ -1,6 +1,9 @@
 package com.itranswarp.shici.bean;
 
+import java.io.IOException;
+
 import com.itranswarp.shici.exception.APIArgumentException;
+import com.itranswarp.shici.exception.APIException;
 import com.itranswarp.shici.model.Poem;
 import com.itranswarp.shici.util.ValidateUtil;
 
@@ -31,7 +34,11 @@ public class PoemBean {
 			throw new APIArgumentException("form");
 		}
 		tags = ValidateUtil.checkTags(tags);
-		imageData = imageData == null ? null : ValidateUtil.checkBase64Data(imageData);
+		try {
+			imageData = ValidateUtil.checkImageData(imageData);
+		} catch (IOException e) {
+			throw new APIException("IOException", e);
+		}
 	}
 
 }

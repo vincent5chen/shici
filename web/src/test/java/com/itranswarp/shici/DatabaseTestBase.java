@@ -16,6 +16,7 @@ public class DatabaseTestBase {
 		database.setBasePackages(Arrays.asList("com.itranswarp.shici.model"));
 		database.setJdbcTemplate(JdbcTemplateHsqldbFactory.createJdbcTemplate());
 		database.init();
+		database.update("alter table Poem add foreign key(poetId) references Poem(id)");
 	}
 
 }

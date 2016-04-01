@@ -7,6 +7,7 @@ import com.itranswarp.shici.TestHelper;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
 import com.itranswarp.shici.model.Hanz;
+import com.itranswarp.shici.model.Poem;
 import com.itranswarp.shici.model.User;
 import com.itranswarp.warpdb.IdUtil;
 import com.itranswarp.warpdb.context.UserContext;
@@ -23,8 +24,11 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 	public void initDb() {
 		// init hanz:
 		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
-			super.database.save(newHanz('汉', '漢'), newHanz('国', '國'), newHanz('陈', '陳'), newHanz('见', '見'),
-					newHanz('张', '張'), newHanz('来', '來'), newHanz('还', '還'), newHanz('详', '詳'));
+			char[][] hanzs = new char[][] { { '东', '東' }, { '台', '臺' }, { '张', '張' }, { '来', '來' }, { '后', '後' },
+					{ '汉', '漢' }, { '国', '國' }, { '陈', '陳' }, { '见', '見' }, { '还', '還' }, { '详', '詳' } };
+			for (char[] hanz : hanzs) {
+				super.database.save(newHanz(hanz[0], hanz[1]));
+			}
 		}
 		hanzService = new HanzService();
 		hanzService.database = super.database;
@@ -68,6 +72,7 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 		bean.name = name;
 		bean.content = content;
 		bean.appreciation = "赏析：" + name;
+		bean.form = Poem.Form.WU_LV;
 		return bean;
 	}
 

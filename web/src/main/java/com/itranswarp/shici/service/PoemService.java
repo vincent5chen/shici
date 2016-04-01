@@ -12,9 +12,12 @@ import com.itranswarp.shici.model.Dynasty;
 import com.itranswarp.shici.model.FeaturedPoem;
 import com.itranswarp.shici.model.Poem;
 import com.itranswarp.shici.model.Poet;
-import com.itranswarp.warpdb.EntityConflictException;
+import com.itranswarp.shici.model.Resource;
+import com.itranswarp.shici.util.HttpUtil;
 import com.itranswarp.warpdb.EntityNotFoundException;
+import com.itranswarp.warpdb.IdUtil;
 import com.itranswarp.warpdb.PagedResults;
+import com.itranswarp.warpdb.entity.BaseEntity;
 
 @Component
 public class PoemService extends AbstractService {
@@ -80,22 +83,18 @@ public class PoemService extends AbstractService {
 		// check:
 		assertEditorRole();
 		Poet poet = getPoet(poetId);
-		// make sure no poem:
-		if (null != database.from(Poem.class).where("poetId=?", poetId).first()) {
-			throw new EntityConflictException("Poet", "Still has poem.");
-		}
 		// delete:
 		database.remove(poet);
 	}
 
 	// poem ///////////////////////////////////////////////////////////////////
 
-	public PagedResults<Poem> getPoems(String poetId, int pageIndex) {
-		return database.from(Poem.class).where("poetId=?", poetId).orderBy("name").list(pageIndex, 20);
-	}
-
 	public Poem getPoem(String poemId) {
 		return database.get(Poem.class, poemId);
+	}
+
+	public PagedResults<Poem> getPoems(String poetId, int pageIndex) {
+		return database.from(Poem.class).where("poetId=?", poetId).orderBy("name").list(pageIndex, 20);
 	}
 
 	public Poem getFeaturedPoem(LocalDate targetDate) {
@@ -117,8 +116,16 @@ public class PoemService extends AbstractService {
 		assertEditorRole();
 		bean.validate();
 		Poet poet = getPoet(bean.poetId);
-		// create:
 		Poem poem = new Poem();
+		poem.id = IdUtil.next();
+		// create image:
+		if (bean.imageData != null) {
+			Resource resource = createResource(poem, "cover", ".jpg", bean.imageData);
+			poem.imageId = resource.id;
+		} else {
+			poem.imageId = "";
+		}
+		// create:
 		copyToPoem(poem, poet, bean);
 		database.save(poem);
 		updatePoemCountOfPoet(bean.poetId);
@@ -134,14 +141,20 @@ public class PoemService extends AbstractService {
 		String oldPoetId = poem.poetId;
 		String newPoetId = bean.poetId;
 		copyToPoem(poem, poet, bean);
-		// update image:
-		if (bean.imageData!=null){
-			//
-		}
 		// update:
 		database.update(poem);
 		if (!oldPoetId.equals(newPoetId)) {
 			updatePoemCountOfPoet(oldPoetId, newPoetId);
+		}
+		// update image:
+		if (bean.imageData != null) {
+			String oldResourceId = poem.imageId;
+			Resource resource = createResource(poem, "cover", ".jpg", bean.imageData);
+			poem.imageId = resource.id;
+			database.updateProperties(poem, "imageId");
+			if (!oldResourceId.isEmpty()) {
+				deleteResource(oldResourceId);
+			}
 		}
 		return poem;
 	}
@@ -161,11 +174,62 @@ public class PoemService extends AbstractService {
 		poem.appreciationCht = hanzService.toCht(bean.appreciation);
 	}
 
+	public void deletePoem(String poemId) {
+		// check:
+		assertEditorRole();
+		Poem poem = getPoem(poemId);
+		// delete:
+		database.remove(poem);
+		updatePoemCountOfPoet(poem.poetId);
+	}
+
 	private void updatePoemCountOfPoet(String... poetIds) {
 		for (String poetId : poetIds) {
-			database.update("update Poet set poemCount=(select count(id) from Poem where poetId=?) where id=?", poetId,
-					poetId);
+			int count = database.queryForInt("select count(id) from Poem where poetId=?", poetId);
+			database.update("update Poet set poemCount=? where id=?", count, poetId);
 		}
+	}
+
+	// Resource ///////////////////////////////////////////////////////////////
+
+	public Resource getResource(String resourceId) {
+		return database.get(Resource.class, resourceId);
+	}
+
+	public Resource createResource(BaseEntity ref, String name, String ext, String base64Data) {
+		Resource resource = new Resource();
+		resource.meta = "";
+		resource.mime = HttpUtil.guessContentType(ext);
+		resource.name = name;
+		resource.refId = ref.id;
+		resource.refType = ref.getClass().getSimpleName();
+		resource.size = getSizeOfBase64String(base64Data);
+		resource.data = base64Data;
+		database.save(resource);
+		return resource;
+	}
+
+	public void deleteResource(String resourceId) {
+		Resource resource = new Resource();
+		resource.id = resourceId;
+		database.remove(resource);
+	}
+
+	int getSizeOfBase64String(String base64Data) {
+		int n = base64Data.length();
+		if (base64Data.endsWith("==")) {
+			n = n - 2;
+		} else if (base64Data.endsWith("=")) {
+			n = n - 1;
+		}
+		int seg = (n / 4) * 3;
+		int mod = n % 4;
+		if (mod == 3) {
+			seg = seg + 2;
+		} else if (mod == 2) {
+			seg = seg + 1;
+		}
+		return seg;
 	}
 
 }

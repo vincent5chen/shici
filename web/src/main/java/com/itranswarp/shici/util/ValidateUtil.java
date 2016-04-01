@@ -1,5 +1,7 @@
 package com.itranswarp.shici.util;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -191,8 +193,11 @@ public class ValidateUtil {
 	}
 
 	public static String checkBase64Data(String data) {
-		if (data == null || data.isEmpty()) {
-			throw new APIArgumentException("data");
+		if (data == null) {
+			return null;
+		}
+		if (data.isEmpty()) {
+			throw new APIArgumentException("data", "data is empty.");
 		}
 		if (data.length() > MAX_FILE_BASE64_LENGTH) {
 			throw new APIArgumentException("data", "data is too large.");
@@ -200,22 +205,31 @@ public class ValidateUtil {
 		return data;
 	}
 
-	public static String checkImageData(String imageData) {
-		return checkBase64Data("imageData", imageData);
-	}
-
-	public static String checkFileData(String fileData) {
-		return checkBase64Data("fileData", fileData);
-	}
-
-	static String checkBase64Data(String name, String data) {
-		if (data == null || data.isEmpty()) {
-			throw new APIArgumentException(name);
+	public static String checkImageData(String imageData) throws IOException {
+		if (imageData == null || imageData.isEmpty()) {
+			return null;
 		}
-		if (data.length() > MAX_FILE_BASE64_LENGTH) {
-			throw new APIArgumentException(name, "File is too large.");
+		if (imageData.length() > MAX_FILE_BASE64_LENGTH) {
+			throw new APIArgumentException("imageData", "File is too large.");
 		}
-		return data;
+		BufferedImage bi = ImageUtil.loadImage(Base64Util.decode(imageData));
+		if (bi == null) {
+			throw new APIArgumentException("imageData", "Invalid image.");
+		}
+		// TODO: check format
+		if (bi.getWidth() == 640 && bi.getHeight() == 360) {
+			return imageData;
+		}
+		if (bi.getWidth() < 640 || bi.getHeight() < 360) {
+			throw new APIArgumentException("imageData", "image is too small.");
+		}
+		BufferedImage scaled = ImageUtil.fitToSize(bi, 640, 360);
+		byte[] scaledData = ImageUtil.toJpeg(scaled);
+		String scaledB64Data = Base64Util.encodeToString(scaledData);
+		if (scaledB64Data.length() > MAX_FILE_BASE64_LENGTH) {
+			throw new APIArgumentException("imageData", "Scaled image is too large.");
+		}
+		return scaledB64Data;
 	}
 
 	public static String checkDateString(String name, String date) {

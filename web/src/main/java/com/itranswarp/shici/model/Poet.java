@@ -19,7 +19,7 @@ public class Poet extends BaseEntity {
 	public String dynastyId;
 
 	@Column(nullable = false)
-	public long poemCount;
+	public int poemCount;
 
 	@Column(length = VARCHAR_100, nullable = false)
 	public String birth;
