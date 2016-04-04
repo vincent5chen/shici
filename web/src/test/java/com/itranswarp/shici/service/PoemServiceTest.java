@@ -3,11 +3,13 @@ package com.itranswarp.shici.service;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
@@ -39,7 +41,6 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		PoemService s = new PoemService();
 		s.database = db;
 		s.hanziService = new HanzServiceTest().initHanziService(db);
-
 		return s;
 	}
 
@@ -559,6 +560,145 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 			poemService.deletePoem(null);
 		}
 	}
+
+	// featured ///////////////////////////////////////////////////////////////
+
+	@Test(expected = APIPermissionException.class)
+	public void testSetAsFeaturedFailedWithoutPermission() {
+		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
+			poemService.setPoemAsFeatured(null);
+		}
+	}
+
+	@Test(expected = APIArgumentException.class)
+	public void testSetAsFeaturedFailedWithDateTooSmall() {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
+			Poem poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
+			poemService.setPoemAsFeatured(newFeaturedBean(poem.id, LocalDate.of(1999, 12, 31)));
+		}
+	}
+
+	@Test(expected = APIArgumentException.class)
+	public void testSetAsFeaturedFailedWithDateTooLarge() {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
+			Poem poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
+			poemService.setPoemAsFeatured(newFeaturedBean(poem.id, LocalDate.of(2100, 1, 1)));
+		}
+	}
+
+	@Test(expected = EntityNotFoundException.class)
+	public void testSetAsFeaturedFailedWithPoemNotFound() {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			poemService.setPoemAsFeatured(newFeaturedBean(IdUtil.next(), LocalDate.of(2016, 1, 1)));
+		}
+	}
+
+	@Test(expected = APIArgumentException.class)
+	public void testSetAsFeaturedFailedForPoemHasNoImage() {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
+			Poem poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
+			poemService.setPoemAsFeatured(newFeaturedBean(poem.id, LocalDate.of(2016, 1, 1)));
+		}
+	}
+
+	@Test
+	public void testSetAsFeaturedOK() throws IOException {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
+			PoemBean poemBean = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
+			poemBean.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
+			Poem poem = poemService.createPoem(poemBean);
+			poemService.setPoemAsFeatured(newFeaturedBean(poem.id, LocalDate.of(2016, 1, 1)));
+		}
+	}
+
+	@Test(expected = DuplicateKeyException.class)
+	public void testSetAsFeaturedFailedForPoemAlreadyFeatured() throws IOException {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
+			PoemBean poemBean = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
+			poemBean.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
+			Poem poem = poemService.createPoem(poemBean);
+			poemService.setPoemAsFeatured(newFeaturedBean(poem.id, LocalDate.of(2016, 1, 1)));
+			poemService.setPoemAsFeatured(newFeaturedBean(poem.id, LocalDate.of(2016, 2, 2)));
+		}
+	}
+
+	@Test(expected = DuplicateKeyException.class)
+	public void testSetAsFeaturedFailedForPubDateAlreadyFeatured() throws IOException {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
+			PoemBean poemBean1 = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
+			poemBean1.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
+			Poem poem1 = poemService.createPoem(poemBean1);
+			PoemBean poemBean2 = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
+			poemBean2.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
+			Poem poem2 = poemService.createPoem(poemBean2);
+			poemService.setPoemAsFeatured(newFeaturedBean(poem1.id, LocalDate.of(2016, 1, 1)));
+			poemService.setPoemAsFeatured(newFeaturedBean(poem2.id, LocalDate.of(2016, 1, 1)));
+		}
+	}
+
+	@Test(expected = APIPermissionException.class)
+	public void testSetAsUnfeaturedFailedWithoutPermission() {
+		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
+			poemService.setPoemAsUnfeatured(null);
+		}
+	}
+
+	@Test(expected = EntityNotFoundException.class)
+	public void testSetAsUnfeaturedFailedForPoemNotExist() {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			poemService.setPoemAsUnfeatured(IdUtil.next());
+		}
+	}
+
+	@Test
+	public void testSetAsUnfeaturedOK() throws IOException {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
+			PoemBean poemBean = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
+			poemBean.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
+			Poem poem = poemService.createPoem(poemBean);
+			poemService.setPoemAsFeatured(newFeaturedBean(poem.id, LocalDate.of(2016, 1, 1)));
+			poemService.setPoemAsUnfeatured(poem.id);
+		}
+	}
+
+	@Test
+	public void testGetFeaturedPoemsAndPoem() throws IOException {
+		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
+			PoemBean poemBean1 = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
+			PoemBean poemBean2 = newPoemBean(poet.id, "送客", "故人洞庭去，杨柳春风生。");
+			poemBean1.imageData = poemBean2.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
+			Poem poem1 = poemService.createPoem(poemBean1);
+			Poem poem2 = poemService.createPoem(poemBean2);
+			poemService.setPoemAsFeatured(newFeaturedBean(poem1.id, LocalDate.of(2016, 1, 1)));
+			poemService.setPoemAsFeatured(newFeaturedBean(poem2.id, LocalDate.of(2016, 2, 2)));
+			List<Poem> featured = poemService.getFeaturedPoems();
+			assertNotNull(featured);
+			assertEquals(2, featured.size());
+			assertEquals(poem2.name, featured.get(0).name);
+			assertEquals(poem1.name, featured.get(1).name);
+			// get single:
+			Poem p11 = poemService.getFeaturedPoem(LocalDate.of(2016, 1, 1));
+			assertEquals(poem1.id, p11.id);
+			Poem p12 = poemService.getFeaturedPoem(LocalDate.of(2016, 1, 2));
+			assertEquals(poem1.id, p12.id);
+			Poem p21 = poemService.getFeaturedPoem(LocalDate.of(2016, 2, 1));
+			assertEquals(poem1.id, p21.id);
+			Poem p22 = poemService.getFeaturedPoem(LocalDate.of(2016, 2, 2));
+			assertEquals(poem2.id, p22.id);
+			Poem p33 = poemService.getFeaturedPoem(LocalDate.of(2016, 3, 3));
+			assertEquals(poem2.id, p33.id);
+		}
+	}
+
+	// category ///////////////////////////////////////////////////////////////
 
 	// resource ///////////////////////////////////////////////////////////////
 

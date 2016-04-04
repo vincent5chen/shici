@@ -3,6 +3,7 @@ package com.itranswarp.shici.service;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
+import org.junit.Test;
 
 import com.itranswarp.shici.model.User;
 import com.itranswarp.warpdb.Database;
@@ -32,6 +33,7 @@ public class HanzServiceTest extends AbstractServiceTestBase {
 		return s;
 	}
 
+	@Test
 	public void testToCht() {
 		assertEquals("陳子昂", hanziService.toCht("陈子昂"));
 	}

@@ -186,7 +186,7 @@ public class ValidateUtil {
 		if (date.isBefore(LocalDate.of(2000, 1, 1))) {
 			throw new APIArgumentException(name, name + " is out of range.");
 		}
-		if (date.isAfter(LocalDate.of(2100, 1, 1))) {
+		if (date.isAfter(LocalDate.of(2099, 12, 31))) {
 			throw new APIArgumentException(name, name + " is out of range.");
 		}
 		return date;

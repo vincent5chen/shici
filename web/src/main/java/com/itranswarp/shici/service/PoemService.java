@@ -370,8 +370,8 @@ public class PoemService extends AbstractService {
 	}
 
 	public List<Poem> getFeaturedPoems() {
-		return database
-				.list("select p.* from FeaturedPoem fp inner join Poem p on fp.poemId=p.id order by fp.displayOrder");
+		return database.list(Poem.class,
+				"select p.* from FeaturedPoem fp inner join Poem p on fp.poemId=p.id order by fp.pubDate desc");
 	}
 
 	@RequestMapping(value = "/api/featured", method = RequestMethod.POST)

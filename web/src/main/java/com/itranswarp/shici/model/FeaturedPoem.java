@@ -15,7 +15,7 @@ import com.itranswarp.warpdb.entity.BaseEntity;
  * @author michael
  */
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(name = "UNI_PubDate", columnNames = "pubDate"),
+@Table(uniqueConstraints = { @UniqueConstraint(name = "UNI_F_PubDate", columnNames = "pubDate"),
 		@UniqueConstraint(name = "UNI_F_PoemId", columnNames = "poemId") })
 public class FeaturedPoem extends BaseEntity {
 

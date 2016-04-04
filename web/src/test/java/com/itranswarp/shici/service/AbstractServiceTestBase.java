@@ -1,9 +1,12 @@
 package com.itranswarp.shici.service;
 
+import java.time.LocalDate;
+
 import org.junit.Before;
 
 import com.itranswarp.shici.DatabaseTestBase;
 import com.itranswarp.shici.TestHelper;
+import com.itranswarp.shici.bean.FeaturedBean;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
 import com.itranswarp.shici.model.Dynasty;
@@ -14,7 +17,7 @@ import com.itranswarp.warpdb.Database;
 import com.itranswarp.warpdb.IdUtil;
 import com.itranswarp.warpdb.context.UserContext;
 
-public class AbstractServiceTestBase extends DatabaseTestBase {
+public abstract class AbstractServiceTestBase extends DatabaseTestBase {
 
 	protected User adminUser;
 	protected User editorUser;
@@ -67,6 +70,13 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 		bean.description = "简介：" + name;
 		bean.birth = "";
 		bean.death = "";
+		return bean;
+	}
+
+	protected FeaturedBean newFeaturedBean(String poemId, LocalDate pubDate) {
+		FeaturedBean bean = new FeaturedBean();
+		bean.poemId = poemId;
+		bean.pubDate = pubDate;
 		return bean;
 	}
 
