@@ -26,6 +26,18 @@
 		</property>
 	</bean>
 
+	<bean id="weixinClient" class="com.itranswarp.wxapi.WeixinClient"
+		init-method="init">
+		<property name="appId" value="${wxapi.app.id}" />
+		<property name="appSecret" value="${wxapi.app.secret}" />
+		<property name="appToken" value="${wxapi.app.token}" />
+		<property name="aesKey" value="${wxapi.app.aeskey}" />
+		<property name="debug" value="${wxapi.debug:true}" />
+		<property name="cache">
+			<bean class="com.itranswarp.wxapi.token.cache.SimpleAccessTokenCache" />
+		</property>
+	</bean>
+
 	<!-- DataSource -->
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
 		destroy-method="close">
