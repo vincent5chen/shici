@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.itranswarp.shici.service.JobService;
+import com.itranswarp.wxapi.WeixinClient;
 
 @Component
 public class Schedulers {
@@ -20,6 +21,14 @@ public class Schedulers {
 
 	@Autowired
 	UnindexTask unindexTask;
+
+	@Autowired
+	WeixinClient weixinClient;
+
+	@Scheduled(initialDelay = WeixinClient.REFRESH_TOKEN_IN_MILLIS, fixedRate = WeixinClient.REFRESH_TOKEN_IN_MILLIS)
+	public void refreshAccessToken() {
+		weixinClient.refreshAccessToken();
+	}
 
 	@Scheduled(initialDelay = ONE_MINUTE * 10, fixedRate = ONE_MINUTE * 10)
 	public void scanTimeoutJobs() {
