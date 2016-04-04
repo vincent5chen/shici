@@ -1,10 +1,12 @@
 package com.itranswarp.shici.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,8 +14,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.itranswarp.shici.bean.CategoryBean;
+import com.itranswarp.shici.bean.FeaturedBean;
+import com.itranswarp.shici.bean.IdsBean;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
+import com.itranswarp.shici.exception.APIArgumentException;
+import com.itranswarp.shici.model.Category;
+import com.itranswarp.shici.model.CategoryPoem;
 import com.itranswarp.shici.model.Dynasty;
 import com.itranswarp.shici.model.FeaturedPoem;
 import com.itranswarp.shici.model.Poem;
@@ -27,10 +35,11 @@ import com.itranswarp.warpdb.entity.BaseEntity;
 import com.itranswarp.wxapi.util.MapUtil;
 
 @RestController
+@Transactional
 public class PoemService extends AbstractService {
 
 	@Autowired
-	HanzService hanzService;
+	HanziService hanziService;
 
 	// dynasty ////////////////////////////////////////////////////////////////
 
@@ -87,9 +96,9 @@ public class PoemService extends AbstractService {
 	private void copyToPoet(Poet poet, PoetBean bean) {
 		poet.dynastyId = bean.dynastyId;
 		poet.name = bean.name;
-		poet.nameCht = hanzService.toCht(bean.name);
+		poet.nameCht = hanziService.toCht(bean.name);
 		poet.description = bean.description;
-		poet.descriptionCht = hanzService.toCht(bean.description);
+		poet.descriptionCht = hanziService.toCht(bean.description);
 		poet.birth = bean.birth;
 		poet.death = bean.death;
 	}
@@ -114,30 +123,6 @@ public class PoemService extends AbstractService {
 	public PagedResults<Poem> getPoems(@PathVariable("id") String poetId,
 			@RequestParam(value = "page", defaultValue = "1") int pageIndex) {
 		return database.from(Poem.class).where("poetId=?", poetId).orderBy("name").list(pageIndex, 20);
-	}
-
-	@RequestMapping(value = "/api/featured/poem", method = RequestMethod.GET)
-	public Poem getFeaturedPoem() {
-		return getFeaturedPoem(LocalDate.now());
-	}
-
-	public Poem getFeaturedPoem(LocalDate targetDate) {
-		FeaturedPoem fp = database.from(FeaturedPoem.class).where("pubDate<=?", targetDate).orderBy("pubDate desc")
-				.first();
-		if (fp == null) {
-			throw new EntityNotFoundException(Poem.class);
-		}
-		return getPoem(fp.poemId);
-	}
-
-	@RequestMapping(value = "/api/featured/poems", method = RequestMethod.GET)
-	public Map<String, List<Poem>> restGetFeaturedPoems() {
-		return MapUtil.createMap("results", getFeaturedPoems());
-	}
-
-	public List<Poem> getFeaturedPoems() {
-		return database
-				.list("select p.* from FeaturedPoem fp inner join Poem p on fp.poemId=p.id order by fp.displayOrder");
 	}
 
 	@RequestMapping(value = "/api/poems", method = RequestMethod.POST)
@@ -198,11 +183,11 @@ public class PoemService extends AbstractService {
 		poem.form = bean.form;
 		poem.tags = bean.tags;
 		poem.name = bean.name;
-		poem.nameCht = hanzService.toCht(bean.name);
+		poem.nameCht = hanziService.toCht(bean.name);
 		poem.content = bean.content;
-		poem.contentCht = hanzService.toCht(bean.content);
+		poem.contentCht = hanziService.toCht(bean.content);
 		poem.appreciation = bean.appreciation;
-		poem.appreciationCht = hanzService.toCht(bean.appreciation);
+		poem.appreciationCht = hanziService.toCht(bean.appreciation);
 	}
 
 	@RequestMapping(value = "/api/poems/{id}/delete", method = RequestMethod.POST)
@@ -262,6 +247,158 @@ public class PoemService extends AbstractService {
 			seg = seg + 1;
 		}
 		return seg;
+	}
+
+	// category ///////////////////////////////////////////////////////////////
+
+	@RequestMapping(value = "/api/categories", method = RequestMethod.GET)
+	public Map<String, List<Category>> restGetCategories() {
+		return MapUtil.createMap("results", getCategories());
+	}
+
+	public List<Category> getCategories() {
+		return database.from(Category.class).orderBy("displayOrder").list();
+	}
+
+	public Category getCategory(String categoryId) {
+		return database.get(Category.class, categoryId);
+	}
+
+	@RequestMapping(value = "/api/categories", method = RequestMethod.POST)
+	public Category createCategory(@RequestBody CategoryBean bean) {
+		// check:
+		assertEditorRole();
+		bean.validate();
+		// create:
+		Category category = new Category();
+		category.name = bean.name;
+		category.nameCht = hanziService.toCht(bean.name);
+		category.description = bean.description;
+		category.descriptionCht = hanziService.toCht(bean.description);
+		long max = -1;
+		for (Category c : getCategories()) {
+			max = c.displayOrder;
+		}
+		category.displayOrder = max + 1;
+		database.save(category);
+		return category;
+	}
+
+	@RequestMapping(value = "/api/categories/{id}", method = RequestMethod.POST)
+	public Category updateCategory(@PathVariable("id") String categoryId, @RequestBody CategoryBean bean) {
+		// check:
+		assertEditorRole();
+		bean.validate();
+		// update:
+		Category category = getCategory(categoryId);
+		category.name = bean.name;
+		category.nameCht = hanziService.toCht(bean.name);
+		category.description = bean.description;
+		category.descriptionCht = hanziService.toCht(bean.description);
+		database.update(category);
+		return category;
+	}
+
+	public void deleteCategory(String categoryId) {
+		// check:
+		assertEditorRole();
+		Category category = getCategory(categoryId);
+		database.remove(category);
+	}
+
+	@RequestMapping(value = "/api/categories/{id}/poems", method = RequestMethod.GET)
+	public Map<String, List<Poem>> restGetPoemsOfCategory(@PathVariable("id") String categoryId) {
+		List<Poem> list = getPoemsOfCategory(categoryId);
+		return MapUtil.createMap("results", list);
+	}
+
+	public List<Poem> getPoemsOfCategory(@PathVariable("id") String categoryId) {
+		return database.list(
+				"select p.* from CategoryPoem cp inner join Poem p on cp.poemId=p.id where cp.id=? order by cp.displayOrder",
+				categoryId);
+	}
+
+	@RequestMapping(value = "/api/categories/{id}/poems", method = RequestMethod.POST)
+	public void updatePoemsOfCategory(@PathVariable("id") String categoryId, @RequestBody IdsBean bean) {
+		// check:
+		assertEditorRole();
+		bean.validate();
+		Category category = getCategory(categoryId);
+		// add:
+		database.update("delete from CategoryPoem where categoryId=?", categoryId);
+		List<CategoryPoem> list = new ArrayList<CategoryPoem>(bean.ids.size());
+		long n = 0;
+		for (String poemId : bean.ids) {
+			CategoryPoem cp = new CategoryPoem();
+			cp.categoryId = categoryId;
+			cp.poemId = poemId;
+			cp.displayOrder = n++;
+			list.add(cp);
+		}
+		database.save(list.toArray(new CategoryPoem[list.size()]));
+		database.save(category); // update version!
+	}
+
+	@RequestMapping(value = "/api/categories/{id}/sort", method = RequestMethod.POST)
+	public void orderCategories(@PathVariable("id") String categoryId, @RequestBody IdsBean bean) {
+		// check:
+		assertEditorRole();
+		bean.validate();
+		// update orders:
+		throw new RuntimeException();
+	}
+
+	// featured ///////////////////////////////////////////////////////////////
+
+	@RequestMapping(value = "/api/featured/poem", method = RequestMethod.GET)
+	public Poem restGetFeaturedPoem() {
+		return getFeaturedPoem(LocalDate.now());
+	}
+
+	public Poem getFeaturedPoem(LocalDate targetDate) {
+		FeaturedPoem fp = database.from(FeaturedPoem.class).where("pubDate<=?", targetDate).orderBy("pubDate desc")
+				.first();
+		if (fp == null) {
+			throw new EntityNotFoundException(Poem.class);
+		}
+		return getPoem(fp.poemId);
+	}
+
+	@RequestMapping(value = "/api/featured/poems", method = RequestMethod.GET)
+	public Map<String, List<Poem>> restGetFeaturedPoems() {
+		return MapUtil.createMap("results", getFeaturedPoems());
+	}
+
+	public List<Poem> getFeaturedPoems() {
+		return database
+				.list("select p.* from FeaturedPoem fp inner join Poem p on fp.poemId=p.id order by fp.displayOrder");
+	}
+
+	@RequestMapping(value = "/api/featured", method = RequestMethod.POST)
+	public void setPoemAsFeatured(@RequestBody FeaturedBean bean) {
+		// check:
+		assertEditorRole();
+		bean.validate();
+		Poem poem = getPoem(bean.poemId);
+		if (poem.imageId.isEmpty()) {
+			throw new APIArgumentException("poemId", "Poem does not have image.");
+		}
+		FeaturedPoem fp = new FeaturedPoem();
+		fp.poemId = bean.poemId;
+		fp.pubDate = bean.pubDate;
+		database.save(fp);
+	}
+
+	@RequestMapping(value = "/api/featured/{poemId}/delete", method = RequestMethod.POST)
+	public void setPoemAsUnfeatured(@PathVariable("poemId") String poemId) {
+		// check:
+		assertEditorRole();
+		Poem poem = getPoem(poemId);
+		FeaturedPoem fp = database.from(FeaturedPoem.class).where("poemId=?", poem.id).first();
+		if (fp == null) {
+			throw new APIArgumentException("poemId", "Poem is not featured.");
+		}
+		database.remove(fp);
 	}
 
 }

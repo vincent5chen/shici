@@ -2,6 +2,7 @@ package com.itranswarp.shici.util;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -176,6 +177,19 @@ public class ValidateUtil {
 			}
 		}
 		return email;
+	}
+
+	public static LocalDate checkDate(LocalDate date, String name) {
+		if (date == null) {
+			throw new APIArgumentException(name, name + " is empty.");
+		}
+		if (date.isBefore(LocalDate.of(2000, 1, 1))) {
+			throw new APIArgumentException(name, name + " is out of range.");
+		}
+		if (date.isAfter(LocalDate.of(2100, 1, 1))) {
+			throw new APIArgumentException(name, name + " is out of range.");
+		}
+		return date;
 	}
 
 	public static String checkTags(String tags) {

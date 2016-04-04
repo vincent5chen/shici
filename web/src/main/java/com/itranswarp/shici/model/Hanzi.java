@@ -8,7 +8,7 @@ import com.itranswarp.warpdb.entity.BaseEntity;
 
 @Entity
 @Table
-public class Hanz extends BaseEntity {
+public class Hanzi extends BaseEntity {
 
 	@Column(columnDefinition = "char(1)", nullable = false)
 	public String s;

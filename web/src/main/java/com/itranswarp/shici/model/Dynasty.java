@@ -22,11 +22,11 @@ public class Dynasty extends BaseEntity {
 	@Column(length = VARCHAR_100, nullable = false)
 	public String nameCht;
 
-	@Column(length = VARCHAR_1000, nullable = false)
-	public String description;
+	@Column(nullable = false)
+	public int poetCount;
 
-	@Column(length = VARCHAR_1000, nullable = false)
-	public String descriptionCht;
+	@Column(nullable = false)
+	public int poemCount;
 
 	@Override
 	public String toString() {

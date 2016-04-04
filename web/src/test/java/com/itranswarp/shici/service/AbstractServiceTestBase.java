@@ -7,7 +7,7 @@ import com.itranswarp.shici.TestHelper;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
 import com.itranswarp.shici.model.Dynasty;
-import com.itranswarp.shici.model.Hanz;
+import com.itranswarp.shici.model.Hanzi;
 import com.itranswarp.shici.model.Poem;
 import com.itranswarp.shici.model.User;
 import com.itranswarp.warpdb.Database;
@@ -34,15 +34,13 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 		}
 	}
 
-	protected void initDynasties(HanzService hanzService, Database db) {
+	protected void initDynasties(HanziService hanzService, Database db) {
 		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
 			String[] names = { "先秦", "汉代", "三国两晋", "南北朝", "隋唐", "宋代", "元代", "明代", "清代", "近现代", "不详" };
 			for (int i = 0; i < names.length; i++) {
 				Dynasty dyn = new Dynasty();
 				dyn.name = names[i];
-				dyn.description = "朝代：" + names[i];
 				dyn.nameCht = hanzService.toCht(dyn.name);
-				dyn.descriptionCht = hanzService.toCht(dyn.description);
 				dyn.displayOrder = i;
 				database.save(dyn);
 			}
@@ -51,8 +49,8 @@ public class AbstractServiceTestBase extends DatabaseTestBase {
 
 	// helper /////////////////////////////////////////////////////////////////
 
-	Hanz newHanz(char s, char t) {
-		Hanz hz = new Hanz();
+	Hanzi newHanz(char s, char t) {
+		Hanzi hz = new Hanzi();
 		hz.s = new String(new char[] { s });
 		hz.t = new String(new char[] { t });
 		return hz;

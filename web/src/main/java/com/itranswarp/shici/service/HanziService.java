@@ -8,18 +8,18 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
-import com.itranswarp.shici.model.Hanz;
+import com.itranswarp.shici.model.Hanzi;
 
 @Component
-public class HanzService extends AbstractService {
+public class HanziService extends AbstractService {
 
 	Map<Character, Character> chtMap;
 
 	@PostConstruct
 	public void init() {
-		List<Hanz> all = database.from(Hanz.class).list();
+		List<Hanzi> all = database.from(Hanzi.class).list();
 		Map<Character, Character> map = new HashMap<Character, Character>();
-		for (Hanz hanz : all) {
+		for (Hanzi hanz : all) {
 			if (hanz.s.isEmpty() || hanz.t.isEmpty()) {
 				log.warn("s or t is empty: " + hanz);
 			}

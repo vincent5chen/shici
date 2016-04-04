@@ -10,14 +10,14 @@ import com.itranswarp.warpdb.context.UserContext;
 
 public class HanzServiceTest extends AbstractServiceTestBase {
 
-	HanzService hanzService;
+	HanziService hanziService;
 
 	@Before
 	public void setUp() {
-		hanzService = initHanzService(database);
+		hanziService = initHanziService(database);
 	}
 
-	public HanzService initHanzService(Database db) {
+	public HanziService initHanziService(Database db) {
 		// init hanz:
 		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
 			char[][] hanzs = new char[][] { { '东', '東' }, { '台', '臺' }, { '张', '張' }, { '来', '來' }, { '后', '後' },
@@ -26,13 +26,13 @@ public class HanzServiceTest extends AbstractServiceTestBase {
 				db.save(newHanz(hanz[0], hanz[1]));
 			}
 		}
-		HanzService s = new HanzService();
+		HanziService s = new HanziService();
 		s.database = db;
 		s.init();
 		return s;
 	}
 
 	public void testToCht() {
-		assertEquals("陳子昂", hanzService.toCht("陈子昂"));
+		assertEquals("陳子昂", hanziService.toCht("陈子昂"));
 	}
 }
