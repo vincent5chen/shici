@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.itranswarp.shici.bean.CategoryBean;
+import com.itranswarp.shici.bean.CategoryPoemBean;
 import com.itranswarp.shici.bean.FeaturedBean;
 import com.itranswarp.shici.bean.IdsBean;
 import com.itranswarp.shici.bean.PoemBean;
@@ -307,36 +308,78 @@ public class PoemService extends AbstractService {
 	}
 
 	@RequestMapping(value = "/api/categories/{id}/poems", method = RequestMethod.GET)
-	public Map<String, List<Poem>> restGetPoemsOfCategory(@PathVariable("id") String categoryId) {
-		List<Poem> list = getPoemsOfCategory(categoryId);
+	public Map<String, List<TheCategoryPoem>> restGetPoemsOfCategory(@PathVariable("id") String categoryId) {
+		List<TheCategoryPoem> list = getPoemsOfCategory(categoryId);
 		return MapUtil.createMap("results", list);
 	}
 
-	public List<Poem> getPoemsOfCategory(@PathVariable("id") String categoryId) {
-		return database.list(
-				"select p.* from CategoryPoem cp inner join Poem p on cp.poemId=p.id where cp.id=? order by cp.displayOrder",
-				categoryId);
+	public List<TheCategoryPoem> getPoemsOfCategory(@PathVariable("id") String categoryId) {
+		Category category = getCategory(categoryId);
+		List<CategoryPoem> cps = database.from(CategoryPoem.class).where("categoryId=?", category.id)
+				.orderBy("displayOrder").list();
+		List<TheCategoryPoem> list = new ArrayList<TheCategoryPoem>();
+		if (cps.isEmpty()) {
+			return list;
+		}
+		TheCategoryPoem tcp = null;
+		for (CategoryPoem cp : cps) {
+			Poem poem = database.get(Poem.class, cp.poemId);
+			if (tcp == null) {
+				// start new section:
+				tcp = new TheCategoryPoem();
+				tcp.sectionName = cp.sectionName;
+				tcp.sectionNameCht = cp.sectionNameCht;
+				tcp.poems = new ArrayList<Poem>(20);
+				tcp.poems.add(poem);
+			} else {
+				if (tcp.sectionName.equals(cp.sectionName)) {
+					// continue section:
+					tcp.poems.add(poem);
+				} else {
+					// start new section:
+					list.add(tcp);
+					tcp = new TheCategoryPoem();
+					tcp.sectionName = cp.sectionName;
+					tcp.sectionNameCht = cp.sectionNameCht;
+					tcp.poems = new ArrayList<Poem>(20);
+					tcp.poems.add(poem);
+				}
+			}
+		}
+		list.add(tcp);
+		return list;
 	}
 
 	@RequestMapping(value = "/api/categories/{id}/poems", method = RequestMethod.POST)
-	public void updatePoemsOfCategory(@PathVariable("id") String categoryId, @RequestBody IdsBean bean) {
+	public void updatePoemsOfCategory(@PathVariable("id") String categoryId,
+			@RequestBody List<CategoryPoemBean> beans) {
 		// check:
 		assertEditorRole();
-		bean.validate();
-		Category category = getCategory(categoryId);
-		// add:
-		database.update("delete from CategoryPoem where categoryId=?", categoryId);
-		List<CategoryPoem> list = new ArrayList<CategoryPoem>(bean.ids.size());
-		long n = 0;
-		for (String poemId : bean.ids) {
-			CategoryPoem cp = new CategoryPoem();
-			cp.categoryId = categoryId;
-			cp.poemId = poemId;
-			cp.displayOrder = n++;
-			list.add(cp);
+		if (beans == null) {
+			throw new APIArgumentException("body is empty");
 		}
-		database.save(list.toArray(new CategoryPoem[list.size()]));
-		database.save(category); // update version!
+		for (CategoryPoemBean bean : beans) {
+			bean.validate();
+		}
+		Category category = getCategory(categoryId);
+		// set:
+		database.update("delete from CategoryPoem where categoryId=?", categoryId);
+		long n = 0;
+		for (CategoryPoemBean bean : beans) {
+			List<CategoryPoem> list = new ArrayList<CategoryPoem>(bean.ids.size());
+			for (String poemId : bean.ids) {
+				CategoryPoem cp = new CategoryPoem();
+				cp.sectionName = bean.sectionName;
+				cp.sectionNameCht = hanziService.toCht(bean.sectionName);
+				cp.categoryId = categoryId;
+				cp.poemId = poemId;
+				cp.displayOrder = n;
+				list.add(cp);
+				n++;
+			}
+			database.save(list.toArray(new CategoryPoem[list.size()]));
+		}
+		database.update(category); // update version!
 	}
 
 	@RequestMapping(value = "/api/categories/{id}/sort", method = RequestMethod.POST)
@@ -401,4 +444,9 @@ public class PoemService extends AbstractService {
 		database.remove(fp);
 	}
 
+	public static class TheCategoryPoem {
+		public String sectionName;
+		public String sectionNameCht;
+		public List<Poem> poems;
+	}
 }

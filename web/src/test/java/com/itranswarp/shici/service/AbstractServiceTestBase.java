@@ -1,11 +1,14 @@
 package com.itranswarp.shici.service;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 
 import org.junit.Before;
 
 import com.itranswarp.shici.DatabaseTestBase;
 import com.itranswarp.shici.TestHelper;
+import com.itranswarp.shici.bean.CategoryBean;
+import com.itranswarp.shici.bean.CategoryPoemBean;
 import com.itranswarp.shici.bean.FeaturedBean;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
@@ -87,6 +90,20 @@ public abstract class AbstractServiceTestBase extends DatabaseTestBase {
 		bean.content = content;
 		bean.appreciation = "赏析：" + name;
 		bean.form = Poem.Form.WU_LV;
+		return bean;
+	}
+
+	protected CategoryBean newCategoryBean(String name) {
+		CategoryBean bean = new CategoryBean();
+		bean.name = name;
+		bean.description = "简介：" + name;
+		return bean;
+	}
+
+	protected CategoryPoemBean newCategoryPoemBean(String sectionName, String... poemIds) {
+		CategoryPoemBean bean = new CategoryPoemBean();
+		bean.sectionName = sectionName;
+		bean.ids = Arrays.asList(poemIds);
 		return bean;
 	}
 

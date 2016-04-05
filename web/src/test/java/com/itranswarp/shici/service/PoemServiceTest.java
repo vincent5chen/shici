@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -15,11 +16,13 @@ import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
 import com.itranswarp.shici.exception.APIArgumentException;
 import com.itranswarp.shici.exception.APIPermissionException;
+import com.itranswarp.shici.model.Category;
 import com.itranswarp.shici.model.Dynasty;
 import com.itranswarp.shici.model.Poem;
 import com.itranswarp.shici.model.Poet;
 import com.itranswarp.shici.model.Resource;
 import com.itranswarp.shici.model.User;
+import com.itranswarp.shici.service.PoemService.TheCategoryPoem;
 import com.itranswarp.shici.util.Base64Util;
 import com.itranswarp.shici.util.FileUtil;
 import com.itranswarp.warpdb.Database;
@@ -634,7 +637,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 			PoemBean poemBean1 = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			poemBean1.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
 			Poem poem1 = poemService.createPoem(poemBean1);
-			PoemBean poemBean2 = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
+			PoemBean poemBean2 = newPoemBean(poet.id, "送客", "故人洞庭去，杨柳春风生。");
 			poemBean2.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
 			Poem poem2 = poemService.createPoem(poemBean2);
 			poemService.setPoemAsFeatured(newFeaturedBean(poem1.id, LocalDate.of(2016, 1, 1)));
@@ -699,6 +702,85 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	}
 
 	// category ///////////////////////////////////////////////////////////////
+
+	@Test(expected = APIPermissionException.class)
+	public void testCreateCategoryFailedWithoutPermission() {
+		try (UserContext<User> ctx = new UserContext<User>(this.normalUser)) {
+			poemService.createCategory(null);
+		}
+	}
+
+	@Test(expected = APIArgumentException.class)
+	public void testCreateCategoryFailedForBadName() {
+		try (UserContext<User> ctx = new UserContext<User>(this.editorUser)) {
+			Category cat = poemService.createCategory(newCategoryBean("  \u3000 \r\n "));
+		}
+	}
+
+	@Test
+	public void testCreateCategoryOK() {
+		try (UserContext<User> ctx = new UserContext<User>(this.editorUser)) {
+			Category cat = poemService.createCategory(newCategoryBean("唐诗三百首"));
+			assertEquals("唐诗三百首", cat.name);
+			assertEquals("唐詩三百首", cat.nameCht);
+			assertEquals("简介：唐诗三百首", cat.description);
+			assertEquals("简介：唐詩三百首", cat.descriptionCht);
+			List<TheCategoryPoem> list = poemService.getPoemsOfCategory(cat.id);
+			assertTrue(list.isEmpty());
+		}
+	}
+
+	@Test(expected = EntityNotFoundException.class)
+	public void testGetCategoryFailedForNotExist() {
+		poemService.getPoemsOfCategory(IdUtil.next());
+	}
+
+	@Test
+	public void testUpdatePoemsOfCategoryAndGetOK() {
+		try (UserContext<User> ctx = new UserContext<User>(this.editorUser)) {
+			Poet poet1 = poemService.createPoet(newPoetBean(getTangDynasty().id, "李白"));
+			Poet poet2 = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
+			Poem poem1a = poemService.createPoem(newPoemBean(poet1.id, "赠汪伦", "李白乘舟将欲行，忽闻岸上踏歌声。"));
+			Poem poem1b = poemService.createPoem(newPoemBean(poet1.id, "送孟浩然之广陵", "故人西辞黄鹤楼，烟花三月下扬州。"));
+			Poem poem2a = poemService.createPoem(newPoemBean(poet2.id, "登幽州台歌", "前不见古人，后不见来者"));
+			Poem poem2b = poemService.createPoem(newPoemBean(poet2.id, "送客", "故人洞庭去，杨柳春风生。"));
+			Category cat = poemService.createCategory(newCategoryBean("唐诗三百首"));
+			poemService.updatePoemsOfCategory(cat.id, Arrays.asList(newCategoryPoemBean("七律", poem1a.id, poem1b.id),
+					newCategoryPoemBean("五律", poem2a.id, poem2b.id)));
+			// get:
+			List<TheCategoryPoem> list = poemService.getPoemsOfCategory(cat.id);
+			assertEquals(2, list.size());
+			TheCategoryPoem sec1 = list.get(0);
+			assertEquals("七律", sec1.sectionName);
+			assertEquals("赠汪伦", sec1.poems.get(0).name);
+			assertEquals("送孟浩然之广陵", sec1.poems.get(1).name);
+			TheCategoryPoem sec2 = list.get(1);
+			assertEquals("五律", sec2.sectionName);
+			assertEquals("登幽州台歌", sec2.poems.get(0).name);
+			assertEquals("送客", sec2.poems.get(1).name);
+		}
+	}
+
+	@Test(expected = APIPermissionException.class)
+	public void testUpdateCategoryFailedWithoutPermission() {
+		try (UserContext<User> ctx = new UserContext<User>(this.normalUser)) {
+			poemService.updateCategory(null, null);
+		}
+	}
+
+	@Test(expected = APIPermissionException.class)
+	public void testUpdatePoemsOfCategoryFailedWithoutPermission() {
+		try (UserContext<User> ctx = new UserContext<User>(this.normalUser)) {
+			poemService.updatePoemsOfCategory(null, null);
+		}
+	}
+
+	@Test(expected = APIPermissionException.class)
+	public void testDeleteCategoryFailedWithoutPermission() {
+		try (UserContext<User> ctx = new UserContext<User>(this.normalUser)) {
+			poemService.deleteCategory(null);
+		}
+	}
 
 	// resource ///////////////////////////////////////////////////////////////
 
