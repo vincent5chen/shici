@@ -23,6 +23,7 @@ import com.itranswarp.shici.model.Poet;
 import com.itranswarp.shici.model.Resource;
 import com.itranswarp.shici.model.User;
 import com.itranswarp.shici.service.PoemService.TheCategoryPoem;
+import com.itranswarp.shici.service.PoemService.TheFeaturedPoem;
 import com.itranswarp.shici.util.Base64Util;
 import com.itranswarp.shici.util.FileUtil;
 import com.itranswarp.warpdb.Database;
@@ -682,11 +683,13 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 			Poem poem2 = poemService.createPoem(poemBean2);
 			poemService.setPoemAsFeatured(newFeaturedBean(poem1.id, LocalDate.of(2016, 1, 1)));
 			poemService.setPoemAsFeatured(newFeaturedBean(poem2.id, LocalDate.of(2016, 2, 2)));
-			List<Poem> featured = poemService.getFeaturedPoems();
+			List<TheFeaturedPoem> featured = poemService.getFeaturedPoems();
 			assertNotNull(featured);
 			assertEquals(2, featured.size());
-			assertEquals(poem2.name, featured.get(0).name);
-			assertEquals(poem1.name, featured.get(1).name);
+			assertEquals(poem2.name, featured.get(0).poem.name);
+			assertEquals(poem1.name, featured.get(1).poem.name);
+			assertEquals(LocalDate.of(2016, 2, 2), featured.get(0).pubDate);
+			assertEquals(LocalDate.of(2016, 1, 1), featured.get(1).pubDate);
 			// get single:
 			Poem p11 = poemService.getFeaturedPoem(LocalDate.of(2016, 1, 1));
 			assertEquals(poem1.id, p11.id);
@@ -713,7 +716,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	@Test(expected = APIArgumentException.class)
 	public void testCreateCategoryFailedForBadName() {
 		try (UserContext<User> ctx = new UserContext<User>(this.editorUser)) {
-			Category cat = poemService.createCategory(newCategoryBean("  \u3000 \r\n "));
+			poemService.createCategory(newCategoryBean("  \u3000 \r\n "));
 		}
 	}
 

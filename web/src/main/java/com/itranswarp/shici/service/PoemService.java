@@ -14,13 +14,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.itranswarp.shici.bean.CategoryBean;
 import com.itranswarp.shici.bean.CategoryPoemBean;
 import com.itranswarp.shici.bean.FeaturedBean;
-import com.itranswarp.shici.bean.IdsBean;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
 import com.itranswarp.shici.exception.APIArgumentException;
+import com.itranswarp.shici.json.LocalDateDeserializer;
+import com.itranswarp.shici.json.LocalDateSerializer;
 import com.itranswarp.shici.model.Category;
 import com.itranswarp.shici.model.CategoryPoem;
 import com.itranswarp.shici.model.Dynasty;
@@ -43,6 +46,11 @@ public class PoemService extends AbstractService {
 	HanziService hanziService;
 
 	// dynasty ////////////////////////////////////////////////////////////////
+
+	@RequestMapping(value = "/api/dynasties", method = RequestMethod.GET)
+	public Map<String, List<Dynasty>> restGetDynasties() {
+		return MapUtil.createMap("results", getDynasties());
+	}
 
 	public List<Dynasty> getDynasties() {
 		return database.from(Dynasty.class).orderBy("displayOrder").list();
@@ -382,15 +390,6 @@ public class PoemService extends AbstractService {
 		database.update(category); // update version!
 	}
 
-	@RequestMapping(value = "/api/categories/{id}/sort", method = RequestMethod.POST)
-	public void orderCategories(@PathVariable("id") String categoryId, @RequestBody IdsBean bean) {
-		// check:
-		assertEditorRole();
-		bean.validate();
-		// update orders:
-		throw new RuntimeException();
-	}
-
 	// featured ///////////////////////////////////////////////////////////////
 
 	@RequestMapping(value = "/api/featured/poem", method = RequestMethod.GET)
@@ -408,13 +407,20 @@ public class PoemService extends AbstractService {
 	}
 
 	@RequestMapping(value = "/api/featured/poems", method = RequestMethod.GET)
-	public Map<String, List<Poem>> restGetFeaturedPoems() {
+	public Map<String, List<TheFeaturedPoem>> restGetFeaturedPoems() {
 		return MapUtil.createMap("results", getFeaturedPoems());
 	}
 
-	public List<Poem> getFeaturedPoems() {
-		return database.list(Poem.class,
-				"select p.* from FeaturedPoem fp inner join Poem p on fp.poemId=p.id order by fp.pubDate desc");
+	public List<TheFeaturedPoem> getFeaturedPoems() {
+		List<FeaturedPoem> fps = database.list("select * from FeaturedPoem order by pubDate desc");
+		List<TheFeaturedPoem> tfps = new ArrayList<TheFeaturedPoem>(fps.size());
+		for (FeaturedPoem fp : fps) {
+			TheFeaturedPoem tfp = new TheFeaturedPoem();
+			tfp.pubDate = fp.pubDate;
+			tfp.poem = getPoem(fp.poemId);
+			tfps.add(tfp);
+		}
+		return tfps;
 	}
 
 	@RequestMapping(value = "/api/featured", method = RequestMethod.POST)
@@ -448,5 +454,13 @@ public class PoemService extends AbstractService {
 		public String sectionName;
 		public String sectionNameCht;
 		public List<Poem> poems;
+	}
+
+	public static class TheFeaturedPoem {
+		public Poem poem;
+
+		@JsonSerialize(using = LocalDateSerializer.class)
+		@JsonDeserialize(using = LocalDateDeserializer.class)
+		public LocalDate pubDate;
 	}
 }
