@@ -33,6 +33,10 @@ public class HttpUtil {
 			this.status = status;
 			this.body = body;
 		}
+
+		public boolean isOK() {
+			return this.status / 100 == 2;
+		}
 	}
 
 	static final Log log = LogFactory.getLog(HttpUtil.class);
