@@ -46,7 +46,7 @@ public class QQOAuthProvider implements OAuthProvider {
 		params.put("grant_type", "authorization_code");
 		params.put("redirect_uri", redirectUri);
 		params.put("code", code);
-		String resp = HttpUtil.httpGet("https://graph.qq.com/oauth2.0/token", params, null);
+		String resp = HttpUtil.httpGet("https://graph.qq.com/oauth2.0/token", params, null).body;
 		log.info("Response: " + resp);
 		Map<String, String> r = HttpUtil.urlDecodeAsMap(resp);
 		String accessToken = r.get("access_token");
@@ -54,7 +54,7 @@ public class QQOAuthProvider implements OAuthProvider {
 		long expiresIn = Long.parseLong(r.get("expires_in"));
 		// get openid:
 		String resp2 = HttpUtil.httpGet(
-				"https://graph.qq.com/oauth2.0/me?access_token=" + HttpUtil.urlEncode(accessToken), null, null);
+				"https://graph.qq.com/oauth2.0/me?access_token=" + HttpUtil.urlEncode(accessToken), null, null).body;
 		log.info("Response: " + resp2);
 		if (resp2.startsWith("callback(")) {
 			resp2 = resp2.substring(9, resp2.lastIndexOf(')'));
@@ -68,7 +68,7 @@ public class QQOAuthProvider implements OAuthProvider {
 		qs.put("appid", this.appKey);
 		qs.put("format", "json");
 		qs.put("openid", authId);
-		String resp3 = HttpUtil.httpGet("https://graph.qq.com/user/get_user_info", qs, null);
+		String resp3 = HttpUtil.httpGet("https://graph.qq.com/user/get_user_info", qs, null).body;
 		log.info("Response: " + resp3);
 		Map<String, String> info = JsonUtil.parseAsMap(resp3);
 		// generate auth:

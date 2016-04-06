@@ -25,6 +25,16 @@ import org.apache.commons.logging.LogFactory;
 
 public class HttpUtil {
 
+	public static class HttpResponse {
+		public final int status;
+		public final String body;
+
+		public HttpResponse(int status, String body) {
+			this.status = status;
+			this.body = body;
+		}
+	}
+
 	static final Log log = LogFactory.getLog(HttpUtil.class);
 
 	static final int CONN_TIMEOUT = 3000;
@@ -151,7 +161,8 @@ public class HttpUtil {
 		return String.join("&", list);
 	}
 
-	public static String httpGet(String url, Map<String, String> data, Map<String, String> headers) throws IOException {
+	public static HttpResponse httpGet(String url, Map<String, String> data, Map<String, String> headers)
+			throws IOException {
 		if (data != null && !data.isEmpty()) {
 			char ch = url.indexOf('?') == (-1) ? '?' : '&';
 			url = url + ch + urlEncode(data);
@@ -159,7 +170,7 @@ public class HttpUtil {
 		return http("GET", url, null, headers);
 	}
 
-	public static String httpPost(String url, String data, Map<String, String> headers) throws IOException {
+	public static HttpResponse httpPost(String url, String data, Map<String, String> headers) throws IOException {
 		InputStream input = null;
 		if (data != null && !data.isEmpty()) {
 			byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
@@ -172,11 +183,11 @@ public class HttpUtil {
 		return http("POST", url, input, headers);
 	}
 
-	public static String httpPost(String url, InputStream input, Map<String, String> headers) throws IOException {
+	public static HttpResponse httpPost(String url, InputStream input, Map<String, String> headers) throws IOException {
 		return http("POST", url, input, headers);
 	}
 
-	public static String httpPut(String url, String data, Map<String, String> headers) throws IOException {
+	public static HttpResponse httpPut(String url, String data, Map<String, String> headers) throws IOException {
 		InputStream input = null;
 		if (data != null && !data.isEmpty()) {
 			byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
@@ -189,11 +200,11 @@ public class HttpUtil {
 		return httpPut(url, input, headers);
 	}
 
-	public static String httpPut(String url, InputStream input, Map<String, String> headers) throws IOException {
+	public static HttpResponse httpPut(String url, InputStream input, Map<String, String> headers) throws IOException {
 		return http("PUT", url, input, headers);
 	}
 
-	public static String httpDelete(String url, String data, Map<String, String> headers) throws IOException {
+	public static HttpResponse httpDelete(String url, String data, Map<String, String> headers) throws IOException {
 		InputStream input = null;
 		if (data != null && !data.isEmpty()) {
 			byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
@@ -206,11 +217,12 @@ public class HttpUtil {
 		return httpDelete(url, input, headers);
 	}
 
-	public static String httpDelete(String url, InputStream input, Map<String, String> headers) throws IOException {
+	public static HttpResponse httpDelete(String url, InputStream input, Map<String, String> headers)
+			throws IOException {
 		return http("DELETE", url, input, headers);
 	}
 
-	static String http(String method, String url, InputStream dataInput, Map<String, String> headers)
+	static HttpResponse http(String method, String url, InputStream dataInput, Map<String, String> headers)
 			throws IOException {
 		log.debug(method + ": " + url);
 		HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
@@ -250,9 +262,10 @@ public class HttpUtil {
 					while ((n = input.read(buffer)) != (-1)) {
 						byteArray.write(buffer, 0, n);
 					}
-					log.error(byteArray.toString("UTF-8"));
+					String body = byteArray.toString("UTF-8");
+					return new HttpResponse(code, body);
 				}
-				throw new IOException("Bad response: " + code);
+				return new HttpResponse(code, null);
 			}
 			input = conn.getInputStream();
 			byte[] buffer = new byte[4096];
@@ -261,7 +274,7 @@ public class HttpUtil {
 			while ((n = input.read(buffer)) != (-1)) {
 				byteArray.write(buffer, 0, n);
 			}
-			return new String(byteArray.toByteArray(), StandardCharsets.UTF_8);
+			return new HttpResponse(code, new String(byteArray.toByteArray(), StandardCharsets.UTF_8));
 		} finally {
 			if (output != null) {
 				try {

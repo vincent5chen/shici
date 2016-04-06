@@ -44,7 +44,8 @@ public class WeiboOAuthProvider implements OAuthProvider {
 		params.put("grant_type", "authorization_code");
 		params.put("redirect_uri", redirectUri);
 		params.put("code", code);
-		String resp = HttpUtil.httpPost("https://api.weibo.com/oauth2/access_token", HttpUtil.urlEncode(params), null);
+		String resp = HttpUtil.httpPost("https://api.weibo.com/oauth2/access_token", HttpUtil.urlEncode(params),
+				null).body;
 		log.info("Response body: " + resp);
 		Map<String, Object> r = JsonUtil.parseAsMap(resp);
 		String accessToken = (String) r.get("access_token");
@@ -53,7 +54,7 @@ public class WeiboOAuthProvider implements OAuthProvider {
 		// get profile:
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("Authorization", "OAuth2 " + accessToken);
-		String resp2 = HttpUtil.httpGet("https://api.weibo.com/2/users/show.json?uid=" + authId, null, headers);
+		String resp2 = HttpUtil.httpGet("https://api.weibo.com/2/users/show.json?uid=" + authId, null, headers).body;
 		log.info("Response body: " + resp2);
 		Map<String, String> profile = JsonUtil.parseAsMap(resp2);
 		// generate auth:

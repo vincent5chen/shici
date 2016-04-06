@@ -55,7 +55,7 @@ public class HttpUtilTest {
 				put("ref", "test");
 			}
 		};
-		String r = HttpUtil.httpGet("http://www.liaoxuefeng.com/", data, null);
+		String r = HttpUtil.httpGet("http://www.liaoxuefeng.com/", data, null).body;
 		assertTrue(r.contains("\u5ed6\u96ea\u5cf0"));
 	}
 
