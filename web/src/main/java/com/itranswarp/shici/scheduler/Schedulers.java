@@ -25,7 +25,7 @@ public class Schedulers {
 	@Autowired
 	WeixinClient weixinClient;
 
-	@Scheduled(initialDelay = WeixinClient.REFRESH_TOKEN_IN_MILLIS, fixedRate = WeixinClient.REFRESH_TOKEN_IN_MILLIS)
+	@Scheduled(initialDelay = 1000, fixedRate = WeixinClient.REFRESH_TOKEN_IN_MILLIS)
 	public void refreshAccessToken() {
 		weixinClient.refreshAccessToken();
 	}
@@ -35,12 +35,12 @@ public class Schedulers {
 		jobService.findTimeoutJob(System.currentTimeMillis());
 	}
 
-	@Scheduled(initialDelay = ONE_MINUTE * 5, fixedRate = ONE_MINUTE * 1)
+	@Scheduled(initialDelay = ONE_MINUTE * 5, fixedRate = ONE_MINUTE * 10)
 	public void executeIndexTask() {
 		indexTask.execute();
 	}
 
-	@Scheduled(initialDelay = ONE_MINUTE * 5, fixedRate = ONE_MINUTE * 5)
+	@Scheduled(initialDelay = ONE_MINUTE * 5, fixedRate = ONE_MINUTE * 50)
 	public void executeUnindexTask() {
 		unindexTask.execute();
 	}
