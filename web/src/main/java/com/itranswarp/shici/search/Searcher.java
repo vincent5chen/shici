@@ -1,35 +1,17 @@
 package com.itranswarp.shici.search;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Arrays;
+import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import javax.tools.FileObject;
-import javax.tools.ForwardingJavaFileManager;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.JavaFileManager;
-import javax.tools.JavaFileManager.Location;
-import javax.tools.JavaFileObject;
-import javax.tools.JavaFileObject.Kind;
-import javax.tools.SimpleJavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.itranswarp.shici.compiler.StringCompiler;
 import com.itranswarp.shici.util.HttpUtil;
 import com.itranswarp.shici.util.HttpUtil.HttpResponse;
 import com.itranswarp.shici.util.JsonUtil;
@@ -47,7 +29,22 @@ public class Searcher {
 	@Value("${es.url}")
 	String esUrl;
 
+	// search /////////////////////////////////////////////////////////////////
+
+	public <T extends BaseEntity> List<T> search(String indexName, String q, int pageIndex) {
+		// search:
+		String searchOptions = "{  }";
+		postJSON(Map.class, indexName + "/_search", searchOptions);
+		return null;
+	}
+
 	// document ///////////////////////////////////////////////////////////////
+
+	public <T extends BaseEntity> void createMapping(String indexName, Class<T> clazz) {
+		Map<String, Map<String, String>> properties = this.createMapping(clazz);
+		putJSON(Map.class, indexName + "/_mapping/" + clazz.getSimpleName(),
+				MapUtil.createMap("properties", properties));
+	}
 
 	public <T extends BaseEntity> void createDocument(String indexName, T doc) {
 		ValidateUtil.checkId(doc.id);
@@ -59,6 +56,11 @@ public class Searcher {
 		Class<? extends DocumentWrapper<T>> cls = getWrapperClass(clazz);
 		log.info(cls);
 		return getJSON(cls, indexName + "/" + clazz.getSimpleName() + "/" + id).getDocument();
+	}
+
+	public <T> void deleteDocument(String indexName, Class<T> clazz, String id) {
+		ValidateUtil.checkId(id);
+		deleteJSON(Map.class, indexName + "/" + clazz.getSimpleName() + "/" + id, null);
 	}
 
 	// index //////////////////////////////////////////////////////////////////
@@ -81,6 +83,52 @@ public class Searcher {
 	}
 
 	// helper /////////////////////////////////////////////////////////////////
+
+	Map<String, Map<String, String>> createMapping(Class<?> clazz) {
+		log.info("Building mapping for class: " + clazz.getName());
+		Map<String, Map<String, String>> properties = new HashMap<String, Map<String, String>>();
+		for (Field f : clazz.getFields()) {
+			if (f.isAnnotationPresent(Analyzed.class)) {
+				properties.put(f.getName(), getMappingProperty(f.getType(), true));
+			} else {
+				Map<String, String> mapping = getMappingProperty(f.getType(), false);
+				if (mapping != null) {
+					properties.put(f.getName(), mapping);
+				} else {
+					log.info("Ignore unsupported field: " + f.getName());
+				}
+			}
+		}
+		return properties;
+	}
+
+	Map<String, String> getMappingProperty(Class<?> clazz, boolean analyzed) {
+		String type;
+		switch (clazz.getName()) {
+		case "java.lang.String":
+			type = "string";
+			break;
+		case "int":
+		case "java.lang.Integer":
+			type = "integer";
+			break;
+		case "long":
+		case "java.lang.Long":
+			type = "long";
+			break;
+		case "float":
+		case "java.lang.Float":
+			type = "float";
+			break;
+		case "double":
+		case "java.lang.Double":
+			type = "double";
+			break;
+		default:
+			return null;
+		}
+		return MapUtil.createMap("type", type, "index", analyzed ? "analyzed" : "not_analyzed");
+	}
 
 	<T> T getJSON(Class<T> clazz, String path) {
 		log.info("GET: " + esUrl + path);
@@ -138,113 +186,32 @@ public class Searcher {
 		throw JsonUtil.fromJson(SearchResultException.class, jsonErr);
 	}
 
+	Map<String, Class<? extends DocumentWrapper<?>>> cached = new HashMap<String, Class<? extends DocumentWrapper<?>>>();
+
 	@SuppressWarnings("unchecked")
 	<T extends BaseEntity> Class<? extends DocumentWrapper<T>> getWrapperClass(Class<T> clazz) {
 		String T = clazz.getName();
-		String packageName = clazz.getPackage().getName();
-		String wrapperClassName = "Wrapper_" + clazz.getSimpleName();
-		StringBuilder sb = new StringBuilder(256);
-		sb.append("package " + packageName + ";\n");
-		sb.append("public class " + wrapperClassName + " implements " + DocumentWrapper.class.getName() + "<" + T
-				+ "> {\n");
-		sb.append("    public String _id;\n");
-		sb.append("    public " + T + " _source;\n");
-		sb.append("    public " + T + " getDocument() {\n");
-		sb.append("        return this._source;\n");
-		sb.append("    }\n");
-		sb.append("}\n");
-		String sourceCode = sb.toString();
-		log.info("Generate Java source:\n" + sourceCode);
-		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		StandardJavaFileManager stdFileManager = compiler.getStandardFileManager(null, null, null);
-		JavaFileObject input = new StringInputJavaFileObject(wrapperClassName, sourceCode);
-		StringJavaFileManager fileManager = new StringJavaFileManager(stdFileManager);
-		CompilationTask task = compiler.getTask(null, fileManager, null, null, null, Arrays.asList(input));
-		Boolean result = task.call();
-		if (result == null || !result.booleanValue()) {
-			throw new RuntimeException("Compilation failed.");
+		Class<? extends DocumentWrapper<T>> compiledClass = (Class<? extends DocumentWrapper<T>>) cached.get(T);
+		if (compiledClass == null) {
+			String packageName = clazz.getPackage().getName();
+			String wrapperClassName = "Wrapper_" + clazz.getSimpleName();
+			StringBuilder sb = new StringBuilder(256);
+			sb.append("package " + packageName + ";\n");
+			sb.append("public class " + wrapperClassName + " implements " + DocumentWrapper.class.getName() + "<" + T
+					+ "> {\n");
+			sb.append("    public String _id;\n");
+			sb.append("    public " + T + " _source;\n");
+			sb.append("    public " + T + " getDocument() {\n");
+			sb.append("        return this._source;\n");
+			sb.append("    }\n");
+			sb.append("}\n");
+			String sourceCode = sb.toString();
+			log.info("Generate Java source:\n" + sourceCode);
+			StringCompiler compiler = new StringCompiler();
+			compiledClass = compiler.compile(packageName + "." + wrapperClassName, sourceCode);
+			cached.put(clazz.getName(), compiledClass);
 		}
-		StringOutputJavaFileObject output = fileManager.output;
-		try {
-			return (Class<? extends DocumentWrapper<T>>) new CompiledClassLoader(output.getByteCode())
-					.loadClass(packageName + "." + wrapperClassName);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
+		return compiledClass;
 	}
 
-}
-
-class StringInputJavaFileObject extends SimpleJavaFileObject {
-	/**
-	 * The source code of this "file".
-	 */
-	final String code;
-
-	StringInputJavaFileObject(String name, String code) {
-		super(URI.create("string:///" + name.replace('.', '/') + Kind.SOURCE.extension), Kind.SOURCE);
-		this.code = code;
-	}
-
-	@Override
-	public CharSequence getCharContent(boolean ignoreEncodingErrors) {
-		return code;
-	}
-}
-
-class StringOutputJavaFileObject extends SimpleJavaFileObject {
-
-	ByteArrayOutputStream byteCode;
-
-	StringOutputJavaFileObject(final String name, final Kind kind) {
-		super(URI.create(name), kind);
-	}
-
-	@Override
-	public InputStream openInputStream() {
-		return new ByteArrayInputStream(getByteCode());
-	}
-
-	@Override
-	public OutputStream openOutputStream() {
-		byteCode = new ByteArrayOutputStream();
-		return byteCode;
-	}
-
-	/**
-	 * @return the byte code generated by the compiler
-	 */
-	byte[] getByteCode() {
-		return byteCode.toByteArray();
-	}
-}
-
-class StringJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> {
-
-	StringOutputJavaFileObject output;
-
-	public StringJavaFileManager(JavaFileManager fileManager) {
-		super(fileManager);
-	}
-
-	@Override
-	public JavaFileObject getJavaFileForOutput(Location location, String qualifiedName, Kind kind,
-			FileObject outputFile) throws IOException {
-		output = new StringOutputJavaFileObject(qualifiedName, kind);
-		return output;
-	}
-}
-
-class CompiledClassLoader extends ClassLoader {
-	final byte[] classData;
-
-	CompiledClassLoader(byte[] classData) {
-		super(CompiledClassLoader.class.getClassLoader());
-		this.classData = classData;
-	}
-
-	@Override
-	protected Class<?> findClass(String qualifiedClassName) throws ClassNotFoundException {
-		return defineClass(qualifiedClassName, classData, 0, classData.length);
-	}
 }
