@@ -2,9 +2,11 @@ package com.itranswarp.shici.search;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,8 +33,10 @@ public class Searcher {
 
 	// search /////////////////////////////////////////////////////////////////
 
-	public <T extends BaseEntity> List<T> search(String indexName, String q, int pageIndex) {
+	public <T extends BaseEntity> List<T> search(String indexName, Class<T> clazz, String[] qs, int pageIndex) {
 		// search:
+		List<String> searchableFields = this.getSearchableFields(clazz);
+		// build query:
 		String searchOptions = "{  }";
 		postJSON(Map.class, indexName + "/_search", searchOptions);
 		return null;
@@ -83,6 +87,22 @@ public class Searcher {
 	}
 
 	// helper /////////////////////////////////////////////////////////////////
+
+	Map<String, List<String>> searchableFieldsCache = new ConcurrentHashMap<String, List<String>>();
+
+	List<String> getSearchableFields(Class<?> clazz) {
+		List<String> list = searchableFieldsCache.get(clazz.getName());
+		if (list == null) {
+			list = new ArrayList<String>();
+			for (Field f : clazz.getFields()) {
+				if (f.isAnnotationPresent(Analyzed.class)) {
+					list.add(f.getName());
+				}
+			}
+			searchableFieldsCache.put(clazz.getName(), list);
+		}
+		return list;
+	}
 
 	Map<String, Map<String, String>> createMapping(Class<?> clazz) {
 		log.info("Building mapping for class: " + clazz.getName());
@@ -186,12 +206,13 @@ public class Searcher {
 		throw JsonUtil.fromJson(SearchResultException.class, jsonErr);
 	}
 
-	Map<String, Class<? extends DocumentWrapper<?>>> cached = new HashMap<String, Class<? extends DocumentWrapper<?>>>();
+	Map<String, Class<? extends DocumentWrapper<?>>> cachedCompiledClasses = new ConcurrentHashMap<String, Class<? extends DocumentWrapper<?>>>();
 
 	@SuppressWarnings("unchecked")
 	<T extends BaseEntity> Class<? extends DocumentWrapper<T>> getWrapperClass(Class<T> clazz) {
 		String T = clazz.getName();
-		Class<? extends DocumentWrapper<T>> compiledClass = (Class<? extends DocumentWrapper<T>>) cached.get(T);
+		Class<? extends DocumentWrapper<T>> compiledClass = (Class<? extends DocumentWrapper<T>>) cachedCompiledClasses
+				.get(T);
 		if (compiledClass == null) {
 			String packageName = clazz.getPackage().getName();
 			String wrapperClassName = "Wrapper_" + clazz.getSimpleName();
@@ -209,7 +230,7 @@ public class Searcher {
 			log.info("Generate Java source:\n" + sourceCode);
 			StringCompiler compiler = new StringCompiler();
 			compiledClass = compiler.compile(packageName + "." + wrapperClassName, sourceCode);
-			cached.put(clazz.getName(), compiledClass);
+			cachedCompiledClasses.put(clazz.getName(), compiledClass);
 		}
 		return compiledClass;
 	}
