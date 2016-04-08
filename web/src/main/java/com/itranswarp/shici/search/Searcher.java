@@ -19,7 +19,6 @@ import com.itranswarp.shici.util.HttpUtil.HttpResponse;
 import com.itranswarp.shici.util.JsonUtil;
 import com.itranswarp.shici.util.MapUtil;
 import com.itranswarp.shici.util.ValidateUtil;
-import com.itranswarp.warpdb.entity.BaseEntity;
 
 @Component
 public class Searcher {
@@ -33,7 +32,7 @@ public class Searcher {
 
 	// search /////////////////////////////////////////////////////////////////
 
-	public <T extends BaseEntity> List<T> search(String indexName, Class<T> clazz, String[] qs, int pageIndex) {
+	public <T extends Searchable> List<T> search(String indexName, Class<T> clazz, String q, int pageIndex) {
 		// search:
 		List<String> searchableFields = this.getSearchableFields(clazz);
 		// build query:
@@ -44,18 +43,18 @@ public class Searcher {
 
 	// document ///////////////////////////////////////////////////////////////
 
-	public <T extends BaseEntity> void createMapping(String indexName, Class<T> clazz) {
+	public <T extends Searchable> void createMapping(String indexName, Class<T> clazz) {
 		Map<String, Map<String, String>> properties = this.createMapping(clazz);
 		putJSON(Map.class, indexName + "/_mapping/" + clazz.getSimpleName(),
 				MapUtil.createMap("properties", properties));
 	}
 
-	public <T extends BaseEntity> void createDocument(String indexName, T doc) {
-		ValidateUtil.checkId(doc.id);
-		putJSON(Map.class, indexName + "/" + doc.getClass().getSimpleName() + "/" + doc.id, doc);
+	public <T extends Searchable> void createDocument(String indexName, T doc) {
+		ValidateUtil.checkId(doc.getId());
+		putJSON(Map.class, indexName + "/" + doc.getClass().getSimpleName() + "/" + doc.getId(), doc);
 	}
 
-	public <T extends BaseEntity> T getDocument(String indexName, Class<T> clazz, String id) {
+	public <T extends Searchable> T getDocument(String indexName, Class<T> clazz, String id) {
 		ValidateUtil.checkId(id);
 		Class<? extends DocumentWrapper<T>> cls = getWrapperClass(clazz);
 		log.info(cls);
@@ -209,7 +208,7 @@ public class Searcher {
 	Map<String, Class<? extends DocumentWrapper<?>>> cachedCompiledClasses = new ConcurrentHashMap<String, Class<? extends DocumentWrapper<?>>>();
 
 	@SuppressWarnings("unchecked")
-	<T extends BaseEntity> Class<? extends DocumentWrapper<T>> getWrapperClass(Class<T> clazz) {
+	<T extends Searchable> Class<? extends DocumentWrapper<T>> getWrapperClass(Class<T> clazz) {
 		String T = clazz.getName();
 		Class<? extends DocumentWrapper<T>> compiledClass = (Class<? extends DocumentWrapper<T>>) cachedCompiledClasses
 				.get(T);
@@ -221,6 +220,10 @@ public class Searcher {
 			sb.append("public class " + wrapperClassName + " implements " + DocumentWrapper.class.getName() + "<" + T
 					+ "> {\n");
 			sb.append("    public String _id;\n");
+			sb.append("    public double _score;\n");
+			sb.append("    public double getScore() {\n");
+			sb.append("        return this._score;\n");
+			sb.append("    }\n");
 			sb.append("    public " + T + " _source;\n");
 			sb.append("    public " + T + " getDocument() {\n");
 			sb.append("        return this._source;\n");
