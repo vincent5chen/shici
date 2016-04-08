@@ -265,7 +265,7 @@ public class ValidateUtil {
 			{ '\u25cf', '\u00b7' }, { '\u25cb', '\u00b7' }, { '\u2299', '\u00b7' }, { '\u00b0', '\u00b7' },
 			{ '\u25aa', '\u00b7' }, { '\u25ab', '\u00b7' }, { '\u2022', '\u00b7' } };
 
-	static String normalizeChinese(String s) {
+	public static String normalizeChinese(String s) {
 		if (s == null) {
 			return "";
 		}
