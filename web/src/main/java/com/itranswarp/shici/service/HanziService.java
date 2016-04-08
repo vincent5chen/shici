@@ -14,19 +14,25 @@ import com.itranswarp.shici.model.Hanzi;
 public class HanziService extends AbstractService {
 
 	Map<Character, Character> chtMap;
+	Map<Character, Character> chsMap;
 
 	@PostConstruct
 	public void init() {
 		List<Hanzi> all = database.from(Hanzi.class).list();
-		Map<Character, Character> map = new HashMap<Character, Character>();
+		Map<Character, Character> theChtMap = new HashMap<Character, Character>();
+		Map<Character, Character> theChsMap = new HashMap<Character, Character>();
 		for (Hanzi hanz : all) {
 			if (hanz.s.isEmpty() || hanz.t.isEmpty()) {
 				log.warn("s or t is empty: " + hanz);
 			}
-			map.put(hanz.s.charAt(0), hanz.t.charAt(0));
+			Character s = hanz.s.charAt(0);
+			Character t = hanz.t.charAt(0);
+			theChtMap.put(s, t);
+			theChsMap.put(t, s);
 		}
 		log.info(all.size() + " characters loaded.");
-		chtMap = map;
+		chtMap = theChtMap;
+		chsMap = theChsMap;
 	}
 
 	public String toCht(String chs) {
@@ -34,6 +40,16 @@ public class HanziService extends AbstractService {
 		for (int i = 0; i < chs.length(); i++) {
 			char ch = chs.charAt(i);
 			Character t = chtMap.get(ch);
+			sb.append(t == null ? ch : t);
+		}
+		return sb.toString();
+	}
+
+	public String toChs(String cht) {
+		StringBuilder sb = new StringBuilder(cht.length());
+		for (int i = 0; i < cht.length(); i++) {
+			char ch = cht.charAt(i);
+			Character t = chsMap.get(ch);
 			sb.append(t == null ? ch : t);
 		}
 		return sb.toString();

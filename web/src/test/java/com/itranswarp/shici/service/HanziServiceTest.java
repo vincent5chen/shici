@@ -35,6 +35,11 @@ public class HanzServiceTest extends AbstractServiceTestBase {
 
 	@Test
 	public void testToCht() {
-		assertEquals("陳子昂", hanziService.toCht("陈子昂"));
+		assertEquals("陳子昂 東漢", hanziService.toCht("陈子昂 东汉"));
+	}
+
+	@Test
+	public void testToChs() {
+		assertEquals("陈子昂 东汉", hanziService.toChs("陳子昂 東漢"));
 	}
 }
