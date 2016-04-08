@@ -9,7 +9,7 @@ import com.itranswarp.shici.model.User;
 import com.itranswarp.warpdb.Database;
 import com.itranswarp.warpdb.context.UserContext;
 
-public class HanzServiceTest extends AbstractServiceTestBase {
+public class HanziServiceTest extends AbstractServiceTestBase {
 
 	HanziService hanziService;
 
@@ -22,7 +22,7 @@ public class HanzServiceTest extends AbstractServiceTestBase {
 		// init hanz:
 		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
 			char[][] hanzs = new char[][] { { '东', '東' }, { '台', '臺' }, { '张', '張' }, { '来', '來' }, { '后', '後' },
-					{ '汉', '漢' }, { '国', '國' }, { '陈', '陳' }, { '见', '見' }, { '还', '還' }, { '详', '詳' }, { '诗', '詩'} };
+					{ '汉', '漢' }, { '国', '國' }, { '陈', '陳' }, { '见', '見' }, { '还', '還' }, { '详', '詳' }, { '诗', '詩' } };
 			for (char[] hanz : hanzs) {
 				db.save(newHanz(hanz[0], hanz[1]));
 			}

@@ -44,12 +44,12 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public PoemService initPoemService(Database db) {
 		PoemService s = new PoemService();
 		s.database = db;
-		s.hanziService = new HanzServiceTest().initHanziService(db);
+		s.hanziService = new HanziServiceTest().initHanziService(db);
 		return s;
 	}
 
 	void initDynasties(Database db) {
-		HanziService hanzService = new HanzServiceTest().initHanziService(db);
+		HanziService hanzService = new HanziServiceTest().initHanziService(db);
 		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
 			String[] names = { "先秦", "汉代", "三国两晋", "南北朝", "隋唐", "宋代", "元代", "明代", "清代", "近现代", "不详" };
 			for (int i = 0; i < names.length; i++) {
