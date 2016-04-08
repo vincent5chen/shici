@@ -104,9 +104,9 @@ public class PoemService extends AbstractService {
 
 	private void copyToPoet(Poet poet, PoetBean bean) {
 		poet.dynastyId = bean.dynastyId;
-		poet.name = bean.name;
+		poet.name = hanziService.toChs(bean.name);
 		poet.nameCht = hanziService.toCht(bean.name);
-		poet.description = bean.description;
+		poet.description = hanziService.toChs(bean.description);
 		poet.descriptionCht = hanziService.toCht(bean.description);
 		poet.birth = bean.birth;
 		poet.death = bean.death;
@@ -191,11 +191,11 @@ public class PoemService extends AbstractService {
 		poem.poetNameCht = poet.nameCht;
 		poem.form = bean.form;
 		poem.tags = bean.tags;
-		poem.name = bean.name;
+		poem.name = hanziService.toChs(bean.name);
 		poem.nameCht = hanziService.toCht(bean.name);
-		poem.content = bean.content;
+		poem.content = hanziService.toChs(bean.content);
 		poem.contentCht = hanziService.toCht(bean.content);
-		poem.appreciation = bean.appreciation;
+		poem.appreciation = hanziService.toChs(bean.appreciation);
 		poem.appreciationCht = hanziService.toCht(bean.appreciation);
 	}
 

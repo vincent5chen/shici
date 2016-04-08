@@ -135,7 +135,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test
 	public void testCreatePoetOK() {
-		PoetBean bean = newPoetBean(getTangDynasty().id, "陈子昂 \u3000\r\n");
+		PoetBean bean = newPoetBean(getTangDynasty().id, "陳子昂 \u3000\r\n");
 		bean.birth = "  659  \t";
 		bean.death = "\n 700 \r";
 		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
@@ -316,7 +316,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		Poem poem = null;
 		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
-			PoemBean bean = newPoemBean(poet.id, " 登●幽 州 台[1]歌", "前不(2)见古人，\n后不见③来者 \t\n  \u3000");
+			PoemBean bean = newPoemBean(poet.id, " 登●幽 州 臺[1]歌", "前不(2)見 古人，\n后不见③来者 \t\n  \u3000");
 			bean.tags = "  唐诗，\t古诗；唐代 古代,诗词";
 			poem = poemService.createPoem(bean);
 		}
