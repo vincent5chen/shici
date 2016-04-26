@@ -44,7 +44,7 @@ public class SearcherTest {
 		Tweet t = Tweet.newTweet("michael", "Hello", "Hello, from 北京奥林匹克森林公园！");
 		searcher.createDocument(INDEX, t);
 		// test
-		Tweet gt = searcher.getDocument(INDEX, Tweet.TweetDocumentWrapper.class, t.id);
+		Tweet gt = searcher.getDocument(INDEX, Tweet.class, t.id);
 		assertNotNull(gt);
 		assertEquals(t.id, gt.id);
 		assertEquals(t.username, gt.username);
@@ -53,7 +53,7 @@ public class SearcherTest {
 		searcher.deleteDocument(INDEX, Tweet.class, t.id);
 		// try get:
 		try {
-			searcher.getDocument(INDEX, Tweet.TweetDocumentWrapper.class, t.id);
+			searcher.getDocument(INDEX, Tweet.class, t.id);
 			fail("Not deleted.");
 		} catch (SearchResultException e) {
 		}
@@ -67,7 +67,7 @@ public class SearcherTest {
 		t2.id = t1.id;
 		searcher.createDocument(INDEX, t2);
 		// test
-		Tweet gt = searcher.getDocument(INDEX, Tweet.TweetDocumentWrapper.class, t1.id);
+		Tweet gt = searcher.getDocument(INDEX, Tweet.class, t1.id);
 		assertNotNull(gt);
 		assertEquals(t2.id, gt.id);
 		assertEquals(t2.username, gt.username);
@@ -75,7 +75,7 @@ public class SearcherTest {
 	}
 
 	@Test
-	public void testSearchEmpty() throws Exception {
+	public void testSearch() throws Exception {
 		String[][] texts = { { "李白", "赠汪伦", "李白乘舟将欲行，忽闻岸上踏歌声。桃花潭水深千尺，不及汪伦送我情。" },
 				{ "李端", "听筝", "鸣筝金粟柱，素手玉房前。欲得周郎顾，时时误拂弦。" },
 				{ "杜甫", "天末怀李白", "凉风起天末，君子意如何。鸿雁几时到，江湖秋水多。文章憎命达，魑魅喜人过。应共冤魂语，投诗赠汨罗。" },
@@ -97,40 +97,40 @@ public class SearcherTest {
 		Thread.sleep(2000);
 		// search by term:
 		final String LEE = "李";
-		List<Tweet> results = searcher.search(INDEX, Tweet.TweetHitsResultWrapper.class, new String[] { LEE }, 10);
+		List<Tweet> results = searcher.search(INDEX, Tweet.class, new String[] { LEE }, 10);
 		assertFalse(results.isEmpty());
 		for (Tweet tweet : results) {
 			assertTrue(tweet.username.contains(LEE) || tweet.title.contains(LEE) || tweet.message.contains(LEE));
 		}
 		// search by xx:
 		final String LIBAI = "李白";
-		results = searcher.search(INDEX, Tweet.TweetHitsResultWrapper.class, new String[] { LIBAI }, 10);
+		results = searcher.search(INDEX, Tweet.class, new String[] { LIBAI }, 10);
 		assertFalse(results.isEmpty());
 		for (Tweet tweet : results) {
 			assertTrue(tweet.username.contains(LIBAI) || tweet.title.contains(LIBAI) || tweet.message.contains(LIBAI));
 		}
 		// search by xxxxx:
 		final String RZXLSZY = "日照香炉生紫烟";
-		results = searcher.search(INDEX, Tweet.TweetHitsResultWrapper.class, new String[] { RZXLSZY }, 10);
+		results = searcher.search(INDEX, Tweet.class, new String[] { RZXLSZY }, 10);
 		assertFalse(results.isEmpty());
 		for (Tweet tweet : results) {
 			assertTrue(tweet.message.contains(RZXLSZY));
 		}
 		// search by xxxxx with fuzzy:
 		final String RZXLSZY2 = "日照香炉升紫烟";
-		results = searcher.search(INDEX, Tweet.TweetHitsResultWrapper.class, new String[] { RZXLSZY2 }, 10);
+		results = searcher.search(INDEX, Tweet.class, new String[] { RZXLSZY2 }, 10);
 		assertFalse(results.isEmpty());
 		for (Tweet tweet : results) {
 			assertTrue(tweet.message.contains(RZXLSZY));
 		}
 		// search by xxxx with fuzzy:
 		final String QGFL = "千古风流";
-		results = searcher.search(INDEX, Tweet.TweetHitsResultWrapper.class, new String[] { QGFL }, 10);
+		results = searcher.search(INDEX, Tweet.class, new String[] { QGFL }, 10);
 		assertEquals(2, results.size());
 		assertTrue(results.get(0).message.contains(QGFL));
 		assertTrue(results.get(1).message.contains("千古风月"));
 		// search by xx and xx:
-		results = searcher.search(INDEX, Tweet.TweetHitsResultWrapper.class, new String[] { LIBAI, QGFL }, 10);
+		results = searcher.search(INDEX, Tweet.class, new String[] { LIBAI, QGFL }, 10);
 		assertFalse(results.isEmpty());
 		for (Tweet tweet : results) {
 			assertTrue(tweet.message.contains(QGFL) || tweet.message.contains("千古风月") || tweet.message.contains("LIBAI")
@@ -138,13 +138,13 @@ public class SearcherTest {
 		}
 		// search "船系钓台下":
 		final String CXDTX = "船系钓台下";
-		results = searcher.search(INDEX, Tweet.TweetHitsResultWrapper.class, new String[] { CXDTX }, 10);
+		results = searcher.search(INDEX, Tweet.class, new String[] { CXDTX }, 10);
 		assertEquals(1, results.size());
 		// delete doc:
 		searcher.deleteDocument(INDEX, Tweet.class, lastId);
 		Thread.sleep(2000);
 		// search again should not found:
-		results = searcher.search(INDEX, Tweet.TweetHitsResultWrapper.class, new String[] { CXDTX }, 10);
+		results = searcher.search(INDEX, Tweet.class, new String[] { CXDTX }, 10);
 		assertTrue(results.isEmpty());
 	}
 }

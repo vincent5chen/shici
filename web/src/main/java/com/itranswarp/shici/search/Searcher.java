@@ -2,7 +2,6 @@ package com.itranswarp.shici.search;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.itranswarp.compiler.JavaStringCompiler;
 import com.itranswarp.shici.util.HttpUtil;
 import com.itranswarp.shici.util.HttpUtil.HttpResponse;
 import com.itranswarp.shici.util.JsonUtil;
@@ -33,18 +33,16 @@ public class Searcher {
 
 	// search /////////////////////////////////////////////////////////////////
 
-	public <T extends Searchable> List<T> search(String indexName, Class<? extends HitsResultWrapper<T>> clazz,
-			String[] qs, int maxResults) {
+	public <T extends Searchable> List<T> search(String indexName, Class<T> clazz, String[] qs, int maxResults) {
 		// build query:
 		Map<String, Object> query = buildQuery(qs);
 		query.put("from", 0);
 		query.put("size", maxResults);
 		log.info("Query: " + JsonUtil.toJson(query));
 		double minScore = 0.0;
-		ParameterizedType t = (ParameterizedType) clazz.getGenericInterfaces()[0];
-		Class<?> cls = (Class<?>) t.getActualTypeArguments()[0];
-		HitsResultWrapper<T> hitsResultWrapper = postJSON(clazz, indexName + "/" + cls.getSimpleName() + "/_search",
-				query);
+		Class<HitsResultWrapper<T>> hitsResultWrapperClass = getHitsResultWrapperClass(clazz);
+		HitsResultWrapper<T> hitsResultWrapper = postJSON(hitsResultWrapperClass,
+				indexName + "/" + clazz.getSimpleName() + "/_search", query);
 		HitsWrapper<T> hitsWrapper = hitsResultWrapper.getHitsWrapper();
 		int total = hitsWrapper.getTotal();
 		if (total == 0) {
@@ -140,14 +138,14 @@ public class Searcher {
 		putJSON(Map.class, indexName + "/" + doc.getClass().getSimpleName() + "/" + doc.getId(), doc);
 	}
 
-	public <T extends Searchable> T getDocument(String indexName, Class<? extends DocumentWrapper<T>> clazz,
-			String id) {
+	public <T extends Searchable> T getDocument(String indexName, Class<T> clazz, String id) {
 		ValidateUtil.checkId(id);
-		DocumentWrapper<T> wrapper = getJSON(clazz, indexName + "/" + clazz.getSimpleName() + "/" + id);
+		Class<DocumentWrapper<T>> wrapperClass = getDocumentWrapperClass(clazz);
+		DocumentWrapper<T> wrapper = getJSON(wrapperClass, indexName + "/" + clazz.getSimpleName() + "/" + id);
 		return wrapper.getDocument();
 	}
 
-	public <T> void deleteDocument(String indexName, Class<T> clazz, String id) {
+	public <T extends Searchable> void deleteDocument(String indexName, Class<T> clazz, String id) {
 		ValidateUtil.checkId(id);
 		deleteJSON(Map.class, indexName + "/" + clazz.getSimpleName() + "/" + id, null);
 	}
@@ -230,7 +228,7 @@ public class Searcher {
 			type = "double";
 			break;
 		default:
-			return null;
+			throw new IllegalArgumentException("Type " + clazz.getName() + " is not supported.");
 		}
 		return MapUtil.createMap("type", type, "index", analyzed ? "analyzed" : "not_analyzed");
 	}
@@ -289,6 +287,44 @@ public class Searcher {
 			jsonErr = "{}";
 		}
 		throw JsonUtil.fromJson(SearchResultException.class, jsonErr);
+	}
+
+	// on-the-fly compiler ////////////////////////////////////////////////////
+
+	Map<String, Class<?>> hitsMap = new ConcurrentHashMap<String, Class<?>>();
+
+	Map<String, Class<?>> docMap = new ConcurrentHashMap<String, Class<?>>();
+
+	@SuppressWarnings("unchecked")
+	<T extends Searchable> Class<HitsResultWrapper<T>> getHitsResultWrapperClass(Class<T> clazz) {
+		String key = clazz.getName();
+		Class<?> value = hitsMap.get(key);
+		if (value == null) {
+			value = compile(new HitsResultWrapperSourceBuilder(), clazz);
+			hitsMap.put(key, value);
+		}
+		return (Class<HitsResultWrapper<T>>) value;
+	}
+
+	@SuppressWarnings("unchecked")
+	<T extends Searchable> Class<DocumentWrapper<T>> getDocumentWrapperClass(Class<T> clazz) {
+		String key = clazz.getName();
+		Class<?> value = docMap.get(key);
+		if (value == null) {
+			value = compile(new DocumentWrapperSourceBuilder(), clazz);
+			docMap.put(key, value);
+		}
+		return (Class<DocumentWrapper<T>>) value;
+	}
+
+	Class<?> compile(SourceBuilder builder, Class<?> clazz) {
+		try {
+			JavaStringCompiler compiler = new JavaStringCompiler();
+			Map<String, byte[]> results = compiler.compile(builder.getFileName(clazz), builder.createSource(clazz));
+			return compiler.loadClass(builder.getClassName(clazz), results);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	// Map<String, Class<?>> cachedHitsWrapperClasses = new

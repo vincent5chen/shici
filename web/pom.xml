@@ -44,6 +44,11 @@
 			<version>${warpdb.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.itranswarp</groupId>
+			<artifactId>compiler</artifactId>
+			<version>${compiler.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.itranswarp.openweixin</groupId>
 			<artifactId>wxapi</artifactId>
 			<version>${wxapi.version}</version>
