@@ -33,6 +33,15 @@ public class Searcher {
 
 	// search /////////////////////////////////////////////////////////////////
 
+	/**
+	 * Search by query string.
+	 * 
+	 * @param indexName Index name.
+	 * @param clazz Document type.
+	 * @param qs Query string as array.
+	 * @param maxResults The max results.
+	 * @return List that contains documents.
+	 */
 	public <T extends Searchable> List<T> search(String indexName, Class<T> clazz, String[] qs, int maxResults) {
 		// build query:
 		Map<String, Object> query = buildQuery(qs);
@@ -152,6 +161,12 @@ public class Searcher {
 
 	// index //////////////////////////////////////////////////////////////////
 
+	/**
+	 * Check if index exist.
+	 * 
+	 * @param name Index name.
+	 * @return True if index exist, otherwise false.
+	 */
 	public boolean indexExist(String name) {
 		try {
 			getJSON(Map.class, name);
@@ -161,10 +176,20 @@ public class Searcher {
 		return true;
 	}
 
+	/**
+	 * Create new index.
+	 * 
+	 * @param name Index name.
+	 */
 	public void createIndex(String name) {
 		putJSON(Map.class, name, null);
 	}
 
+	/**
+	 * Delete index.
+	 * 
+	 * @param name Index name.
+	 */
 	public void deleteIndex(String name) {
 		deleteJSON(Map.class, name, null);
 	}
@@ -327,118 +352,4 @@ public class Searcher {
 		}
 	}
 
-	// Map<String, Class<?>> cachedHitsWrapperClasses = new
-	// ConcurrentHashMap<String, Class<?>>();
-	//
-	// @SuppressWarnings("unchecked")
-	// <T extends Searchable> Class<? extends HitsWrapper<T>>
-	// getHitsWrapperClass(Class<T> clazz) {
-	// getDocumentWrapperClass(clazz);
-	// String T = clazz.getName();
-	// Class<? extends HitsWrapper<T>> compiledClass = (Class<? extends
-	// HitsWrapper<T>>) cachedHitsWrapperClasses
-	// .get(T);
-	// if (compiledClass == null) {
-	// Class<?> hitsHits = compileHits(clazz);
-	// compiledClass = (Class<? extends HitsWrapper<T>>)
-	// compileHitsResult(clazz, hitsHits);
-	// cachedHitsWrapperClasses.put(clazz.getName(), compiledClass);
-	// }
-	// return compiledClass;
-	// }
-	//
-	// <T extends Searchable> Class<?> compileHitsResult(Class<T> clazz,
-	// Class<?> hits) {
-	// String T = clazz.getName();
-	// String packageName = clazz.getPackage().getName();
-	// String hitsClassName = "HitsResult_" + clazz.getSimpleName();
-	// StringBuilder sb = new StringBuilder(256);
-	// sb.append("package " + packageName + ";\n");
-	// sb.append("public class " + hitsClassName + " implements " +
-	// HitsResultWrapper.class.getName() + "<" + T
-	// + "> {\n");
-	// sb.append(" public int took;\n");
-	// sb.append(" public " + hits.getName() + " hits;\n");
-	// sb.append(" public " + HitsWrapper.class.getName() + "<" + T + ">
-	// getHitsWrapper() {\n");
-	// sb.append(" return this.hits;\n");
-	// sb.append(" }\n");
-	// sb.append("}\n");
-	// String sourceCode = sb.toString();
-	// log.info("Generate Java source: " + hitsClassName + ".java\n" +
-	// sourceCode);
-	// StringCompiler compiler = new StringCompiler();
-	// return compiler.compile(packageName + "." + hitsClassName, sourceCode);
-	// }
-	//
-	// <T extends Searchable> Class<?> compileHits(Class<T> clazz) {
-	// String T = clazz.getName();
-	// String packageName = clazz.getPackage().getName();
-	// String hitsClassName = "Hits__" + clazz.getSimpleName();
-	// StringBuilder sb = new StringBuilder(256);
-	// sb.append("package " + packageName + ";\n");
-	// sb.append("public class " + hitsClassName + " implements " +
-	// HitsWrapper.class.getName() + "<" + T + "> {\n");
-	// sb.append(" public int total;\n");
-	// sb.append(" public int getTotal() {\n");
-	// sb.append(" return this.total;\n");
-	// sb.append(" }\n");
-	// sb.append(" public java.util.List<" + DocumentWrapper.class.getName() +
-	// "<" + T + ">> hits;\n");
-	// sb.append(" public java.util.List<" + DocumentWrapper.class.getName() +
-	// "<" + T
-	// + ">> getDocumentWrappers() {\n");
-	// sb.append(" return this.hits;\n");
-	// sb.append(" }\n");
-	// sb.append("}\n");
-	// String sourceCode = sb.toString();
-	// log.info("Generate Java source: " + hitsClassName + ".java\n" +
-	// sourceCode);
-	// StringCompiler compiler = new StringCompiler();
-	// return compiler.compile(packageName + "." + hitsClassName, sourceCode);
-	// }
-	//
-	// Map<String, Class<?>> cachedCompiledWrapperClasses = new
-	// ConcurrentHashMap<String, Class<?>>();
-	//
-	// @SuppressWarnings("unchecked")
-	// <T extends Searchable> Class<? extends DocumentWrapper<T>>
-	// getDocumentWrapperClass(Class<T> clazz) {
-	// String T = clazz.getName();
-	// Class<? extends DocumentWrapper<T>> compiledClass = (Class<? extends
-	// DocumentWrapper<T>>) cachedCompiledWrapperClasses
-	// .get(T);
-	// if (compiledClass == null) {
-	// compiledClass = compileDocumentWrapperClass(clazz);
-	// cachedCompiledWrapperClasses.put(clazz.getName(), compiledClass);
-	// }
-	// return compiledClass;
-	// }
-	//
-	// <T extends Searchable> Class<? extends DocumentWrapper<T>>
-	// compileDocumentWrapperClass(Class<T> clazz) {
-	// String T = clazz.getName();
-	// String packageName = clazz.getPackage().getName();
-	// String mainClassName = "DocumentWrapper__" + clazz.getSimpleName();
-	// StringBuilder sb = new StringBuilder(256);
-	// sb.append("package " + packageName + ";\n");
-	// sb.append(
-	// "public class " + mainClassName + " implements " +
-	// DocumentWrapper.class.getName() + "<" + T + "> {\n");
-	// sb.append(" public String _id;\n");
-	// sb.append(" public double _score;\n");
-	// sb.append(" public double getScore() {\n");
-	// sb.append(" return this._score;\n");
-	// sb.append(" }\n");
-	// sb.append(" public " + T + " _source;\n");
-	// sb.append(" public " + T + " getDocument() {\n");
-	// sb.append(" return this._source;\n");
-	// sb.append(" }\n");
-	// sb.append("}\n");
-	// String sourceCode = sb.toString();
-	// log.info("Generate Java source: " + mainClassName + ".java\n" +
-	// sourceCode);
-	// StringCompiler compiler = new StringCompiler();
-	// return compiler.compile(packageName + "." + mainClassName, sourceCode);
-	// }
 }

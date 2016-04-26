@@ -1,5 +1,10 @@
 package com.itranswarp.shici.search;
 
+/**
+ * Exception when search failed.
+ * 
+ * @author michael
+ */
 public class SearchException extends RuntimeException {
 
 	public SearchException() {

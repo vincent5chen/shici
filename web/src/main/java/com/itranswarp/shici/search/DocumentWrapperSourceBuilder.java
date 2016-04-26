@@ -1,6 +1,6 @@
 package com.itranswarp.shici.search;
 
-public class DocumentWrapperSourceBuilder extends SourceBuilder {
+class DocumentWrapperSourceBuilder extends SourceBuilder {
 
 	static final String TEMPLATE = "package ${package};                                         \n"
 			+ "import ${package}.${name};                                                       \n"
