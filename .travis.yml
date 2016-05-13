@@ -3,5 +3,5 @@ language: java
 jdk:
   - oraclejdk8
 
-install: cd project && mvn install -DskipTests=true
+install: cd web && mvn install -DskipTests=true
 
