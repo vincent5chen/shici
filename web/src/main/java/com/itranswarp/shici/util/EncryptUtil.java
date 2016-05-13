@@ -15,7 +15,7 @@ public class EncryptUtil {
 	static final byte[] DEFAULT_KEY = getFirst16Bytes("ZhongHuaShiCi.com");
 
 	// Don't change the initial vector:
-	static final byte[] INIT_VECTOR = getFirst16Bytes("Welcome~To~ZhongHuaShiCi!");
+	static final byte[] INIT_VECTOR = getFirst16Bytes("http://www.shi-ci.com");
 
 	public static String encryptByAES(String dataToEncrypt) {
 		return encryptByAES(DEFAULT_KEY, dataToEncrypt);
