@@ -28,7 +28,7 @@ public class UIController {
 	}
 
 	@RequestMapping(value = "/search", method = RequestMethod.GET)
-	public ModelAndView search() {
+	public ModelAndView search(@RequestParam("q") String q) {
 		return null;
 	}
 
