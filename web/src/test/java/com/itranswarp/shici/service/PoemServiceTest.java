@@ -619,7 +619,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		}
 	}
 
-	@Test(expected = DuplicateKeyException.class)
+	@Test(expected = APIArgumentException.class)
 	public void testSetAsFeaturedFailedForPoemAlreadyFeatured() throws IOException {
 		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));

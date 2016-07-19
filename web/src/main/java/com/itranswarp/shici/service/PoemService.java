@@ -432,7 +432,11 @@ public class PoemService extends AbstractService {
 		if (poem.imageId.isEmpty()) {
 			throw new APIArgumentException("poemId", "Poem does not have image.");
 		}
-		FeaturedPoem fp = new FeaturedPoem();
+		FeaturedPoem fp = database.from(FeaturedPoem.class).where("poemId=?", poem.id).first();
+		if (fp != null) {
+			throw new APIArgumentException("poemId", "Poem already set featured.");
+		}
+		fp = new FeaturedPoem();
 		fp.poemId = bean.poemId;
 		fp.pubDate = bean.pubDate;
 		database.save(fp);
