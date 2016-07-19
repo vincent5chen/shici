@@ -3,7 +3,9 @@ language: java
 jdk:
   - oraclejdk8
 
-script: mkdir /var/log/shici/
+before-install:
+- sudo mkdir /var/log/shici/
+- sudo chmod a+w /var/log/shici/
 
-install: cd web && mvn install -DskipTests=true
+install: cd web && mvn install
 
