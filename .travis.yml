@@ -7,5 +7,5 @@ before-install:
 - sudo mkdir /var/log/shici/
 - sudo chmod a+w /var/log/shici/
 
-install: cd web && mvn -DskipTests=true install
+install: cd web && mvn -DskipTests=true package
 
