@@ -5,8 +5,10 @@ import static org.junit.Assert.*;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class SearcherTest {
 
 	final String INDEX = "thetestindex";
