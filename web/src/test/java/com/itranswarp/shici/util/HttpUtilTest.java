@@ -55,8 +55,8 @@ public class HttpUtilTest {
 				put("ref", "test");
 			}
 		};
-		String r = HttpUtil.httpGet("http://www.liaoxuefeng.com/", data, null).body;
-		assertTrue(r.contains("\u5ed6\u96ea\u5cf0"));
+		String r = HttpUtil.httpGet("https://code.visualstudio.com/Docs/supporting/faq", data, null).body;
+		assertTrue(r.contains("Visual Studio Code"));
 	}
 
 }
