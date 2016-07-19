@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.itranswarp.shici.TestHelper;
@@ -31,6 +32,7 @@ public class AliyunStorageTest {
 		return as;
 	}
 
+	@Ignore
 	@Test
 	public void testPutAsInputStream() throws IOException {
 		RemoteObject ro = storage.put(".jpg", FileUtil.getResource("/1280x800.jpg"));
