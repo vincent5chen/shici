@@ -5,8 +5,6 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-import com.itranswarp.warpdb.entity.BaseEntity;
-
 /**
  * Job object.
  * 

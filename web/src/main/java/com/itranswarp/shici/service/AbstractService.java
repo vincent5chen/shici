@@ -4,11 +4,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.itranswarp.shici.context.UserContext;
 import com.itranswarp.shici.exception.APIAuthenticationException;
 import com.itranswarp.shici.exception.APIPermissionException;
 import com.itranswarp.shici.model.User;
 import com.itranswarp.warpdb.Database;
-import com.itranswarp.warpdb.context.UserContext;
 
 public abstract class AbstractService {
 

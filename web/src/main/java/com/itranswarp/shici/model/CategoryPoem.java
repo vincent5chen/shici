@@ -6,8 +6,6 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.itranswarp.warpdb.entity.BaseEntity;
-
 /**
  * Many-to-many relationship between Category and Poem.
  * 

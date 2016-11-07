@@ -5,8 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.itranswarp.warpdb.entity.BaseEntity;
-
 /**
  * Using OAuth2 authentication.
  * 

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.itranswarp.shici.auth.CookieAuth;
 import com.itranswarp.shici.auth.CookieAuthenticatorHelper;
+import com.itranswarp.shici.context.UserContext;
 import com.itranswarp.shici.model.OAuth;
 import com.itranswarp.shici.model.User;
 import com.itranswarp.shici.oauth.OAuthAuthentication;
@@ -24,7 +25,6 @@ import com.itranswarp.shici.oauth.OAuthProvider;
 import com.itranswarp.shici.util.HttpUtil;
 import com.itranswarp.shici.util.JsonUtil;
 import com.itranswarp.warpdb.IdUtil;
-import com.itranswarp.warpdb.context.UserContext;
 
 @Controller
 public class OAuthService extends AbstractService {
@@ -107,7 +107,7 @@ public class OAuthService extends AbstractService {
 			oauth.accessToken = oa.accessToken;
 			oauth.refreshToken = oa.refreshToken;
 			oauth.expiresAt = oa.getExpiresAt();
-			try (UserContext<User> ctx = new UserContext<User>(user)) {
+			try (UserContext ctx = new UserContext(user)) {
 				database.save(oauth, user);
 			}
 		} else {
@@ -117,7 +117,7 @@ public class OAuthService extends AbstractService {
 			oauth.expiresAt = oa.getExpiresAt();
 			// try find user:
 			user = database.get(User.class, oauth.userId);
-			try (UserContext<User> ctx = new UserContext<User>(user)) {
+			try (UserContext ctx = new UserContext(user)) {
 				database.updateProperties(oauth, "accessToken", "refreshToken", "expiresAt");
 			}
 		}

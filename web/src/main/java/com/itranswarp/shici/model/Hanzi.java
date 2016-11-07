@@ -4,8 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import com.itranswarp.warpdb.entity.BaseEntity;
-
 @Entity
 @Table
 public class Hanzi extends BaseEntity {

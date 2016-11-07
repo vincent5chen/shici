@@ -18,10 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.itranswarp.shici.auth.Authenticator;
+import com.itranswarp.shici.context.UserContext;
 import com.itranswarp.shici.exception.APIAuthenticationException;
 import com.itranswarp.shici.model.User;
 import com.itranswarp.warpdb.Database;
-import com.itranswarp.warpdb.context.UserContext;
 
 /**
  * Do authentication for each request and set UserContext if authenticate OK.
@@ -81,7 +81,7 @@ public class AuthenticationFilter implements Filter {
 			}
 		} else {
 			log.info("Authentication bind to: " + user.email);
-			try (UserContext<User> context = new UserContext<User>(user)) {
+			try (UserContext context = new UserContext(user)) {
 				chain.doFilter(request, response);
 			} catch (Exception e) {
 				log.error("Exception when process request:", e);

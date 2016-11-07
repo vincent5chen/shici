@@ -3,8 +3,6 @@ package com.itranswarp.shici.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-import com.itranswarp.warpdb.entity.BaseEntity;
-
 /**
  * Poem object.
  * 

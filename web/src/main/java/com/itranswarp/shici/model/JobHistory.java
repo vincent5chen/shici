@@ -5,8 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
-import com.itranswarp.warpdb.entity.BaseEntity;
-
 /**
  * Read only Job history object.
  * 

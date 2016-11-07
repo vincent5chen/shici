@@ -5,15 +5,13 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.itranswarp.warpdb.entity.BaseEntity;
-
 /**
  * ApiAuth stores a key-secret pair that associate to a user.
  * 
  * @author michael
  */
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(name = "UK_ApiAuth_userId", columnNames = { "userId" }) )
+@Table(uniqueConstraints = @UniqueConstraint(name = "UK_ApiAuth_userId", columnNames = { "userId" }))
 public class ApiAuth extends BaseEntity {
 
 	@Column(nullable = false)
