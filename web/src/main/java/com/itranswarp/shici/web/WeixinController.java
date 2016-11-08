@@ -170,11 +170,13 @@ public class WeixinController {
 		case AbstractEvent.EVENT_SUBSCRIBE:
 			return builder.toTextMessage(getWelcome());
 		case AbstractEvent.EVENT_UNSUBSCRIBE:
-			// cannot send message to unsubscribe user:
+			// cannot send message to unsubscribed user:
 			log.warn("User lost: " + event.FromUserName);
 			return null;
+		default:
+			// default:
+			return builder.toTextMessage("Cannot handle this event!");
 		}
-		return builder.toTextMessage("Cannot handle this event!");
 	}
 
 	String getWelcome() {
