@@ -23,8 +23,8 @@ import com.itranswarp.shici.model.User;
 import com.itranswarp.shici.oauth.OAuthAuthentication;
 import com.itranswarp.shici.oauth.OAuthProvider;
 import com.itranswarp.shici.util.HttpUtil;
+import com.itranswarp.shici.util.IdUtils;
 import com.itranswarp.shici.util.JsonUtil;
-import com.itranswarp.warpdb.IdUtil;
 
 @Controller
 public class OAuthService extends AbstractService {
@@ -89,13 +89,13 @@ public class OAuthService extends AbstractService {
 		OAuthAuthentication oa = provider.getAuthentication(redirectUri, code);
 		// try find oauth user:
 		final String oauthId = providerName + ":" + oa.oauthId;
-		OAuth oauth = database.from(OAuth.class).where("oauthId=?", oauthId).first();
+		OAuth oauth = warpdb.from(OAuth.class).where("oauthId=?", oauthId).first();
 		User user = null;
 		if (oauth == null) {
 			// first time to sign in:
 			log.info("First time to sign in: " + oa.name);
 			user = new User();
-			user.id = IdUtil.next();
+			user.id = IdUtils.next();
 			user.email = user.id + "#" + providerName;
 			user.name = oa.name;
 			user.gender = "";
@@ -108,7 +108,7 @@ public class OAuthService extends AbstractService {
 			oauth.refreshToken = oa.refreshToken;
 			oauth.expiresAt = oa.getExpiresAt();
 			try (UserContext ctx = new UserContext(user)) {
-				database.save(oauth, user);
+				warpdb.save(oauth, user);
 			}
 		} else {
 			// not first time, update token:
@@ -116,9 +116,9 @@ public class OAuthService extends AbstractService {
 			oauth.refreshToken = oa.refreshToken;
 			oauth.expiresAt = oa.getExpiresAt();
 			// try find user:
-			user = database.get(User.class, oauth.userId);
+			user = warpdb.get(User.class, oauth.userId);
 			try (UserContext ctx = new UserContext(user)) {
-				database.updateProperties(oauth, "accessToken", "refreshToken", "expiresAt");
+				warpdb.updateProperties(oauth, "accessToken", "refreshToken", "expiresAt");
 			}
 		}
 		// generate cookie:

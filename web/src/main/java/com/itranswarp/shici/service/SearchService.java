@@ -73,7 +73,7 @@ public class SearchService extends AbstractService {
 		int maxResults = 200;
 		int count = 0;
 		for (;;) {
-			List<Poem> poems = database.list(Poem.class,
+			List<Poem> poems = warpdb.list(Poem.class,
 					"select * from Poem where updatedAt>? order by updatedAt limit ?", updatedAt, maxResults);
 			if (poems.isEmpty()) {
 				break;

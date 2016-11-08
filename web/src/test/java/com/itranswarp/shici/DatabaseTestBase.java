@@ -5,20 +5,20 @@ import java.util.Arrays;
 import org.junit.Before;
 
 import com.itranswarp.shici.model.ForeignKeys;
-import com.itranswarp.warpdb.Database;
+import com.itranswarp.warpdb.WarpDb;
 
 public class DatabaseTestBase {
 
-	protected Database database = null;
+	protected WarpDb warpdb = null;
 
 	@Before
 	public void setUpDatabase() {
-		database = new Database();
-		database.setBasePackages(Arrays.asList("com.itranswarp.shici.model"));
-		database.setJdbcTemplate(JdbcTemplateHsqldbFactory.createJdbcTemplate());
-		database.init();
+		warpdb = new WarpDb();
+		warpdb.setBasePackages(Arrays.asList("com.itranswarp.shici.model"));
+		warpdb.setJdbcTemplate(JdbcTemplateHsqldbFactory.createJdbcTemplate());
+		warpdb.init();
 		for (String fk : ForeignKeys.FOREIGN_KEYS) {
-			database.update(fk);
+			warpdb.update(fk);
 		}
 	}
 

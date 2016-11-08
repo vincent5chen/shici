@@ -11,8 +11,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.itranswarp.shici.exception.APIArgumentException;
-import com.itranswarp.shici.model.User;
-import com.itranswarp.warpdb.IdUtil;
+import com.itranswarp.shici.model.User; 
 
 public class ValidateUtil {
 
@@ -29,7 +28,7 @@ public class ValidateUtil {
 	}
 
 	public static String checkId(String id, String argName) {
-		if (!IdUtil.isValidId(id)) {
+		if (!IdUtils.isValidId(id)) {
 			throw new APIArgumentException(argName);
 		}
 		return id;
@@ -52,7 +51,7 @@ public class ValidateUtil {
 		}
 		Set<String> sets = new HashSet<String>(ids.size());
 		for (String id : ids) {
-			if (!IdUtil.isValidId(id)) {
+			if (!IdUtils.isValidId(id)) {
 				throw new APIArgumentException("ids", "Ids contains invalid id.");
 			}
 			sets.add(id);

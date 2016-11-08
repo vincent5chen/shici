@@ -21,7 +21,7 @@ import com.itranswarp.shici.auth.Authenticator;
 import com.itranswarp.shici.context.UserContext;
 import com.itranswarp.shici.exception.APIAuthenticationException;
 import com.itranswarp.shici.model.User;
-import com.itranswarp.warpdb.Database;
+import com.itranswarp.warpdb.WarpDb;
 
 /**
  * Do authentication for each request and set UserContext if authenticate OK.
@@ -34,7 +34,7 @@ public class AuthenticationFilter implements Filter {
 	final Log log = LogFactory.getLog(getClass());
 
 	@Autowired
-	Database database;
+	WarpDb warpdb;
 
 	@Autowired
 	Authenticator[] authenticators = new Authenticator[0];

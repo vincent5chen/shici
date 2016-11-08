@@ -13,15 +13,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.itranswarp.shici.context.UserContext;
 import com.itranswarp.shici.exception.APIEntityNotFoundException;
 import com.itranswarp.shici.exception.InvalidJobStatusException;
 import com.itranswarp.shici.model.Job;
 import com.itranswarp.shici.model.JobHistory;
+import com.itranswarp.shici.util.IdUtils;
 import com.itranswarp.shici.util.JsonUtil;
-import com.itranswarp.shici.util.MapUtil;
-import com.itranswarp.warpdb.IdUtil;
-import com.itranswarp.warpdb.PagedResults;
-import com.itranswarp.warpdb.context.UserContext;
+import com.itranswarp.shici.util.MapUtil; 
+import com.itranswarp.warpdb.PagedResults; 
 
 /**
  * Services for async jobs.
@@ -36,9 +36,9 @@ public class JobService extends AbstractService {
 			@RequestParam(value = "page", defaultValue = "1") int page) {
 		if (status.isEmpty()) {
 			// get all jobs:
-			return database.from(Job.class).orderBy("createdAt desc").list(page);
+			return warpdb.from(Job.class).orderBy("createdAt desc").list(page);
 		} else {
-			return database.from(Job.class).where("status=?", status).orderBy("createdAt desc").list(page);
+			return warpdb.from(Job.class).where("status=?", status).orderBy("createdAt desc").list(page);
 		}
 	}
 
@@ -48,7 +48,7 @@ public class JobService extends AbstractService {
 	}
 
 	public List<JobHistory> getJobHistories(String jobId) {
-		return database.from(JobHistory.class).where("jobId=?", jobId).orderBy("createdAt desc").list();
+		return warpdb.from(JobHistory.class).where("jobId=?", jobId).orderBy("createdAt desc").list();
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class JobService extends AbstractService {
 	public Job createJob(String type, String refId, String name, Object data, TimeUnit unit, long estimateTime,
 			int maxRetries) {
 		Job job = new Job();
-		job.id = IdUtil.next();
+		job.id = IdUtils.next();
 		job.userId = UserContext.getRequiredCurrentUser().id;
 		job.refId = refId;
 		job.name = name;
@@ -73,7 +73,7 @@ public class JobService extends AbstractService {
 		job.retry = maxRetries;
 		job.status = Job.Status.PENDING;
 		job.data = JsonUtil.toJson(data);
-		database.save(job, JobHistory.info(job.id, "Job created."));
+		warpdb.save(job, JobHistory.info(job.id, "Job created."));
 		return job;
 	}
 
@@ -85,14 +85,14 @@ public class JobService extends AbstractService {
 	@Transactional
 	public Job fetchJob(String type) {
 		// query:
-		List<Job> list = database.list("select * from Job where type=? and status=? order by updatedAt desc limit 1",
+		List<Job> list = warpdb.list("select * from Job where type=? and status=? order by updatedAt desc limit 1",
 				type, Job.Status.PENDING);
 		if (list.isEmpty()) {
 			return null;
 		}
 		String jobId = list.get(0).id;
 		// lock for update:
-		List<Job> jobs = database.list("select * from Job where id=? for update", jobId);
+		List<Job> jobs = warpdb.list("select * from Job where id=? for update", jobId);
 		Job job = jobs.get(0);
 		if (!job.status.equals(Job.Status.PENDING)) {
 			return null;
@@ -101,14 +101,14 @@ public class JobService extends AbstractService {
 		job.status = Job.Status.EXECUTING;
 		job.startAt = System.currentTimeMillis();
 		job.timeoutAt = job.startAt + job.estimateTime * 1000L;
-		database.updateProperties(job, "status", "startAt", "timeoutAt");
-		database.save(JobHistory.info(job.id, "Job started."));
+		warpdb.updateProperties(job, "status", "startAt", "timeoutAt");
+		warpdb.save(JobHistory.info(job.id, "Job started."));
 		return job;
 	}
 
 	@Transactional
 	public void setJobComplete(String jobId) {
-		List<Job> jobs = database.list("select * from Job where id=? for update", jobId);
+		List<Job> jobs = warpdb.list("select * from Job where id=? for update", jobId);
 		if (jobs.isEmpty()) {
 			throw new APIEntityNotFoundException(Job.class);
 		}
@@ -120,8 +120,8 @@ public class JobService extends AbstractService {
 		job.completeAt = System.currentTimeMillis();
 		job.timeoutAt = 0;
 		job.lastError = "";
-		database.updateProperties(job, "status", "completeAt", "timeoutAt", "lastError");
-		database.save(JobHistory.info(job.id, "Job completed."));
+		warpdb.updateProperties(job, "status", "completeAt", "timeoutAt", "lastError");
+		warpdb.save(JobHistory.info(job.id, "Job completed."));
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class JobService extends AbstractService {
 	 */
 	@Transactional
 	public boolean setJobFailed(String jobId, String errorMessage, Throwable t) {
-		List<Job> jobs = database.list("select * from Job where id=? for update", jobId);
+		List<Job> jobs = warpdb.list("select * from Job where id=? for update", jobId);
 		if (jobs.isEmpty()) {
 			throw new APIEntityNotFoundException(Job.class);
 		}
@@ -152,9 +152,9 @@ public class JobService extends AbstractService {
 			job.completeAt = System.currentTimeMillis();
 			job.timeoutAt = 0;
 			job.lastError = errorMessage;
-			database.updateProperties(job, "retried", "status", "completeAt", "timeoutAt", "lastError");
-			database.save(JobHistory.error(job.id, errorMessage + "\n" + toStackTrace(t)));
-			database.save(JobHistory.info(job.id, "Will retry job later."));
+			warpdb.updateProperties(job, "retried", "status", "completeAt", "timeoutAt", "lastError");
+			warpdb.save(JobHistory.error(job.id, errorMessage + "\n" + toStackTrace(t)));
+			warpdb.save(JobHistory.info(job.id, "Will retry job later."));
 			return false;
 		} else {
 			// job failed:
@@ -162,15 +162,15 @@ public class JobService extends AbstractService {
 			job.completeAt = System.currentTimeMillis();
 			job.timeoutAt = 0;
 			job.lastError = errorMessage;
-			database.updateProperties(job, "status", "completeAt", "timeoutAt", "lastError");
-			database.save(JobHistory.error(job.id, errorMessage + "\n" + toStackTrace(t)));
+			warpdb.updateProperties(job, "status", "completeAt", "timeoutAt", "lastError");
+			warpdb.save(JobHistory.error(job.id, errorMessage + "\n" + toStackTrace(t)));
 			return true;
 		}
 	}
 
 	@Transactional
 	public void setJobTimeout(String jobId) {
-		List<Job> jobs = database.list("select * from Job where id=? for update", jobId);
+		List<Job> jobs = warpdb.list("select * from Job where id=? for update", jobId);
 		if (jobs.isEmpty()) {
 			throw new APIEntityNotFoundException(Job.class);
 		}
@@ -188,13 +188,13 @@ public class JobService extends AbstractService {
 			job.lastError = "Job timeout.";
 		}
 		job.timeoutAt = System.currentTimeMillis();
-		database.updateProperties(job, "retried", "status", "timeoutAt", "lastError");
-		database.save(JobHistory.error(job.id, job.lastError));
+		warpdb.updateProperties(job, "retried", "status", "timeoutAt", "lastError");
+		warpdb.save(JobHistory.error(job.id, job.lastError));
 	}
 
 	@Transactional
 	public void restartJob(String jobId) {
-		List<Job> jobs = database.list("select * from Job where id=? for update", jobId);
+		List<Job> jobs = warpdb.list("select * from Job where id=? for update", jobId);
 		if (jobs.isEmpty()) {
 			throw new APIEntityNotFoundException(Job.class);
 		}
@@ -205,8 +205,8 @@ public class JobService extends AbstractService {
 		job.status = Job.Status.PENDING;
 		job.startAt = System.currentTimeMillis();
 		job.retried = 0;
-		database.updateProperties(job, "status", "startAt", "retried");
-		database.save(JobHistory.info(job.id, "Job is restarted."));
+		warpdb.updateProperties(job, "status", "startAt", "retried");
+		warpdb.save(JobHistory.info(job.id, "Job is restarted."));
 	}
 
 	/**
@@ -216,7 +216,7 @@ public class JobService extends AbstractService {
 	 */
 	@Transactional
 	public Job findTimeoutJob(long timeoutAt) {
-		List<Job> jobs = database.list("select * from Job where timeoutAt>? and status=? order by timeoutAt limit 1",
+		List<Job> jobs = warpdb.list("select * from Job where timeoutAt>? and status=? order by timeoutAt limit 1",
 				timeoutAt, Job.Status.EXECUTING);
 		if (jobs.isEmpty()) {
 			return null;

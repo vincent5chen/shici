@@ -19,7 +19,7 @@ import com.itranswarp.shici.util.MapUtil;
 public class StaticPageService extends AbstractService {
 
 	public StaticPage getStaticPage(String id) {
-		StaticPage sp = database.fetch(StaticPage.class, id);
+		StaticPage sp = warpdb.fetch(StaticPage.class, id);
 		if (sp == null) {
 			throw new APIEntityNotFoundException(StaticPage.class);
 		}
@@ -27,7 +27,7 @@ public class StaticPageService extends AbstractService {
 	}
 
 	public StaticPage getStaticPageByAlias(String alias) {
-		StaticPage sp = database.from(StaticPage.class).where("alias=?", alias).first();
+		StaticPage sp = warpdb.from(StaticPage.class).where("alias=?", alias).first();
 		if (sp == null) {
 			throw new APIEntityNotFoundException(StaticPage.class);
 		}
@@ -35,7 +35,7 @@ public class StaticPageService extends AbstractService {
 	}
 
 	public List<StaticPage> getStaticPages() {
-		return database.from(StaticPage.class).orderBy("alias").list();
+		return warpdb.from(StaticPage.class).orderBy("alias").list();
 	}
 
 	@RequestMapping(value = "/api/staticpages", method = RequestMethod.GET)
@@ -54,7 +54,7 @@ public class StaticPageService extends AbstractService {
 	public StaticPage restCreateStaticPage(@RequestBody StaticPageBean bean) {
 		assertEditorRole();
 		bean.validate();
-		StaticPage exist = database.from(StaticPage.class).where("alias=?", bean.alias).first();
+		StaticPage exist = warpdb.from(StaticPage.class).where("alias=?", bean.alias).first();
 		if (exist != null) {
 			throw new APIEntityConflictException("alias", "alias exist");
 		}
@@ -63,7 +63,7 @@ public class StaticPageService extends AbstractService {
 		sp.alias = bean.alias;
 		sp.name = bean.name;
 		sp.content = bean.content;
-		database.save(sp);
+		warpdb.save(sp);
 		return sp;
 	}
 
@@ -74,7 +74,7 @@ public class StaticPageService extends AbstractService {
 		// update:
 		StaticPage sp = getStaticPage(id);
 		if (!sp.alias.equals(bean.alias)) {
-			StaticPage exist = database.from(StaticPage.class).where("alias=?", bean.alias).first();
+			StaticPage exist = warpdb.from(StaticPage.class).where("alias=?", bean.alias).first();
 			if (exist != null) {
 				throw new APIEntityConflictException("alias", "alias exist");
 			}
@@ -82,7 +82,7 @@ public class StaticPageService extends AbstractService {
 		sp.alias = bean.alias;
 		sp.name = bean.name;
 		sp.content = bean.content;
-		database.update(sp);
+		warpdb.update(sp);
 		return sp;
 	}
 
@@ -90,7 +90,7 @@ public class StaticPageService extends AbstractService {
 	public StaticPage restDeleteStaticPage(@PathVariable("id") String id) {
 		assertEditorRole();
 		StaticPage sp = getStaticPage(id);
-		database.remove(sp);
+		warpdb.remove(sp);
 		return sp;
 	}
 }

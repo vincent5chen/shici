@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +26,7 @@ import com.itranswarp.shici.bean.PoetBean;
 import com.itranswarp.shici.exception.APIArgumentException;
 import com.itranswarp.shici.json.LocalDateDeserializer;
 import com.itranswarp.shici.json.LocalDateSerializer;
+import com.itranswarp.shici.model.BaseEntity;
 import com.itranswarp.shici.model.Category;
 import com.itranswarp.shici.model.CategoryPoem;
 import com.itranswarp.shici.model.Dynasty;
@@ -32,10 +35,8 @@ import com.itranswarp.shici.model.Poem;
 import com.itranswarp.shici.model.Poet;
 import com.itranswarp.shici.model.Resource;
 import com.itranswarp.shici.util.HttpUtil;
-import com.itranswarp.warpdb.EntityNotFoundException;
-import com.itranswarp.warpdb.IdUtil;
+import com.itranswarp.shici.util.IdUtils;
 import com.itranswarp.warpdb.PagedResults;
-import com.itranswarp.warpdb.entity.BaseEntity;
 import com.itranswarp.wxapi.util.MapUtil;
 
 @RestController
@@ -53,11 +54,11 @@ public class PoemService extends AbstractService {
 	}
 
 	public List<Dynasty> getDynasties() {
-		return database.from(Dynasty.class).orderBy("displayOrder").list();
+		return warpdb.from(Dynasty.class).orderBy("displayOrder").list();
 	}
 
 	public Dynasty getDynasty(String dynastyId) {
-		return database.get(Dynasty.class, dynastyId);
+		return warpdb.get(Dynasty.class, dynastyId);
 	}
 
 	// poet ///////////////////////////////////////////////////////////////////
@@ -68,12 +69,12 @@ public class PoemService extends AbstractService {
 	}
 
 	public List<Poet> getPoets(String dynastyId) {
-		return database.from(Poet.class).where("dynastyId=?", dynastyId).orderBy("name").list();
+		return warpdb.from(Poet.class).where("dynastyId=?", dynastyId).orderBy("name").list();
 	}
 
 	@RequestMapping(value = "/api/poets/{id}", method = RequestMethod.GET)
 	public Poet getPoet(@PathVariable("id") String poetId) {
-		return database.get(Poet.class, poetId);
+		return warpdb.get(Poet.class, poetId);
 	}
 
 	@RequestMapping(value = "/api/poets", method = RequestMethod.POST)
@@ -85,7 +86,7 @@ public class PoemService extends AbstractService {
 		// create:
 		Poet poet = new Poet();
 		copyToPoet(poet, bean);
-		database.save(poet);
+		warpdb.save(poet);
 		return poet;
 	}
 
@@ -98,7 +99,7 @@ public class PoemService extends AbstractService {
 		// update:
 		Poet poet = getPoet(poetId);
 		copyToPoet(poet, bean);
-		database.update(poet);
+		warpdb.update(poet);
 		return poet;
 	}
 
@@ -118,20 +119,20 @@ public class PoemService extends AbstractService {
 		assertEditorRole();
 		Poet poet = getPoet(poetId);
 		// delete:
-		database.remove(poet);
+		warpdb.remove(poet);
 	}
 
 	// poem ///////////////////////////////////////////////////////////////////
 
 	@RequestMapping(value = "/api/poems/{id}", method = RequestMethod.GET)
 	public Poem getPoem(@PathVariable("id") String poemId) {
-		return database.get(Poem.class, poemId);
+		return warpdb.get(Poem.class, poemId);
 	}
 
 	@RequestMapping(value = "/api/poets/{id}/poems", method = RequestMethod.GET)
 	public PagedResults<Poem> getPoems(@PathVariable("id") String poetId,
 			@RequestParam(value = "page", defaultValue = "1") int pageIndex) {
-		return database.from(Poem.class).where("poetId=?", poetId).orderBy("name").list(pageIndex, 20);
+		return warpdb.from(Poem.class).where("poetId=?", poetId).orderBy("name").list(pageIndex, 20);
 	}
 
 	@RequestMapping(value = "/api/poems", method = RequestMethod.POST)
@@ -141,7 +142,7 @@ public class PoemService extends AbstractService {
 		bean.validate();
 		Poet poet = getPoet(bean.poetId);
 		Poem poem = new Poem();
-		poem.id = IdUtil.next();
+		poem.id = IdUtils.next();
 		// create image:
 		if (bean.imageData != null) {
 			Resource resource = createResource(poem, "cover", ".jpg", bean.imageData);
@@ -151,7 +152,7 @@ public class PoemService extends AbstractService {
 		}
 		// create:
 		copyToPoem(poem, poet, bean);
-		database.save(poem);
+		warpdb.save(poem);
 		updatePoemCountOfPoet(bean.poetId);
 		return poem;
 	}
@@ -167,7 +168,7 @@ public class PoemService extends AbstractService {
 		String newPoetId = bean.poetId;
 		copyToPoem(poem, poet, bean);
 		// update:
-		database.update(poem);
+		warpdb.update(poem);
 		if (!oldPoetId.equals(newPoetId)) {
 			updatePoemCountOfPoet(oldPoetId, newPoetId);
 		}
@@ -176,7 +177,7 @@ public class PoemService extends AbstractService {
 			String oldResourceId = poem.imageId;
 			Resource resource = createResource(poem, "cover", ".jpg", bean.imageData);
 			poem.imageId = resource.id;
-			database.updateProperties(poem, "imageId");
+			warpdb.updateProperties(poem, "imageId");
 			if (!oldResourceId.isEmpty()) {
 				deleteResource(oldResourceId);
 			}
@@ -205,13 +206,13 @@ public class PoemService extends AbstractService {
 		assertEditorRole();
 		Poem poem = getPoem(poemId);
 		// delete:
-		database.remove(poem);
+		warpdb.remove(poem);
 		updatePoemCountOfPoet(poem.poetId);
 	}
 
 	private void updatePoemCountOfPoet(String... poetIds) {
 		for (String poetId : poetIds) {
-			database.update("update Poet set poemCount=(select count(id) from Poem where poetId=?) where id=?", poetId,
+			warpdb.update("update Poet set poemCount=(select count(id) from Poem where poetId=?) where id=?", poetId,
 					poetId);
 		}
 	}
@@ -219,7 +220,7 @@ public class PoemService extends AbstractService {
 	// Resource ///////////////////////////////////////////////////////////////
 
 	public Resource getResource(String resourceId) {
-		return database.get(Resource.class, resourceId);
+		return warpdb.get(Resource.class, resourceId);
 	}
 
 	public Resource createResource(BaseEntity ref, String name, String ext, String base64Data) {
@@ -231,14 +232,14 @@ public class PoemService extends AbstractService {
 		resource.refType = ref.getClass().getSimpleName();
 		resource.size = getSizeOfBase64String(base64Data);
 		resource.data = base64Data;
-		database.save(resource);
+		warpdb.save(resource);
 		return resource;
 	}
 
 	public void deleteResource(String resourceId) {
 		Resource resource = new Resource();
 		resource.id = resourceId;
-		database.remove(resource);
+		warpdb.remove(resource);
 	}
 
 	int getSizeOfBase64String(String base64Data) {
@@ -266,11 +267,11 @@ public class PoemService extends AbstractService {
 	}
 
 	public List<Category> getCategories() {
-		return database.from(Category.class).orderBy("displayOrder").list();
+		return warpdb.from(Category.class).orderBy("displayOrder").list();
 	}
 
 	public Category getCategory(String categoryId) {
-		return database.get(Category.class, categoryId);
+		return warpdb.get(Category.class, categoryId);
 	}
 
 	@RequestMapping(value = "/api/categories", method = RequestMethod.POST)
@@ -289,7 +290,7 @@ public class PoemService extends AbstractService {
 			max = c.displayOrder;
 		}
 		category.displayOrder = max + 1;
-		database.save(category);
+		warpdb.save(category);
 		return category;
 	}
 
@@ -304,7 +305,7 @@ public class PoemService extends AbstractService {
 		category.nameCht = hanziService.toCht(bean.name);
 		category.description = bean.description;
 		category.descriptionCht = hanziService.toCht(bean.description);
-		database.update(category);
+		warpdb.update(category);
 		return category;
 	}
 
@@ -312,7 +313,7 @@ public class PoemService extends AbstractService {
 		// check:
 		assertEditorRole();
 		Category category = getCategory(categoryId);
-		database.remove(category);
+		warpdb.remove(category);
 	}
 
 	@RequestMapping(value = "/api/categories/{id}/poems", method = RequestMethod.GET)
@@ -323,7 +324,7 @@ public class PoemService extends AbstractService {
 
 	public List<TheCategoryPoem> getPoemsOfCategory(@PathVariable("id") String categoryId) {
 		Category category = getCategory(categoryId);
-		List<CategoryPoem> cps = database.from(CategoryPoem.class).where("categoryId=?", category.id)
+		List<CategoryPoem> cps = warpdb.from(CategoryPoem.class).where("categoryId=?", category.id)
 				.orderBy("displayOrder").list();
 		List<TheCategoryPoem> list = new ArrayList<TheCategoryPoem>();
 		if (cps.isEmpty()) {
@@ -331,7 +332,7 @@ public class PoemService extends AbstractService {
 		}
 		TheCategoryPoem tcp = null;
 		for (CategoryPoem cp : cps) {
-			Poem poem = database.get(Poem.class, cp.poemId);
+			Poem poem = warpdb.get(Poem.class, cp.poemId);
 			if (tcp == null) {
 				// start new section:
 				tcp = new TheCategoryPoem();
@@ -371,7 +372,7 @@ public class PoemService extends AbstractService {
 		}
 		Category category = getCategory(categoryId);
 		// set:
-		database.update("delete from CategoryPoem where categoryId=?", categoryId);
+		warpdb.update("delete from CategoryPoem where categoryId=?", categoryId);
 		long n = 0;
 		for (CategoryPoemBean bean : beans) {
 			List<CategoryPoem> list = new ArrayList<CategoryPoem>(bean.ids.size());
@@ -385,9 +386,9 @@ public class PoemService extends AbstractService {
 				list.add(cp);
 				n++;
 			}
-			database.save(list.toArray(new CategoryPoem[list.size()]));
+			warpdb.save(list.toArray(new CategoryPoem[list.size()]));
 		}
-		database.update(category); // update version!
+		warpdb.update(category); // update version!
 	}
 
 	// featured ///////////////////////////////////////////////////////////////
@@ -398,10 +399,10 @@ public class PoemService extends AbstractService {
 	}
 
 	public Poem getFeaturedPoem(LocalDate targetDate) {
-		FeaturedPoem fp = database.from(FeaturedPoem.class).where("pubDate<=?", targetDate).orderBy("pubDate desc")
+		FeaturedPoem fp = warpdb.from(FeaturedPoem.class).where("pubDate<=?", targetDate).orderBy("pubDate desc")
 				.first();
 		if (fp == null) {
-			throw new EntityNotFoundException(Poem.class);
+			throw new EntityNotFoundException(Poem.class.getSimpleName());
 		}
 		return getPoem(fp.poemId);
 	}
@@ -412,7 +413,7 @@ public class PoemService extends AbstractService {
 	}
 
 	public List<TheFeaturedPoem> getFeaturedPoems() {
-		List<FeaturedPoem> fps = database.list("select * from FeaturedPoem order by pubDate desc");
+		List<FeaturedPoem> fps = warpdb.list("select * from FeaturedPoem order by pubDate desc");
 		List<TheFeaturedPoem> tfps = new ArrayList<TheFeaturedPoem>(fps.size());
 		for (FeaturedPoem fp : fps) {
 			TheFeaturedPoem tfp = new TheFeaturedPoem();
@@ -432,14 +433,14 @@ public class PoemService extends AbstractService {
 		if (poem.imageId.isEmpty()) {
 			throw new APIArgumentException("poemId", "Poem does not have image.");
 		}
-		FeaturedPoem fp = database.from(FeaturedPoem.class).where("poemId=?", poem.id).first();
+		FeaturedPoem fp = warpdb.from(FeaturedPoem.class).where("poemId=?", poem.id).first();
 		if (fp != null) {
 			throw new APIArgumentException("poemId", "Poem already set featured.");
 		}
 		fp = new FeaturedPoem();
 		fp.poemId = bean.poemId;
 		fp.pubDate = bean.pubDate;
-		database.save(fp);
+		warpdb.save(fp);
 	}
 
 	@RequestMapping(value = "/api/featured/{poemId}/delete", method = RequestMethod.POST)
@@ -447,11 +448,11 @@ public class PoemService extends AbstractService {
 		// check:
 		assertEditorRole();
 		Poem poem = getPoem(poemId);
-		FeaturedPoem fp = database.from(FeaturedPoem.class).where("poemId=?", poem.id).first();
+		FeaturedPoem fp = warpdb.from(FeaturedPoem.class).where("poemId=?", poem.id).first();
 		if (fp == null) {
 			throw new APIArgumentException("poemId", "Poem is not featured.");
 		}
-		database.remove(fp);
+		warpdb.remove(fp);
 	}
 
 	public static class TheCategoryPoem {

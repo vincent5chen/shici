@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.itranswarp.shici.exception.APIAuthenticationException;
 import com.itranswarp.shici.model.ApiAuth;
 import com.itranswarp.shici.model.User;
-import com.itranswarp.warpdb.Database;
+import com.itranswarp.warpdb.WarpDb;
 
 /**
  * Authenticate by header X-API-Key and X-API-Secret.
@@ -29,7 +29,7 @@ public class ApiKeyAuthenticator implements Authenticator {
 	static final String HEADER_API_SECRET = "X-API-Secret";
 
 	@Autowired
-	Database database;
+	WarpDb warpdb;
 
 	@Override
 	public User authenticate(HttpServletRequest request, HttpServletResponse response) {
@@ -41,11 +41,11 @@ public class ApiKeyAuthenticator implements Authenticator {
 		if (apiSecret == null) {
 			throw new APIAuthenticationException(HEADER_API_SECRET, "Missing http header: " + HEADER_API_SECRET);
 		}
-		ApiAuth aa = database.fetch("select * from ApiAuth where apiKey=? and apiSecret=?", apiKey, apiSecret);
+		ApiAuth aa = warpdb.fetch("select * from ApiAuth where apiKey=? and apiSecret=?", apiKey, apiSecret);
 		if (aa == null || aa.disabled) {
 			throw new APIAuthenticationException("Invalid " + HEADER_API_KEY + " or " + HEADER_API_SECRET);
 		}
-		return database.get(User.class, aa.userId);
+		return warpdb.get(User.class, aa.userId);
 	}
 
 }

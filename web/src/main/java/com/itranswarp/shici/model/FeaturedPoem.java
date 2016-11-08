@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.itranswarp.shici.json.LocalDateDeserializer;
 import com.itranswarp.shici.json.LocalDateSerializer;
+import com.itranswarp.warpdb.converter.LocalDateConverter;
 
 /**
  * Featured poems.

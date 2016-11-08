@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.itranswarp.shici.model.OAuth;
 import com.itranswarp.shici.util.Base64Util;
 import com.itranswarp.shici.util.HashUtil;
-import com.itranswarp.warpdb.Database;
+import com.itranswarp.warpdb.WarpDb;
 
 @Component
 public class CookieAuthenticatorHelper {
@@ -26,7 +26,7 @@ public class CookieAuthenticatorHelper {
 	int sessionCookieRefreshTime = 300;
 
 	@Autowired
-	Database database;
+	WarpDb warpdb;
 
 	/**
 	 * Encode value as type : auth_id : expires : sha1(type : auth_id : expires
@@ -71,7 +71,7 @@ public class CookieAuthenticatorHelper {
 		}
 		CookieAuth cauth = null;
 		// oauth signin:
-		OAuth oa = database.fetch(OAuth.class, theId);
+		OAuth oa = warpdb.fetch(OAuth.class, theId);
 		if (oa != null && type.equals(oa.provider)) {
 			cauth = new CookieAuth(oa.userId, oa.provider, oa.id, oa.accessToken);
 		}

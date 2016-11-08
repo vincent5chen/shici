@@ -37,6 +37,19 @@ public class IdUtils {
 		return builder.toString();
 	}
 
+	public static boolean isValidId(String id) {
+		if (id == null || id.length() != 16) {
+			return false;
+		}
+		for (int i = 0; i < id.length(); i++) {
+			char ch = id.charAt(i);
+			if (!((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'v'))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	static void setStringAt(StringBuilder buffer, int bufferStart, String str, int length) {
 		int strStart = 0;
 		int strEnd = str.length();

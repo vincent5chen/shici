@@ -1,6 +1,6 @@
 package com.itranswarp.shici.search;
 
-import com.itranswarp.warpdb.IdUtil;
+import com.itranswarp.shici.util.IdUtils;
 
 public class Tweet implements Searchable {
 
@@ -23,7 +23,7 @@ public class Tweet implements Searchable {
 		t.title = title;
 		t.message = message;
 		t.score = (long) (Math.random() * 100000000);
-		t.id = IdUtil.next();
+		t.id = IdUtils.next();
 		return t;
 	}
 

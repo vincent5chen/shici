@@ -8,14 +8,14 @@ import com.itranswarp.shici.context.UserContext;
 import com.itranswarp.shici.exception.APIAuthenticationException;
 import com.itranswarp.shici.exception.APIPermissionException;
 import com.itranswarp.shici.model.User;
-import com.itranswarp.warpdb.Database;
+import com.itranswarp.warpdb.WarpDb;
 
 public abstract class AbstractService {
 
 	protected final Log log = LogFactory.getLog(getClass());
 
 	@Autowired
-	protected Database database;
+	protected WarpDb warpdb;
 
 	public void assertAdminRole() {
 		assertRole(User.Role.ADMIN);

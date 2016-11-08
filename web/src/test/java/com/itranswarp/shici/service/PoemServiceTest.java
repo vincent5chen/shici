@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,6 +16,7 @@ import org.springframework.dao.DuplicateKeyException;
 
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
+import com.itranswarp.shici.context.UserContext;
 import com.itranswarp.shici.exception.APIArgumentException;
 import com.itranswarp.shici.exception.APIPermissionException;
 import com.itranswarp.shici.model.Category;
@@ -26,10 +29,8 @@ import com.itranswarp.shici.service.PoemService.TheCategoryPoem;
 import com.itranswarp.shici.service.PoemService.TheFeaturedPoem;
 import com.itranswarp.shici.util.Base64Util;
 import com.itranswarp.shici.util.FileUtil;
-import com.itranswarp.warpdb.Database;
-import com.itranswarp.warpdb.EntityNotFoundException;
-import com.itranswarp.warpdb.IdUtil;
-import com.itranswarp.warpdb.context.UserContext;
+import com.itranswarp.shici.util.IdUtils;
+import com.itranswarp.warpdb.WarpDb;
 
 public class PoemServiceTest extends AbstractServiceTestBase {
 
@@ -37,27 +38,27 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Before
 	public void setUp() {
-		poemService = initPoemService(database);
-		initDynasties(database);
+		poemService = initPoemService(warpdb);
+		initDynasties(warpdb);
 	}
 
-	public PoemService initPoemService(Database db) {
+	public PoemService initPoemService(WarpDb db) {
 		PoemService s = new PoemService();
-		s.database = db;
+		s.warpdb = db;
 		s.hanziService = new HanziServiceTest().initHanziService(db);
 		return s;
 	}
 
-	void initDynasties(Database db) {
+	void initDynasties(WarpDb db) {
 		HanziService hanzService = new HanziServiceTest().initHanziService(db);
-		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
+		try (UserContext context = new UserContext(User.SYSTEM)) {
 			String[] names = { "先秦", "汉代", "三国两晋", "南北朝", "隋唐", "宋代", "元代", "明代", "清代", "近现代", "不详" };
 			for (int i = 0; i < names.length; i++) {
 				Dynasty dyn = new Dynasty();
 				dyn.name = names[i];
 				dyn.nameCht = hanzService.toCht(dyn.name);
 				dyn.displayOrder = i;
-				database.save(dyn);
+				db.save(dyn);
 			}
 		}
 	}
@@ -84,7 +85,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = EntityNotFoundException.class)
 	public void testGetDynastyNotFound() {
-		poemService.getDynasty(IdUtil.next());
+		poemService.getDynasty(IdUtils.next());
 	}
 
 	@Test
@@ -104,7 +105,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIPermissionException.class)
 	public void testCreatePoetFailedWithoutPermission() {
-		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
+		try (UserContext context = new UserContext(super.normalUser)) {
 			poemService.createPoet(null);
 		}
 	}
@@ -112,7 +113,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	@Test(expected = APIArgumentException.class)
 	public void testCreatePoetFailedForInvalidName() {
 		PoetBean bean = newPoetBean(getTangDynasty().id, "  \u3000\r\n ");
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poemService.createPoet(bean);
 		}
 	}
@@ -120,15 +121,15 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	@Test(expected = APIArgumentException.class)
 	public void testCreatePoetFailedForInvalidDynastyId() {
 		PoetBean bean = newPoetBean("123", "陈子昂");
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poemService.createPoet(bean);
 		}
 	}
 
 	@Test(expected = EntityNotFoundException.class)
 	public void testCreatePoetFailedForNonExistDynastyId() {
-		PoetBean bean = newPoetBean(IdUtil.next(), "陈子昂");
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		PoetBean bean = newPoetBean(IdUtils.next(), "陈子昂");
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poemService.createPoet(bean);
 		}
 	}
@@ -138,7 +139,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		PoetBean bean = newPoetBean(getTangDynasty().id, "陳子昂 \u3000\r\n");
 		bean.birth = "  659  \t";
 		bean.death = "\n 700 \r";
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(bean);
 			assertNotNull(poet);
 			assertEquals("陈子昂", poet.name);
@@ -153,13 +154,13 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = EntityNotFoundException.class)
 	public void testGetPoetFailedForNonExist() {
-		poemService.getPoet(IdUtil.next());
+		poemService.getPoet(IdUtils.next());
 	}
 
 	@Test
 	public void testGetPoetOK() {
 		Poet created = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			created = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 		}
 		Poet query = poemService.getPoet(created.id);
@@ -178,7 +179,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test
 	public void testGetPoetsWith3() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poemService.createPoet(newPoetBean(getTangDynasty().id, "C-陈子昂"));
 			poemService.createPoet(newPoetBean(getTangDynasty().id, "L-李白"));
 			poemService.createPoet(newPoetBean(getTangDynasty().id, "D-杜甫"));
@@ -193,14 +194,14 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIPermissionException.class)
 	public void testUpdatePoetFailedWithoutPermission() {
-		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
+		try (UserContext context = new UserContext(super.normalUser)) {
 			poemService.updatePoet(null, null);
 		}
 	}
 
 	@Test(expected = APIArgumentException.class)
 	public void testUpdatePoetFailedWithBadName() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poemService.updatePoet(poet.id, newPoetBean(getTangDynasty().id, " [ ]\n "));
 		}
@@ -208,23 +209,23 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = EntityNotFoundException.class)
 	public void testUpdatePoetFailedWithBadDynastyId() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
-			poemService.updatePoet(poet.id, newPoetBean(IdUtil.next(), "子昂"));
+			poemService.updatePoet(poet.id, newPoetBean(IdUtils.next(), "子昂"));
 		}
 	}
 
 	@Test(expected = EntityNotFoundException.class)
 	public void testUpdatePoetFailedWithBadPoetId() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
-			poemService.updatePoet(IdUtil.next(), newPoetBean(getTangDynasty().id, "子昂"));
+			poemService.updatePoet(IdUtils.next(), newPoetBean(getTangDynasty().id, "子昂"));
 		}
 	}
 
 	@Test
 	public void testUpdatePoetOK() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poemService.updatePoet(poet.id, newPoetBean(getTangDynasty().id, "张子昂"));
 			// check:
@@ -238,14 +239,14 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIPermissionException.class)
 	public void testDeletePoetFailedWithoutPermission() {
-		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
+		try (UserContext context = new UserContext(super.normalUser)) {
 			poemService.deletePoet(null);
 		}
 	}
 
 	@Test(expected = DataIntegrityViolationException.class)
 	public void testDeletePoetFailedForPoemExist() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			poemService.deletePoet(poet.id);
@@ -254,7 +255,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test
 	public void testDeletePoetOK() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poemService.deletePoet(poet.id);
 		}
@@ -264,22 +265,22 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = EntityNotFoundException.class)
 	public void testGetPoemButNotFound() {
-		poemService.getPoem(IdUtil.next());
+		poemService.getPoem(IdUtils.next());
 	}
 
 	@Test(expected = APIPermissionException.class)
 	public void testCreatePoemFailedWithoutPermission() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 		}
-		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
+		try (UserContext context = new UserContext(super.normalUser)) {
 			poemService.createPoem(null);
 		}
 	}
 
 	@Test(expected = APIArgumentException.class)
 	public void testCreatePoemFailedWithBadName() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poemService.createPoem(newPoemBean(poet.id, "   \u3000  ", "前不见古人，后不见来者"));
 		}
@@ -287,7 +288,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIArgumentException.class)
 	public void testCreatePoemFailedWithBadContent() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "  \n \t  \u3000  "));
 		}
@@ -295,7 +296,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIArgumentException.class)
 	public void testCreatePoemFailedWithBadForm() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean bean = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			bean.form = 1234;
@@ -305,8 +306,8 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = EntityNotFoundException.class)
 	public void testCreatePoemFailedWithBadPoetId() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
-			poemService.createPoem(newPoemBean(IdUtil.next(), "登幽州台歌", "前不见古人，后不见来者"));
+		try (UserContext context = new UserContext(super.editorUser)) {
+			poemService.createPoem(newPoemBean(IdUtils.next(), "登幽州台歌", "前不见古人，后不见来者"));
 		}
 	}
 
@@ -314,7 +315,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testCreatePoemWithoutImageAndGetOK() {
 		Poet poet = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean bean = newPoemBean(poet.id, " 登●幽 州 臺[1]歌", "前不(2)見 古人，\n后不见③来者 \t\n  \u3000");
 			bean.tags = "  唐诗，\t古诗；唐代 古代,诗词";
@@ -342,7 +343,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testCreatePoemWithImageAndGetOK() throws IOException {
 		Poet poet = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean bean = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			bean.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
@@ -360,7 +361,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testCreatePoemWithLargeImageAndGetOK() throws IOException {
 		Poet poet = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean bean = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			bean.imageData = Base64Util.encodeToString(FileUtil.getResource("/1280x800.jpg"));
@@ -376,7 +377,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIPermissionException.class)
 	public void testUpdatePoemFailedWithoutPermission() {
-		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
+		try (UserContext context = new UserContext(super.normalUser)) {
 			poemService.updatePoem(null, null);
 		}
 	}
@@ -385,7 +386,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testUpdatePoemFailedWithBadName() {
 		Poet poet = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			poemService.updatePoem(poem.id, newPoemBean(poet.id, "⒈⒉⒊ \n ", "前不见古人，后不见来者"));
@@ -396,7 +397,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testUpdatePoemFailedWithBadContent() {
 		Poet poet = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			poemService.updatePoem(poem.id, newPoemBean(poet.id, "登幽州台歌", " \n \u3000 \t\t\r\n(1)\n "));
@@ -407,7 +408,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testUpdatePoemFailedWithBadForm() {
 		Poet poet = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			PoemBean bean = newPoemBean(poet.id, "幽州台歌", "前不见，后不见");
@@ -420,7 +421,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testUpdatePoemFailedWithBadImage() throws IOException {
 		Poet poet = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			PoemBean bean = newPoemBean(poet.id, "幽州台歌", "前不见，后不见");
@@ -433,10 +434,10 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testUpdatePoemFailedWithBadPoetId() {
 		Poet poet = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
-			poemService.updatePoem(poem.id, newPoemBean(IdUtil.next(), "幽州台歌", "前不见，后不见"));
+			poemService.updatePoem(poem.id, newPoemBean(IdUtils.next(), "幽州台歌", "前不见，后不见"));
 		}
 	}
 
@@ -444,7 +445,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testUpdatePoemOK() {
 		Poet poet = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			PoemBean bean = newPoemBean(poet.id, " 幽州 {1}台歌", "前不见，\n\n后不见");
@@ -473,7 +474,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testUpdatePoemOKWithImageAdded() throws IOException {
 		Poet poet = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			PoemBean bean = newPoemBean(poet.id, " 幽州 {1}台歌", "前不见，\n\n后不见");
@@ -492,7 +493,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		Poet poet = null;
 		Poem poem = null;
 		Resource oldRes = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean create = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			create.imageData = Base64Util.encodeToString(FileUtil.getResource("/1280x800.jpg"));
@@ -521,7 +522,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		Poet poet = null;
 		Poem poem = null;
 		Resource oldRes = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean create = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			create.imageData = Base64Util.encodeToString(FileUtil.getResource("/1280x800.jpg"));
@@ -543,7 +544,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		Poet poet1 = null;
 		Poet poet2 = null;
 		Poem poem = null;
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			poet1 = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			poet2 = poemService.createPoet(newPoetBean(getSongDynasty().id, "苏东坡"));
 			poem = poemService.createPoem(newPoemBean(poet1.id, "登幽州台歌", "前不见古人，后不见来者"));
@@ -560,7 +561,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIPermissionException.class)
 	public void testDeletePoemFailedWithoutPermission() {
-		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
+		try (UserContext context = new UserContext(super.normalUser)) {
 			poemService.deletePoem(null);
 		}
 	}
@@ -569,14 +570,14 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIPermissionException.class)
 	public void testSetAsFeaturedFailedWithoutPermission() {
-		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
+		try (UserContext context = new UserContext(super.normalUser)) {
 			poemService.setPoemAsFeatured(null);
 		}
 	}
 
 	@Test(expected = APIArgumentException.class)
 	public void testSetAsFeaturedFailedWithDateTooSmall() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			Poem poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			poemService.setPoemAsFeatured(newFeaturedBean(poem.id, LocalDate.of(1999, 12, 31)));
@@ -585,7 +586,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIArgumentException.class)
 	public void testSetAsFeaturedFailedWithDateTooLarge() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			Poem poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			poemService.setPoemAsFeatured(newFeaturedBean(poem.id, LocalDate.of(2100, 1, 1)));
@@ -594,14 +595,14 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = EntityNotFoundException.class)
 	public void testSetAsFeaturedFailedWithPoemNotFound() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
-			poemService.setPoemAsFeatured(newFeaturedBean(IdUtil.next(), LocalDate.of(2016, 1, 1)));
+		try (UserContext context = new UserContext(super.editorUser)) {
+			poemService.setPoemAsFeatured(newFeaturedBean(IdUtils.next(), LocalDate.of(2016, 1, 1)));
 		}
 	}
 
 	@Test(expected = APIArgumentException.class)
 	public void testSetAsFeaturedFailedForPoemHasNoImage() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			Poem poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			poemService.setPoemAsFeatured(newFeaturedBean(poem.id, LocalDate.of(2016, 1, 1)));
@@ -610,7 +611,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test
 	public void testSetAsFeaturedOK() throws IOException {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean poemBean = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			poemBean.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
@@ -621,7 +622,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIArgumentException.class)
 	public void testSetAsFeaturedFailedForPoemAlreadyFeatured() throws IOException {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean poemBean = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			poemBean.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
@@ -633,7 +634,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = DuplicateKeyException.class)
 	public void testSetAsFeaturedFailedForPubDateAlreadyFeatured() throws IOException {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean poemBean1 = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			poemBean1.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
@@ -648,21 +649,21 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIPermissionException.class)
 	public void testSetAsUnfeaturedFailedWithoutPermission() {
-		try (UserContext<User> context = new UserContext<User>(super.normalUser)) {
+		try (UserContext context = new UserContext(super.normalUser)) {
 			poemService.setPoemAsUnfeatured(null);
 		}
 	}
 
 	@Test(expected = EntityNotFoundException.class)
 	public void testSetAsUnfeaturedFailedForPoemNotExist() {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
-			poemService.setPoemAsUnfeatured(IdUtil.next());
+		try (UserContext context = new UserContext(super.editorUser)) {
+			poemService.setPoemAsUnfeatured(IdUtils.next());
 		}
 	}
 
 	@Test
 	public void testSetAsUnfeaturedOK() throws IOException {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean poemBean = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			poemBean.imageData = Base64Util.encodeToString(FileUtil.getResource("/640x360.jpg"));
@@ -674,7 +675,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test
 	public void testGetFeaturedPoemsAndPoem() throws IOException {
-		try (UserContext<User> context = new UserContext<User>(super.editorUser)) {
+		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean poemBean1 = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
 			PoemBean poemBean2 = newPoemBean(poet.id, "送客", "故人洞庭去，杨柳春风生。");
@@ -708,21 +709,21 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIPermissionException.class)
 	public void testCreateCategoryFailedWithoutPermission() {
-		try (UserContext<User> ctx = new UserContext<User>(this.normalUser)) {
+		try (UserContext ctx = new UserContext(this.normalUser)) {
 			poemService.createCategory(null);
 		}
 	}
 
 	@Test(expected = APIArgumentException.class)
 	public void testCreateCategoryFailedForBadName() {
-		try (UserContext<User> ctx = new UserContext<User>(this.editorUser)) {
+		try (UserContext ctx = new UserContext(this.editorUser)) {
 			poemService.createCategory(newCategoryBean("  \u3000 \r\n "));
 		}
 	}
 
 	@Test
 	public void testCreateCategoryOK() {
-		try (UserContext<User> ctx = new UserContext<User>(this.editorUser)) {
+		try (UserContext ctx = new UserContext(this.editorUser)) {
 			Category cat = poemService.createCategory(newCategoryBean("唐诗三百首"));
 			assertEquals("唐诗三百首", cat.name);
 			assertEquals("唐詩三百首", cat.nameCht);
@@ -735,12 +736,12 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = EntityNotFoundException.class)
 	public void testGetCategoryFailedForNotExist() {
-		poemService.getPoemsOfCategory(IdUtil.next());
+		poemService.getPoemsOfCategory(IdUtils.next());
 	}
 
 	@Test
 	public void testUpdatePoemsOfCategoryAndGetOK() {
-		try (UserContext<User> ctx = new UserContext<User>(this.editorUser)) {
+		try (UserContext ctx = new UserContext(this.editorUser)) {
 			Poet poet1 = poemService.createPoet(newPoetBean(getTangDynasty().id, "李白"));
 			Poet poet2 = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			Poem poem1a = poemService.createPoem(newPoemBean(poet1.id, "赠汪伦", "李白乘舟将欲行，忽闻岸上踏歌声。"));
@@ -766,21 +767,21 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 
 	@Test(expected = APIPermissionException.class)
 	public void testUpdateCategoryFailedWithoutPermission() {
-		try (UserContext<User> ctx = new UserContext<User>(this.normalUser)) {
+		try (UserContext ctx = new UserContext(this.normalUser)) {
 			poemService.updateCategory(null, null);
 		}
 	}
 
 	@Test(expected = APIPermissionException.class)
 	public void testUpdatePoemsOfCategoryFailedWithoutPermission() {
-		try (UserContext<User> ctx = new UserContext<User>(this.normalUser)) {
+		try (UserContext ctx = new UserContext(this.normalUser)) {
 			poemService.updatePoemsOfCategory(null, null);
 		}
 	}
 
 	@Test(expected = APIPermissionException.class)
 	public void testDeleteCategoryFailedWithoutPermission() {
-		try (UserContext<User> ctx = new UserContext<User>(this.normalUser)) {
+		try (UserContext ctx = new UserContext(this.normalUser)) {
 			poemService.deleteCategory(null);
 		}
 	}

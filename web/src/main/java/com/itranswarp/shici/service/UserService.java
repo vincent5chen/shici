@@ -34,7 +34,7 @@ public class UserService extends AbstractService {
 	 * @return
 	 */
 	public User fetchUser(String id) {
-		return database.fetch(User.class, id);
+		return warpdb.fetch(User.class, id);
 	}
 
 	/**
@@ -44,7 +44,7 @@ public class UserService extends AbstractService {
 	 * @return
 	 */
 	public User getUser(String id) {
-		User user = database.fetch(User.class, id);
+		User user = warpdb.fetch(User.class, id);
 		if (user == null) {
 			throw new APIEntityNotFoundException(User.class);
 		}
@@ -52,13 +52,13 @@ public class UserService extends AbstractService {
 	}
 
 	public List<User> doGetEditors() {
-		return database.from(User.class).where("role <= ?", User.Role.EDITOR).orderBy("name").list();
+		return warpdb.from(User.class).where("role <= ?", User.Role.EDITOR).orderBy("name").list();
 	}
 
 	@RequestMapping(value = "/api/users", method = RequestMethod.GET)
 	public PagedResults<User> getUsers(@RequestParam(value = "page", defaultValue = "1") int pageIndex) {
 		assertEditorRole();
-		return database.from(User.class).orderBy("createdAt desc").list(pageIndex);
+		return warpdb.from(User.class).orderBy("createdAt desc").list(pageIndex);
 	}
 
 	@RequestMapping(value = "/api/editors", method = RequestMethod.GET)
@@ -79,7 +79,7 @@ public class UserService extends AbstractService {
 		} else {
 			user.lockedUntil = System.currentTimeMillis() + seconds * 1000L;
 		}
-		database.updateProperties(user, "lockedUntil");
+		warpdb.updateProperties(user, "lockedUntil");
 		return user;
 	}
 

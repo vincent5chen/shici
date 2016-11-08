@@ -18,7 +18,7 @@ public class HanziService extends AbstractService {
 
 	@PostConstruct
 	public void init() {
-		List<Hanzi> all = database.from(Hanzi.class).list();
+		List<Hanzi> all = warpdb.from(Hanzi.class).list();
 		Map<Character, Character> theChtMap = new HashMap<Character, Character>();
 		Map<Character, Character> theChsMap = new HashMap<Character, Character>();
 		for (Hanzi hanz : all) {

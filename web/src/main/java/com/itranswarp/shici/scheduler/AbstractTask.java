@@ -4,10 +4,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.itranswarp.shici.context.UserContext;
 import com.itranswarp.shici.model.Job;
 import com.itranswarp.shici.model.User;
 import com.itranswarp.shici.service.JobService;
-import com.itranswarp.warpdb.context.UserContext;
 
 public abstract class AbstractTask {
 
@@ -18,7 +18,7 @@ public abstract class AbstractTask {
 
 	public final void execute() {
 		log.info("Start scheduled task: " + getClass().getSimpleName());
-		try (UserContext<User> ctx = new UserContext<User>(User.SYSTEM)) {
+		try (UserContext ctx = new UserContext(User.SYSTEM)) {
 			Job job = null;
 			try {
 				job = jobService.fetchJob(getJobType());

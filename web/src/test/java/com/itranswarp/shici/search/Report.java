@@ -1,7 +1,7 @@
 package com.itranswarp.shici.search;
 
-import com.itranswarp.warpdb.IdUtil;
-import com.itranswarp.warpdb.entity.BaseEntity;
+import com.itranswarp.shici.model.BaseEntity;
+import com.itranswarp.shici.util.IdUtils;
 
 public class Report extends BaseEntity {
 	public String username;
@@ -13,7 +13,7 @@ public class Report extends BaseEntity {
 		r.username = username;
 		r.tags = tags;
 		r.content = content;
-		r.id = IdUtil.next();
+		r.id = IdUtils.next();
 		r.createdBy = r.updatedBy = "00000000000000000000";
 		r.createdAt = r.updatedAt = System.currentTimeMillis();
 		return r;

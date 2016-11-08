@@ -12,13 +12,13 @@ import com.itranswarp.shici.bean.CategoryPoemBean;
 import com.itranswarp.shici.bean.FeaturedBean;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
+import com.itranswarp.shici.context.UserContext;
 import com.itranswarp.shici.model.Dynasty;
 import com.itranswarp.shici.model.Hanzi;
 import com.itranswarp.shici.model.Poem;
 import com.itranswarp.shici.model.User;
-import com.itranswarp.warpdb.Database;
-import com.itranswarp.warpdb.IdUtil;
-import com.itranswarp.warpdb.context.UserContext;
+import com.itranswarp.shici.util.IdUtils;
+import com.itranswarp.warpdb.WarpDb;
 
 public abstract class AbstractServiceTestBase extends DatabaseTestBase {
 
@@ -34,21 +34,21 @@ public abstract class AbstractServiceTestBase extends DatabaseTestBase {
 		normalUser = newUser(User.Role.USER, "User");
 		User[] users = new User[] { adminUser, editorUser, normalUser };
 		for (User user : users) {
-			try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
-				super.database.save(user);
+			try (UserContext context = new UserContext(User.SYSTEM)) {
+				super.warpdb.save(user);
 			}
 		}
 	}
 
-	protected void initDynasties(HanziService hanzService, Database db) {
-		try (UserContext<User> context = new UserContext<User>(User.SYSTEM)) {
+	protected void initDynasties(HanziService hanzService, WarpDb warpdb) {
+		try (UserContext context = new UserContext(User.SYSTEM)) {
 			String[] names = { "先秦", "汉代", "三国两晋", "南北朝", "隋唐", "宋代", "元代", "明代", "清代", "近现代", "不详" };
 			for (int i = 0; i < names.length; i++) {
 				Dynasty dyn = new Dynasty();
 				dyn.name = names[i];
 				dyn.nameCht = hanzService.toCht(dyn.name);
 				dyn.displayOrder = i;
-				database.save(dyn);
+				warpdb.save(dyn);
 			}
 		}
 	}
@@ -109,7 +109,7 @@ public abstract class AbstractServiceTestBase extends DatabaseTestBase {
 
 	protected User newUser(long role, String name) {
 		User user = new User();
-		user.id = IdUtil.next();
+		user.id = IdUtils.next();
 		user.role = role;
 		user.name = name;
 		user.email = name.toLowerCase() + "@test.com";

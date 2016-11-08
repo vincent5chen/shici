@@ -1,5 +1,6 @@
 package com.itranswarp.shici.web;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.itranswarp.shici.exception.APIErrorInfo;
 import com.itranswarp.shici.exception.APIException;
-import com.itranswarp.warpdb.EntityNotFoundException;
 
 @ControllerAdvice
 public class RestExceptionHandler {
@@ -30,7 +30,7 @@ public class RestExceptionHandler {
 			}
 			if (e instanceof EntityNotFoundException) {
 				EntityNotFoundException enf = (EntityNotFoundException) e;
-				return new APIErrorInfo("entity:notfound", enf.name, enf.getMessage());
+				return new APIErrorInfo("entity:notfound", enf.getMessage(), "Entity not found: " + enf.getMessage());
 			}
 			log.error("Handle Non-APIException: " + e.getClass().getName(), e);
 			return new APIException(e).toErrorInfo();

@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import com.itranswarp.warpdb.IdUtil;
+import com.itranswarp.shici.util.IdUtils;
 
 public abstract class AbstractStorage {
 
@@ -35,9 +35,9 @@ public abstract class AbstractStorage {
 	public String generateFileName(String prefix, String ext) {
 		LocalDateTime dt = LocalDateTime.now();
 		if (prefix == null) {
-			return dt.format(FORMATTER) + IdUtil.next() + ext;
+			return dt.format(FORMATTER) + IdUtils.next() + ext;
 		} else {
-			return prefix + "/" + dt.format(FORMATTER) + IdUtil.next() + ext;
+			return prefix + "/" + dt.format(FORMATTER) + IdUtils.next() + ext;
 		}
 	}
 }
