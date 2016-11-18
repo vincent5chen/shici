@@ -27,7 +27,7 @@ public class Robot {
 	@PostConstruct
 	public void init() {
 		String[] ids = apiIds.trim().split(",");
-		List<String> keys = new ArrayList<String>();
+		List<String> keys = new ArrayList<>();
 		for (String id : ids) {
 			String s = id.trim();
 			if (!s.isEmpty() && !keys.contains(s)) {
