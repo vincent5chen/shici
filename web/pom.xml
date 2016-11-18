@@ -40,7 +40,7 @@
 		<jedis.version>2.8.0</jedis.version>
 		<jetty.version>9.3.2.v20150730</jetty.version>
 		<junit.version>4.12</junit.version>
-		<log4j.version>2.5</log4j.version>
+		<log4j.version>2.6.2</log4j.version>
 		<mysql.connector.version>5.1.40</mysql.connector.version>
 		<pebble.version>1.6.0</pebble.version>
 		<spring.version>4.3.3.RELEASE</spring.version>

@@ -63,7 +63,7 @@
 	</bean>
 
 	<!-- Database -->
-	<bean id="database" class="com.itranswarp.warpdb.Database"
+	<bean id="warpdb" class="com.itranswarp.warpdb.WarpDb"
 		init-method="init">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 		<property name="basePackages">

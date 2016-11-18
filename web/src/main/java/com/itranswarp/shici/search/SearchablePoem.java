@@ -1,28 +1,37 @@
-package com.itranswarp.shici.searchable;
+package com.itranswarp.shici.search;
 
+import com.itranswarp.search.SearchableField;
+import com.itranswarp.search.SearchableId;
 import com.itranswarp.shici.model.Poem;
-import com.itranswarp.shici.search.Analyzed;
-import com.itranswarp.shici.search.Searchable;
 
-public class SearchablePoem implements Searchable {
+public class SearchablePoem {
 
-	public long form;
-	public long rating;
-
+	@SearchableId
 	public String poemId;
+
+	@SearchableField
 	public String poetId;
+	@SearchableField
 	public String dynastyId;
 
-	@Analyzed
+	@SearchableField
+	public long form;
+	@SearchableField
+	public long rating;
+
+	@SearchableField(boost = 5)
 	public String name;
+	@SearchableField(boost = 5)
 	public String nameCht;
 
-	@Analyzed
+	@SearchableField(boost = 3)
 	public String poetName;
+	@SearchableField(boost = 3)
 	public String poetNameCht;
 
-	@Analyzed
+	@SearchableField
 	public String content;
+	@SearchableField
 	public String contentCht;
 
 	public SearchablePoem() {
@@ -44,8 +53,4 @@ public class SearchablePoem implements Searchable {
 		this.contentCht = poem.contentCht;
 	}
 
-	@Override
-	public String getId() {
-		return this.poemId;
-	}
 }
