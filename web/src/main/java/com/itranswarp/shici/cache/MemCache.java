@@ -1,7 +1,6 @@
 package com.itranswarp.shici.cache;
 
 import java.io.IOException;
-import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,23 +38,6 @@ public class MemCache implements Cache {
 			return null;
 		}
 		return (T) this.mc.get(key);
-	}
-
-	@Override
-	public <T> T get(String key, Function<String, T> fn) {
-		if (this.mc == null) {
-			return fn.apply(key);
-		}
-		T t = get(key);
-		if (t == null) {
-			log.info("Key is missing in memcached: " + key);
-			t = fn.apply(key);
-			this.mc.set(key, this.expires, t);
-			log.info("Put object to memcached: " + key);
-		} else {
-			log.info("Key hit in memcached: " + key);
-		}
-		return t;
 	}
 
 	@Override
