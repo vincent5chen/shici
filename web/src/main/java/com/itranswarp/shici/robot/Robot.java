@@ -22,6 +22,7 @@ public class Robot {
 	String apiIds;
 
 	String[] apiKeys;
+	String[] apiSecrets;
 
 	@PostConstruct
 	public void init() {
@@ -41,7 +42,10 @@ public class Robot {
 	}
 
 	public RobotResponse talk(String userId, String text, String location) throws Exception {
-		Map<String, String> params = MapUtil.createMap("key", selectKey(userId), "userid", userId, "info", text);
+		int n = selectKey(userId);
+		String key = this.apiKeys[n];
+		String secret = this.apiSecrets[n];
+		Map<String, String> params = MapUtil.createMap("key", key, "userid", userId, "info", text);
 		if (location != null && !location.isEmpty()) {
 			params.put("loc", location);
 		}
@@ -53,9 +57,8 @@ public class Robot {
 		return resp;
 	}
 
-	String selectKey(String userId) {
-		int n = userId.hashCode() % this.apiKeys.length;
-		return this.apiKeys[n];
+	int selectKey(String userId) {
+		return userId.hashCode() % this.apiKeys.length;
 	}
 
 	public static class RobotResponse {
