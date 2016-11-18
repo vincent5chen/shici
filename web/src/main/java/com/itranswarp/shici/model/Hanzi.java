@@ -2,10 +2,8 @@ package com.itranswarp.shici.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Table;
 
 @Entity
-@Table
 public class Hanzi extends BaseEntity {
 
 	@Column(columnDefinition = "char(1)", nullable = false)

@@ -19,8 +19,8 @@ public class HanziService extends AbstractService {
 	@PostConstruct
 	public void init() {
 		List<Hanzi> all = warpdb.from(Hanzi.class).list();
-		Map<Character, Character> theChtMap = new HashMap<Character, Character>();
-		Map<Character, Character> theChsMap = new HashMap<Character, Character>();
+		Map<Character, Character> theChtMap = new HashMap<>();
+		Map<Character, Character> theChsMap = new HashMap<>();
 		for (Hanzi hanz : all) {
 			if (hanz.s.isEmpty() || hanz.t.isEmpty()) {
 				log.warn("s or t is empty: " + hanz);

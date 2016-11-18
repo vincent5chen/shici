@@ -54,7 +54,7 @@ public class AliyunStorage extends AbstractStorage {
 		String now = DateUtil.gmtNow();
 		String fileName = generateFileName(prefix, ext);
 		String signature = sign("PUT", contentType, now, this.bucket, fileName);
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put("Date", now);
 		headers.put("Content-Type", contentType);
 		headers.put("Content-Disposition", "inline");
@@ -72,7 +72,7 @@ public class AliyunStorage extends AbstractStorage {
 		String now = DateUtil.gmtNow();
 		String fileName = url.substring(prefix.length());
 		String signature = sign("DELETE", "", now, this.bucket, fileName);
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put("Date", now);
 		headers.put("Authorization", "OSS " + accessKeyId + ":" + signature);
 		HttpUtil.httpDelete("http://" + internalHost + "/" + fileName, "", headers);

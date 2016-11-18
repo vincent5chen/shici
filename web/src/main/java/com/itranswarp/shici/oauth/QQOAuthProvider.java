@@ -40,7 +40,7 @@ public class QQOAuthProvider implements OAuthProvider {
 
 	@Override
 	public OAuthAuthentication getAuthentication(String redirectUri, String code) throws IOException {
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("client_id", this.appKey);
 		params.put("client_secret", this.appSecret);
 		params.put("grant_type", "authorization_code");
@@ -62,7 +62,7 @@ public class QQOAuthProvider implements OAuthProvider {
 		Map<String, String> p = JsonUtil.parseAsMap(resp2);
 		String authId = p.get("openid");
 		// get user info:
-		Map<String, String> qs = new HashMap<String, String>();
+		Map<String, String> qs = new HashMap<>();
 		qs.put("access_token", accessToken);
 		qs.put("oauth_comsumer_key", this.appKey);
 		qs.put("appid", this.appKey);

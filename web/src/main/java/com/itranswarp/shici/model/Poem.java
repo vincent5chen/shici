@@ -2,7 +2,6 @@ package com.itranswarp.shici.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * Poem object.
@@ -10,7 +9,6 @@ import javax.persistence.Table;
  * @author michael
  */
 @Entity
-@Table
 public class Poem extends BaseEntity {
 
 	public static interface Form {

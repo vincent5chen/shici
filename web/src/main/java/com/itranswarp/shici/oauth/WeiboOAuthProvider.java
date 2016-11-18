@@ -38,7 +38,7 @@ public class WeiboOAuthProvider implements OAuthProvider {
 
 	@Override
 	public OAuthAuthentication getAuthentication(String redirectUri, String code) throws IOException {
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("client_id", this.appKey);
 		params.put("client_secret", this.appSecret);
 		params.put("grant_type", "authorization_code");
@@ -52,7 +52,7 @@ public class WeiboOAuthProvider implements OAuthProvider {
 		String authId = (String) r.get("uid");
 		long expiresIn = ((Number) r.get("expires_in")).longValue();
 		// get profile:
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put("Authorization", "OAuth2 " + accessToken);
 		String resp2 = HttpUtil.httpGet("https://api.weibo.com/2/users/show.json?uid=" + authId, null, headers).body;
 		log.info("Response body: " + resp2);

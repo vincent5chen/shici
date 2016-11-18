@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 public class ListUtil {
 
 	public static <R, T> Map<R, T> listToMap(Collection<T> list, Function<? super T, ? extends R> mapper) {
-		Map<R, T> map = new HashMap<R, T>(list.size());
+		Map<R, T> map = new HashMap<>(list.size());
 		for (T t : list) {
 			R r = mapper.apply(t);
 			map.put(r, t);
@@ -25,7 +25,7 @@ public class ListUtil {
 	}
 
 	public static <R, T> Set<R> listToSet(Collection<T> list, Function<? super T, ? extends R> mapper) {
-		Set<R> set = new HashSet<R>();
+		Set<R> set = new HashSet<>();
 		for (T t : list) {
 			R r = mapper.apply(t);
 			set.add(r);
@@ -34,8 +34,8 @@ public class ListUtil {
 	}
 
 	public static <R, T> List<T> distinct(Collection<T> list, Function<? super T, ? extends R> mapper) {
-		Set<R> set = new HashSet<R>();
-		List<T> rs = new ArrayList<T>(list.size());
+		Set<R> set = new HashSet<>();
+		List<T> rs = new ArrayList<>(list.size());
 		for (T t : list) {
 			R r = mapper.apply(t);
 			if (!set.contains(r)) {
@@ -47,7 +47,7 @@ public class ListUtil {
 	}
 
 	public static <R, T> List<R> map(Collection<T> list, Function<? super T, ? extends R> mapper) {
-		List<R> rs = new ArrayList<R>(list.size());
+		List<R> rs = new ArrayList<>(list.size());
 		for (T t : list) {
 			R r = mapper.apply(t);
 			rs.add(r);

@@ -19,7 +19,7 @@ import com.itranswarp.shici.model.User;
  */
 public class UserContext implements AutoCloseable {
 
-	static final ThreadLocal<User> current = new ThreadLocal<User>();
+	static final ThreadLocal<User> current = new ThreadLocal<>();
 
 	public UserContext(User user) {
 		current.set(user);

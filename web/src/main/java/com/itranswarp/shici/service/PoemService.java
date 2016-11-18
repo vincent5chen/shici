@@ -326,7 +326,7 @@ public class PoemService extends AbstractService {
 		Category category = getCategory(categoryId);
 		List<CategoryPoem> cps = warpdb.from(CategoryPoem.class).where("categoryId=?", category.id)
 				.orderBy("displayOrder").list();
-		List<TheCategoryPoem> list = new ArrayList<TheCategoryPoem>();
+		List<TheCategoryPoem> list = new ArrayList<>();
 		if (cps.isEmpty()) {
 			return list;
 		}
@@ -338,7 +338,7 @@ public class PoemService extends AbstractService {
 				tcp = new TheCategoryPoem();
 				tcp.sectionName = cp.sectionName;
 				tcp.sectionNameCht = cp.sectionNameCht;
-				tcp.poems = new ArrayList<Poem>(20);
+				tcp.poems = new ArrayList<>(20);
 				tcp.poems.add(poem);
 			} else {
 				if (tcp.sectionName.equals(cp.sectionName)) {
@@ -350,7 +350,7 @@ public class PoemService extends AbstractService {
 					tcp = new TheCategoryPoem();
 					tcp.sectionName = cp.sectionName;
 					tcp.sectionNameCht = cp.sectionNameCht;
-					tcp.poems = new ArrayList<Poem>(20);
+					tcp.poems = new ArrayList<>(20);
 					tcp.poems.add(poem);
 				}
 			}
@@ -375,7 +375,7 @@ public class PoemService extends AbstractService {
 		warpdb.update("delete from CategoryPoem where categoryId=?", categoryId);
 		long n = 0;
 		for (CategoryPoemBean bean : beans) {
-			List<CategoryPoem> list = new ArrayList<CategoryPoem>(bean.ids.size());
+			List<CategoryPoem> list = new ArrayList<>(bean.ids.size());
 			for (String poemId : bean.ids) {
 				CategoryPoem cp = new CategoryPoem();
 				cp.sectionName = bean.sectionName;
@@ -414,7 +414,7 @@ public class PoemService extends AbstractService {
 
 	public List<TheFeaturedPoem> getFeaturedPoems() {
 		List<FeaturedPoem> fps = warpdb.list("select * from FeaturedPoem order by pubDate desc");
-		List<TheFeaturedPoem> tfps = new ArrayList<TheFeaturedPoem>(fps.size());
+		List<TheFeaturedPoem> tfps = new ArrayList<>(fps.size());
 		for (FeaturedPoem fp : fps) {
 			TheFeaturedPoem tfp = new TheFeaturedPoem();
 			tfp.pubDate = fp.pubDate;

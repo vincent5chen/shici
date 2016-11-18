@@ -49,7 +49,7 @@ public class HttpUtil {
 	static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	static {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put(".txt", "text/plain");
 		map.put(".html", "text/html");
 		map.put(".htm", "text/html");
@@ -121,7 +121,7 @@ public class HttpUtil {
 
 	public static Map<String, String> urlDecodeAsMap(String qs) {
 		String[] ss = qs.split("&");
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		for (String s : ss) {
 			int pos = s.indexOf('=');
 			if (pos <= 0) {
@@ -156,7 +156,7 @@ public class HttpUtil {
 	 * @return
 	 */
 	public static String urlEncode(Map<String, String> params) {
-		List<String> list = new ArrayList<String>(params.size());
+		List<String> list = new ArrayList<>(params.size());
 		String[] keys = params.keySet().toArray(EMPTY_STRING_ARRAY);
 		Arrays.sort(keys);
 		for (String key : keys) {
@@ -179,7 +179,7 @@ public class HttpUtil {
 		if (data != null && !data.isEmpty()) {
 			byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
 			if (headers == null) {
-				headers = new HashMap<String, String>();
+				headers = new HashMap<>();
 			}
 			headers.put("Content-Length", String.valueOf(bytes.length));
 			input = new ByteArrayInputStream(bytes);
@@ -196,7 +196,7 @@ public class HttpUtil {
 		if (data != null && !data.isEmpty()) {
 			byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
 			if (headers == null) {
-				headers = new HashMap<String, String>();
+				headers = new HashMap<>();
 			}
 			headers.put("Content-Length", String.valueOf(bytes.length));
 			input = new ByteArrayInputStream(bytes);
@@ -213,7 +213,7 @@ public class HttpUtil {
 		if (data != null && !data.isEmpty()) {
 			byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
 			if (headers == null) {
-				headers = new HashMap<String, String>();
+				headers = new HashMap<>();
 			}
 			headers.put("Content-Length", String.valueOf(bytes.length));
 			input = new ByteArrayInputStream(bytes);
@@ -313,7 +313,7 @@ public class HttpUtil {
 	}
 
 	public static Map<String, String> getParameters(HttpServletRequest request) {
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		Enumeration<String> en = request.getParameterNames();
 		while (en.hasMoreElements()) {
 			String name = en.nextElement();

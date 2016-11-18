@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.itranswarp.shici.exception.APIArgumentException;
-import com.itranswarp.shici.model.User; 
+import com.itranswarp.shici.model.User;
 
 public class ValidateUtil {
 
@@ -49,7 +49,7 @@ public class ValidateUtil {
 		if (ids == null) {
 			throw new APIArgumentException("ids", "Ids cannot be null.");
 		}
-		Set<String> sets = new HashSet<String>(ids.size());
+		Set<String> sets = new HashSet<>(ids.size());
 		for (String id : ids) {
 			if (!IdUtils.isValidId(id)) {
 				throw new APIArgumentException("ids", "Ids contains invalid id.");
@@ -196,7 +196,7 @@ public class ValidateUtil {
 			return "";
 		}
 		String[] ss = tags.split("[，；\\,\\;\\s\u00a0\u3000]+");
-		List<String> tagList = new ArrayList<String>(ss.length);
+		List<String> tagList = new ArrayList<>(ss.length);
 		for (String s : ss) {
 			if (!s.isEmpty()) {
 				tagList.add(s);
@@ -258,7 +258,7 @@ public class ValidateUtil {
 
 	static final String TRIM_STRING = " " + "［］｛｝（）" + "\"\'“”[](){}0123456789\u00a0\u3000\t\r\n\0"
 			+ "⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽⑾⑿⒀⒁⒂⒃⒄⒅⒆⒇" + "⒈⒉⒊⒋⒌⒍⒎⒏⒐⒑⒒⒓⒔⒕⒖⒗⒘⒙⒚⒛" + "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
-	static final Set<String> SHOULD_REMOVE = new HashSet<String>(Arrays.asList(TRIM_STRING.split("")));
+	static final Set<String> SHOULD_REMOVE = new HashSet<>(Arrays.asList(TRIM_STRING.split("")));
 
 	static final char[][] SHOULD_REPLACE = { { ',', '，' }, { '.', '。' }, { ';', '；' }, { '?', '？' }, { '!', '！' },
 			{ '\u25cf', '\u00b7' }, { '\u25cb', '\u00b7' }, { '\u2299', '\u00b7' }, { '\u00b0', '\u00b7' },

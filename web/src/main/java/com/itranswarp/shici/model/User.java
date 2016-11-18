@@ -25,8 +25,7 @@ public class User extends BaseEntity {
 		static final String FEMALE = "female";
 		static final String UNKNOWN = "unknown";
 
-		static final Set<String> SET = Collections
-				.unmodifiableSet(new HashSet<String>(Arrays.asList(MALE, FEMALE, UNKNOWN)));
+		static final Set<String> SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(MALE, FEMALE, UNKNOWN)));
 	}
 
 	public static final User SYSTEM;

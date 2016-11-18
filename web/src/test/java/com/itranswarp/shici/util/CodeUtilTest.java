@@ -13,7 +13,7 @@ public class CodeUtilTest {
 	@Test
 	public void testGenerate6CharsCode() {
 		Pattern p = Pattern.compile("^[a-z0-9]{6}$");
-		Set<String> set = new HashSet<String>();
+		Set<String> set = new HashSet<>();
 		for (int i = 0; i < 1000; i++) {
 			String code = CodeUtil.generate6CharsCode();
 			assertTrue(p.matcher(code).matches());

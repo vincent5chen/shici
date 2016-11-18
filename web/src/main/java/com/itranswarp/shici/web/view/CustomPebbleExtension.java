@@ -15,7 +15,7 @@ public class CustomPebbleExtension extends AbstractExtension {
 
 	@Override
 	public Map<String, Filter> getFilters() {
-		Map<String, Filter> map = new HashMap<String, Filter>();
+		Map<String, Filter> map = new HashMap<>();
 		map.put("addslashes", new AddSlashesFilter());
 		map.put("json", new JsonFilter());
 		map.put("d", new DateFilter());

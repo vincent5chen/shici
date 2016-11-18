@@ -42,7 +42,7 @@ public class OAuthService extends AbstractService {
 
 	@PostConstruct
 	public void init() {
-		this.providerMap = new HashMap<String, OAuthProvider>();
+		this.providerMap = new HashMap<>();
 		for (OAuthProvider provider : this.providers) {
 			providerMap.put(provider.getName(), provider);
 		}
