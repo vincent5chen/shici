@@ -63,7 +63,7 @@ public class PoemService extends AbstractService {
 
 	// poet ///////////////////////////////////////////////////////////////////
 
-	@RequestMapping(value = "/api/{id}/poets", method = RequestMethod.GET)
+	@RequestMapping(value = "/api/dynasties/{id}/poets", method = RequestMethod.GET)
 	public Map<String, List<Poet>> restGetPoets(@PathVariable("id") String dynastyId) {
 		return MapUtil.createMap("results", getPoets(dynastyId));
 	}
