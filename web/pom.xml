@@ -45,7 +45,7 @@
 		<pebble.version>1.6.0</pebble.version>
 		<spring.version>4.3.3.RELEASE</spring.version>
 		<spymemcached.version>2.12.0</spymemcached.version>
-		<warpdb.version>2.2</warpdb.version>
+		<warpdb.version>2.4</warpdb.version>
 		<wxapi.version>1.2</wxapi.version>
 	</properties>
 
