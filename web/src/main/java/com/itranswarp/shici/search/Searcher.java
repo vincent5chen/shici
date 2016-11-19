@@ -39,7 +39,7 @@ public class Searcher {
 	@PostConstruct
 	public void init() throws Exception {
 		SearchableClient client = new SearchableClient();
-		client.setBasePackage("com.itranswarp.shici.search");
+		client.setBasePackage(SearchablePoem.class.getPackage().getName());
 		client.setHost(host);
 		client.setIndex(INDEX_NAME);
 		client.setMaxResults(20);

@@ -1,9 +1,11 @@
 package com.itranswarp.shici.search;
 
+import com.itranswarp.search.SearchableDocument;
 import com.itranswarp.search.SearchableField;
 import com.itranswarp.search.SearchableId;
 import com.itranswarp.shici.model.Poem;
 
+@SearchableDocument
 public class SearchablePoem {
 
 	@SearchableId
