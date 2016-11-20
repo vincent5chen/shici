@@ -3,6 +3,7 @@ package com.itranswarp.shici.web;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -11,6 +12,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * 
  * @author michael
  */
+@Component
 public class PerformanceHandler extends HandlerInterceptorAdapter {
 
 	static final String ATTR_START_TIME = "ATTR_START_TIME";
