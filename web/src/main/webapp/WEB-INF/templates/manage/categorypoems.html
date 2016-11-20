@@ -34,6 +34,33 @@ $(function () {
 			poems: []
 		},
 		methods: {
+			moveUp: function (p) {
+				var n = this.indexOf(p);
+				if (n > 0) {
+					this.swapFrom(n-1);
+				}
+			},
+			moveDown: function (p) {
+				var n = this.indexOf(p);
+				if (n < this.poems.length - 1) {
+					this.swapFrom(n);
+				}
+			},
+			indexOf: function (p) {
+				var i;
+				for (i=0; i<this.poems.length; i++) {
+					if (this.poems[i].id === p.id) {
+						return i;
+					}
+				}
+				throw 'ERROR';
+			},
+			swapFrom: function (n) {
+				var
+					p1 = this.poems[n],
+					p2 = this.poems[n+1];
+				this.poems.splice(n, 2, p2, p1);
+			}
 		},
 		created: function () {
 			var that = this;
@@ -82,9 +109,9 @@ $(function () {
 					<td v-text="p.name"></td>
 					<td v-text="p.content.length <= 32 ? p.content : p.content.substring(0, 32) + '...'"></td>
 					<td>
-						<a href="#0"><i class="uk-icon-arrow-up"></i> 上移</a>
+						<a v-on:click="moveUp(p)" href="#0"><i class="uk-icon-arrow-up"></i> 上移</a>
 						&nbsp;&nbsp;&nbsp;
-						<a href="#0"><i class="uk-icon-arrow-down"></i> 下移</a>
+						<a v-on:click="moveDown(p)" href="#0"><i class="uk-icon-arrow-down"></i> 下移</a>
 					</td>
 					<td>
 						<a v-bind:href="'/manage/dynasties/poets/poems/'+p.id+'/edit'" target="_blank"><i class="uk-icon-list"></i> 编辑</a>
