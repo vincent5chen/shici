@@ -53,12 +53,22 @@ public class PoemService extends AbstractService {
 		return MapUtil.createMap("results", getDynasties());
 	}
 
+	@RequestMapping(value = "/api/dynasties/{id}", method = RequestMethod.GET)
+	public Dynasty restGetDynasty(@PathVariable("id") String dynastyId) {
+		return getDynasty(dynastyId);
+	}
+
 	public List<Dynasty> getDynasties() {
 		return warpdb.from(Dynasty.class).orderBy("displayOrder").list();
 	}
 
 	public Dynasty getDynasty(String dynastyId) {
-		return warpdb.get(Dynasty.class, dynastyId);
+		for (Dynasty d : getDynasties()) {
+			if (d.id.equals(dynastyId)) {
+				return d;
+			}
+		}
+		throw new EntityNotFoundException("Dynasty");
 	}
 
 	// poet ///////////////////////////////////////////////////////////////////
@@ -266,12 +276,22 @@ public class PoemService extends AbstractService {
 		return MapUtil.createMap("results", getCategories());
 	}
 
+	@RequestMapping(value = "/api/categories/{id}", method = RequestMethod.GET)
+	public Category restGetCategory(@PathVariable("id") String categoryId) {
+		return getCategory(categoryId);
+	}
+
 	public List<Category> getCategories() {
 		return warpdb.from(Category.class).orderBy("displayOrder").list();
 	}
 
 	public Category getCategory(String categoryId) {
-		return warpdb.get(Category.class, categoryId);
+		for (Category c : getCategories()) {
+			if (c.id.equals(categoryId)) {
+				return c;
+			}
+		}
+		throw new EntityNotFoundException("Category");
 	}
 
 	@RequestMapping(value = "/api/categories", method = RequestMethod.POST)
@@ -322,7 +342,7 @@ public class PoemService extends AbstractService {
 		return MapUtil.createMap("results", list);
 	}
 
-	public List<TheCategoryPoem> getPoemsOfCategory(@PathVariable("id") String categoryId) {
+	public List<TheCategoryPoem> getPoemsOfCategory(String categoryId) {
 		Category category = getCategory(categoryId);
 		List<CategoryPoem> cps = warpdb.from(CategoryPoem.class).where("categoryId=?", category.id)
 				.orderBy("displayOrder").list();
