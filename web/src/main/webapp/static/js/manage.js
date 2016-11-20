@@ -176,6 +176,111 @@ function authFrom(provider) {
     }
 }
 
+// register custom filters for Vue:
+
+if (typeof(Vue)!=='undefined') {
+    Vue.filter('datetime', function (value) {
+    	if (!value) {
+    		return '';
+    	}
+        var d = value;
+        if (typeof(value)==='number') {
+            d = new Date(value);
+        }
+        if (d.getFullYear && d.getMonth && d.getDate) {
+            return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes();
+        }
+        return '' + d;
+    });
+    Vue.filter('date', function (value) {
+    	if (!value) {
+    		return '';
+    	}
+        var d = value;
+        if (typeof(value)==='number') {
+            d = new Date(value);
+        }
+        if (d.getFullYear && d.getMonth && d.getDate) {
+            return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+        }
+        return '' + d;
+    });
+    Vue.filter('duration', function (value) {
+    	var m = Math.floor(value / 60);
+    	var s = Math.round(value % 60);
+    	if (m === 0) {
+    		return s + '\'';
+    	}
+    	return m + '\'' + s + '\'';
+    });
+    Vue.filter('abbr', function (value) {
+    	if (value && value.length && value.length > 10) {
+    		return value.substring(0, 10) + '...';
+    	}
+    	return value;
+    });
+    Vue.filter('shortEmail', function (value) {
+        if (value && value.length && value.length > 30) {
+            return '...' + value.substring(value.length - 25);
+        }
+        return value;
+    });
+    Vue.filter('shortUrl', function (value) {
+        if (value && value.length && value.length > 30) {
+            var n = value.indexOf('/', 8);
+            if (n != (-1)) {
+                return value.substring(0, n+1) + '...' + value.substring(value.length - 10);
+            }
+            return value.substring(value.length - 25) + '...';
+        }
+        return value;
+    });
+}
+
+function createPagination(dom, page) {
+	var s = ['<ul class="uk-pagination">'];
+	if (page.totalItems === 0) {
+		s.push('<li><span>No items available</span></li>');
+	} else {
+		// show 1, 2, 3:
+		var index = [1, 2, 3];
+		// show index:
+		index.push(page.pageIndex - 2);
+		index.push(page.pageIndex - 1);
+		index.push(page.pageIndex);
+		index.push(page.pageIndex + 1);
+		index.push(page.pageIndex + 2);
+		// show last 98, 99, 100:
+		index.push(page.totalPages - 2);
+		index.push(page.totalPages - 1);
+		index.push(page.totalPages);
+		index = _.filter(_.uniq(index), function (num) {
+			return num >= 1 && num <= page.totalPages;
+		});
+		if (page.pageIndex >= 7) {
+			index.splice(3, 0, '...');
+		}
+		if ((page.totalPages - page.pageIndex) > 5) {
+			index.splice(index.length - 3, 0, '...');
+		}
+		_.each(index, function (num) {
+			if (num === '...') {
+				s.push('<li><span>...</span></li>');
+			}
+			else if (num === page.pageIndex) {
+				s.push('<li class="uk-active"><span>' + num + '</span></li>');
+			}
+			else {
+				s.push('<li><a href="#0" onclick="gotoPage(' + num + ')">' + num + '</a></li>');
+			}
+		});
+	}
+	s.push('</ul>');
+	$(dom).html(s.join(''));
+}
+
+//********************************************************************************
+
 function redirect(url) {
     var
         hash_pos = url.indexOf('#'),
