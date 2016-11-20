@@ -14,8 +14,6 @@
 @import "uikit/src/less/components/datepicker.less";
 @import "uikit/themes/almost-flat/datepicker.less";
 
-//@import "uikit/themes/almost-flat/variables.less";
-
 // customized less ////////////////////////////////////////////////////////////
 
 // @import "custom/base.less";
@@ -37,9 +35,6 @@
     text-shadow: none;
 }
 
-ul.uk-tab {
-    padding-left: @global-margin;
-}
 
 // grid.less
 
@@ -62,23 +57,19 @@ ul.uk-tab {
 // customize navbar.less //////////////////////////////////////////////////////
 
 @navbar-background:              #0593d3;
-
-@navbar-nav-height:              49px;
-@navbar-nav-line-height:         @navbar-nav-height - 1;
+@navbar-hover-background:		 #0482ba;
 
 @navbar-nav-color:               @global-contrast-color;
 @navbar-nav-font-size:           @global-font-size;
 
-@navbar-nav-hover-background:    @x-navbar-hover-background;
+@navbar-nav-hover-background:    @navbar-hover-background;
 @navbar-nav-hover-color:         @global-contrast-color;
 
-@navbar-nav-onclick-background:  darken(@x-navbar-hover-background, 5%);
+@navbar-nav-onclick-background:  darken(@navbar-hover-background, 5%);
 @navbar-nav-onclick-color:       @global-contrast-color;
 
-@navbar-nav-active-background:   @x-navbar-hover-background;
+@navbar-nav-active-background:   @navbar-hover-background;
 @navbar-nav-active-color:        @global-contrast-color;
-
-@navbar-border:                  rgba(255,255,255,0.75);
 
 @navbar-text-shadow:             none;
 
@@ -90,28 +81,10 @@ ul.uk-tab {
     padding-left: 5px;
 }
 
-@x-navbar-hover-background:      #0482ba;
-
-.hook-navbar-nav() {
-    margin-top: -1px; // 1
-    margin-left: -1px; // 2
-    border: 1px solid transparent;
-    border-bottom-width: 0;
-    text-shadow: none;
-    transition: background-color 0.5s, border-color 0.5s;
-}
-
 .hook-navbar-nav-hover() {
     position: relative; // 1
-    z-index: 1; // 2
-    border-left-color:  darken(@x-navbar-hover-background, 5%);
-    border-right-color: darken(@x-navbar-hover-background, 5%);
-    border-top-color:   darken(@x-navbar-hover-background, 5%);
-    background-color:   @x-navbar-hover-background;
+    border-left-color:  darken(@navbar-hover-background, 5%);
+    border-right-color: darken(@navbar-hover-background, 5%);
+    background-color:   @navbar-hover-background;
     color: #fff;
-    transition: background-color 1s, border-color 1s;
 }
-
-// customize overlay.less /////////////////////////////////////////////////////
-
-@overlay-panel-padding:  10px;
