@@ -1,0 +1,108 @@
+{% extends("_manage.html") %}
+
+{% block title %} 朝代 - 诗人 - 诗词列表 {% endblock %}
+
+{% block head %}
+<script>
+
+var poetId = '{{ poetId }}';
+
+$(function () {
+	var vm = new Vue({
+		el: '#vm',
+		data: {
+			dynasty: {
+				name: 'Loading'
+			},
+			poet: {
+				name: 'Loading'
+			},
+			poems: [],
+			page: {
+			}
+		},
+		methods: {
+			getFormName: function (form) {
+				switch (form) {
+				case 54:
+					return '五绝';
+				case 58:
+					return '五律';
+				case 74:
+					return '七绝';
+				case 78:
+					return '七律';
+				case 9:
+					return '词';
+				case 8:
+					return '曲';
+				case 15:
+					return '赋';
+				default:
+					return '未知';
+				}
+			}
+		},
+		created: function () {
+			var that = this;
+			that.$resource('/api/poets/'+poetId+'.json').get().then(function (resp) {
+				resp.json().then(function (r) {
+					that.poet = r;
+					that.$resource('/api/dynasties/'+that.poet.dynastyId+'.json').get().then(function (resp) {
+						resp.json().then(function (r) {
+							that.dynasty = r;
+							that.$resource('/api/poets/'+poetId+'/poems.json').get().then(function (resp) {
+								resp.json().then(function (r) {
+									that.poems = r.results;
+									that.page = r.page;
+								});
+							}, alertError);
+						});
+					}, alertError);
+				});
+			}, alertError);
+		}
+	});
+});
+
+</script>
+{% endblock %}
+
+{% block main %}
+	<div id="vm">
+		<ul class="uk-breadcrumb">
+    		<li><a href="/manage/dynasties">所有朝代</a></li>
+    		<li><a v-bind:href="'/manage/dynasties/'+dynasty.id+'/poets'" v-text="dynasty.name"></a></li>
+    		<li class="uk-active"><span v-text="poet.name"></span></li>
+		</ul>
+
+		<table class="uk-table uk-table-hover">
+			<thead>
+				<tr>
+					<th width="15%">图片</th>
+					<th width="20%">名称</th>
+					<th width="auto">内容</th>
+					<th width="10%">格式</th>
+					<th width="10%"></th>
+					<th width="10%"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-show="page.pageIndex===undefined">
+					<td colspan="6">Loading...</td>
+				</tr>
+				<tr v-for="p in poems">
+					<td>
+						<img v-if="p.imageId!==''" v-bind:src="'/resources/'+p.imageId">
+					</td>
+					<td><span v-text="p.name"></span></td>
+					<td v-text="p.content.length <= 32 ? p.content : p.content.substring(0, 32) + '...'"></td>
+					<td v-text="getFormName(p.form)"></td>
+					<td><a v-bind:href="'/manage/dynasties/poets/poems/'+p.id+'/edit'"><i class="uk-icon-list"></i> 编辑诗词</a></td>
+					<td><a v-bind:href="'/manage/dynasties/poets/poems/'+p.id+'/delete'"><i class="uk-icon-plus"></i> 删除诗词</a></td>
+				</tr>
+			</tbody>
+		</table>
+		<p><a class="uk-button" v-bind:href="'/manage/dynasties/poets/'+poet.id+'/poems/add'"><i class="uk-icon-plus"></i> 添加诗词</a></p>
+	</div>
+{% endblock %}

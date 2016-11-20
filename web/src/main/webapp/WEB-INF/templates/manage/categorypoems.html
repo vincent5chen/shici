@@ -1,0 +1,99 @@
+{% extends("_manage.html") %}
+
+{% block title %} 朝代 - 诗人 - 诗词列表 {% endblock %}
+
+{% block head %}
+<script>
+
+var categoryId = '{{ categoryId }}';
+
+function toSectionPoems(results) {
+	var
+		poems = [],
+		section,
+		poem,
+		i, j;
+	for (i=0; i<results.length; i++) {
+		section = results[i];
+		for (j=0; j<section.poems.length; j++) {
+			poem = section.poems[j];
+			poem.sectionName = section.sectionName;
+			poems.push(poem);
+		}
+	}
+	return poems;
+}
+
+$(function () {
+	var vm = new Vue({
+		el: '#vm',
+		data: {
+			category: {
+				name: 'Loading'
+			},
+			poems: []
+		},
+		methods: {
+		},
+		created: function () {
+			var that = this;
+			that.$resource('/api/categories/'+categoryId+'/poems.json').get().then(function (resp) {
+				resp.json().then(function (r) {
+					that.poems = toSectionPoems(r.results);
+					that.$resource('/api/categories/'+categoryId+'.json').get().then(function (resp) {
+						resp.json().then(function (r) {
+							that.category = r;
+						});
+					}, alertError);
+				});
+			}, alertError);
+		}
+	});
+});
+
+</script>
+{% endblock %}
+
+{% block main %}
+	<div id="vm">
+		<ul class="uk-breadcrumb">
+    		<li><a href="/manage/categories">所有诗集</a></li>
+    		<li class="uk-active"><span v-text="category.name"></span></li>
+		</ul>
+
+		<table class="uk-table uk-table-hover">
+			<thead>
+				<tr>
+					<th width="15%">Section Name</th>
+					<th width="20%">名称</th>
+					<th width="auto">内容</th>
+					<th width="15%">顺序</th>
+					<th width="15%"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-show="category.name==='Loading'">
+					<td colspan="6">Loading...</td>
+				</tr>
+				<tr v-for="p in poems">
+					<td>
+						<input name="section" v-model="p.sectionName" maxlength="50">
+					</td>
+					<td v-text="p.name"></td>
+					<td v-text="p.content.length <= 32 ? p.content : p.content.substring(0, 32) + '...'"></td>
+					<td>
+						<a href="#0"><i class="uk-icon-arrow-up"></i> 上移</a>
+						&nbsp;&nbsp;&nbsp;
+						<a href="#0"><i class="uk-icon-arrow-down"></i> 下移</a>
+					</td>
+					<td>
+						<a v-bind:href="'/manage/dynasties/poets/poems/'+p.id+'/edit'" target="_blank"><i class="uk-icon-list"></i> 编辑</a>
+						&nbsp;&nbsp;&nbsp;
+						<a href="#0"><i class="uk-icon-ban"></i> 移除</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<p><a class="uk-button" v-bind:href="'/manage/categories/'+category.id+'/poems/add'"><i class="uk-icon-plus"></i> 添加诗词</a></p>
+	</div>
+{% endblock %}

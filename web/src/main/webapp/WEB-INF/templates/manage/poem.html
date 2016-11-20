@@ -1,0 +1,168 @@
+{% extends("_manage.html") %}
+
+{% block title %} 朝代 - 添加诗人 {% endblock %}
+
+{% block head %}
+<script>
+
+var action = '{{ action }}';
+
+$(function () {
+	var vm = new Vue({
+		el: '#vm',
+		data: {
+			dynasty: {
+				name: 'Loading'
+			},
+			poet: {
+				name: 'Loading'
+			},
+			poem: {
+				poetId: '{{ poem.poetId }}',
+				name: '{{ poem.name }}',
+				form: {{ poem.form }},
+				content: '{{ poem.content }}',
+				appreciation: '{{ poem.appreciation }}',
+				tags: '{{ poem.tags }}',
+				imageData: '{{ poem.imageData }}'
+			}
+		},
+		methods: {
+			setImageData: function (data) {
+				var $img = $('#vm image');
+				if (data.startsWith('data:image/jpeg;base64,')) {
+					this.poem.imageData = data.substring(23);
+				} else {
+					this.poem.imageData = data;
+				}
+			},
+			
+		},
+		created: function () {
+			var that = this;
+			that.$resource('/api/poets/'+that.poem.poetId+'.json').get().then(function (resp) {
+				resp.json().then(function (r) {
+					that.poet = r;
+					that.$resource('/api/dynasties/'+that.poet.dynastyId+'.json').get().then(function (resp) {
+						resp.json().then(function (r) {
+							that.dynasty = r;
+						});
+					}, alertError);
+				});
+			}, alertError);
+		},
+		submit: function () {
+			var that = this;
+			that.$resource(action).post(that.poet).then(function (resp) {
+			}, alertError);
+		}
+	});
+
+	var $file = $('#file');
+	$file.change(function () {
+		var f = $file.val();
+		if (f) {
+			try {
+				var lf = $file.get(0).files[0];
+				if (lf.type !== 'image/jpeg') {
+					alertError('Only support JPG file!');
+				} else {
+					var reader  = new FileReader();
+					reader.addEventListener("load", function () {
+						var img = new Image();
+						img.onload = function () {
+							if (img.width !== 640 && img.height !== 360) {
+								alertError('Only support 640x360: actual size = '+img.width+'x'+img.height);
+							} else {
+								vm.setImageData(reader.result);
+							}
+						};
+						img.onerror = function () {
+							alertError('Cannot load as image.');
+						};
+						img.src = reader.result;
+					}, false);
+					reader.readAsDataURL(lf);
+				}
+			} catch (e) {
+				alertError(e);
+			}
+		}
+	});
+});
+
+</script>
+{% endblock %}
+
+{% block main %}
+	<div id="vm">
+		<ul class="uk-breadcrumb">
+    		<li><a href="/manage/dynasties">所有朝代</a></li>
+    		<li><a v-bind:href="'/manage/dynasties/'+dynasty.id+'/poets'" v-text="dynasty.name"></a></li>
+    		<li><a v-bind:href="'/manage/dynasties/poets/'+poet.id+'/poems'" v-text="poet.name"></a></li>
+    		<li class="uk-active"><span v-text="poem.name"></span></li>
+		</ul>
+		<form class="uk-form uk-form-stacked">
+			<fieldset>
+				<legend>诗词</legend>
+				<div class="uk-form-row">
+					<label class="uk-form-label">图片</label>
+					<div class="uk-form-controls">
+						<div>
+							<img v-bind:src="'data:image/jpeg;base64,'+poem.imageData" style="width:640px; height:360px;">
+						</div>
+						<input type="hidden" v-model="poem.imageData">
+						<div class="uk-width-2-3" style="margin-top:5px">
+							<input id="file" type="file" accept="image/jpeg">
+							<a v-on:click="setImageData('')" href="#0" style="float:right">清除图片</a>
+						</div>
+					</div>
+				</div>
+				<div class="uk-form-row">
+					<label class="uk-form-label">名字</label>
+					<div class="uk-form-controls">
+						<input v-model="poem.name" maxlength="50" class="uk-width-2-3">
+					</div>
+				</div>
+				<div class="uk-form-row">
+					<label class="uk-form-label">标签</label>
+					<div class="uk-form-controls">
+						<input v-model="poem.tags" maxlength="50" class="uk-width-2-3">
+					</div>
+				</div>
+				<div class="uk-form-row">
+					<label class="uk-form-label">格式</label>
+					<div class="uk-form-controls">
+						<select v-model.number="poem.form" class="uk-width-2-3">
+							<option value="0">未知</option>
+							<option value="54">五绝</option>
+							<option value="58">五律</option>
+							<option value="74">七绝</option>
+							<option value="78">七律</option>
+							<option value="9">词</option>
+							<option value="8">曲</option>
+							<option value="15">赋</option>
+						</select>
+					</div>
+				</div>
+				<div class="uk-form-row">
+					<label class="uk-form-label">内容</label>
+					<div class="uk-form-controls">
+						<textarea v-model="poem.content" rows="15" class="uk-width-2-3" style="resize:none"></textarea>
+					</div>
+				</div>
+				<div class="uk-form-row">
+					<label class="uk-form-label">赏析</label>
+					<div class="uk-form-controls">
+						<textarea v-model="poem.appreciation" rows="10" class="uk-width-2-3" style="resize:none"></textarea>
+					</div>
+				</div>
+				<div class="uk-form-row">
+					<div class="uk-form-controls">
+						<button class="uk-button uk-button-primary"><i class="uk-icon-save"></i> 保存</button>
+					</div>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+{% endblock %}

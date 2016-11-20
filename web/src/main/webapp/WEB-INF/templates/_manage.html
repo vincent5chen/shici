@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>{% block title %} TITLE {% endblock %} - 中华诗词管理后台</title>
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/underscore.min.js"></script>
+    <script type="text/javascript" src="/static/js/uikit.min.js"></script>
+    <script type="text/javascript" src="/static/js/vue.js"></script>
+    <script type="text/javascript" src="/static/js/vue-resource.min.js"></script>
+    <script type="text/javascript" src="/static/js/main.js"></script>
+    <script type="text/javascript" src="/static/js/manage.js"></script>
+
+    <style>
+
+    </style>
+    
+    <script>
+
+function alertError(resp) {
+	alert(resp);
+}
+
+    </script>
+
+    {% block head %}<!-- block head  -->{% endblock %}
+</head>
+
+<body>
+    <div id="header" class="uk-navbar uk-navbar-attached" style="position:fixed;left:0;right:0;top:0;">
+        <div class="uk-container uk-container-center">
+            <div class="uk-navbar uk-navbar-attached">
+                <a href="/" class="uk-navbar-brand">中华诗词</a>
+                <ul class="uk-navbar-nav">
+                	<li><a href="/manage/dynasties">朝代</a></li>
+                	<li><a href="/manage/categories">诗集</a></li>
+                	<li><a href="/manage/featured">精选</a></li>
+                	<li><a href="/manage/users">用户</a></li>
+                </ul>
+                <div class="uk-navbar-content">
+                    <form class="uk-form uk-margin-remove uk-display-inline-block">
+                    	<input type="text" placeholder="Search">
+                    </form>
+                </div>
+        		<div class="uk-navbar-flip">
+                    <ul class="uk-navbar-nav">
+                    	<li><a href="/auth/signout">安全登出</a></li>
+            		</ul>
+            	</div>
+            </div>
+        </div>
+    </div>
+    <div style="height: 65px"></div>
+    <!-- // header -->
+
+
+    <div id="main" class="uk-container uk-container-center">
+        {% block main %}
+		<div>
+			<ul class="uk-breadcrumb">
+    			<li><a href="">...</a></li>
+    			<li><a href="">...</a></li>
+    			<li><span>...</span></li>
+    			<li class="uk-active"><span>...</span></li>
+			</ul>
+		</div>
+
+		<div id="vm">
+			<table class="uk-table uk-table-hover">
+				<thead>
+					<tr>
+						<th>XXX</th>
+						<th>YYY</th>
+						<th>ZZZ</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+        {% endblock %}
+    </div>
+
+    <div style="height: 65px"></div>
+    <div id="footer" style="border:none; border-top:solid 1px #ccc; background-color:#fff; position:fixed;left:0;right:0;bottom:0;">
+        <div class="uk-container uk-container-center">
+            <div class="uk-grid">
+                <div class="uk-width-1-1" style="text-align:center;">
+                    <p style="line-height:3em">Copyright&copy;2016, <a href="http://www.shi-ci.com/" target="_blank">www.shi-ci.com</a>, all rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
