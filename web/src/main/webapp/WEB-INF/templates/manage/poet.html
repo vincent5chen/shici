@@ -22,17 +22,20 @@ $(function () {
 				death: '{{ poet.death }}'
 			}
 		},
+		methods: {
+			submit: function () {
+				var that = this;
+				that.$resource(action).save(that.poet).then(function (resp) {
+					location.assign('/manage/dynasties/'+that.poet.dynastyId+'/poets');
+				}, alertError);
+			}
+		},
 		created: function () {
 			var that = this;
 			that.$resource('/api/dynasties/'+that.poet.dynastyId+'.json').get().then(function (resp) {
 				resp.json().then(function (r) {
 					that.dynasty = r;
 				});
-			}, alertError);
-		},
-		submit: function () {
-			var that = this;
-			that.$resource(action).post(that.poet).then(function (resp) {
 			}, alertError);
 		}
 	});
@@ -48,7 +51,7 @@ $(function () {
     		<li><a v-bind:href="'/manage/dynasties/'+poet.dynastyId+'/poets'" v-text="dynasty.name"></a></li>
     		<li class="uk-active"><span v-text="poet.name"></span></li>
 		</ul>
-		<form class="uk-form uk-form-stacked">
+		<form v-on:submit.prevent="submit" class="uk-form uk-form-stacked">
 			<fieldset>
 				<legend>诗人</legend>
 				<div class="uk-form-row">

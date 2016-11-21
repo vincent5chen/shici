@@ -19,7 +19,10 @@
     <script>
 
 function alertError(resp) {
-	alert(resp);
+	if (resp.body) {
+		resp = resp.body;
+	}
+	UIkit.modal.alert(resp && resp.message || resp.error || resp);
 }
 
     </script>

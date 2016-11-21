@@ -16,6 +16,16 @@ $(function () {
 			},
 			poets: []
 		},
+		methods: {
+			deletePoet: function (poet) {
+				var that = this;
+				UIkit.modal.confirm('确认要删除诗人“'+poet.name+'”？', function () {
+					that.$resource('/api/poets/'+poet.id+'.json').delete().then(function (resp) {
+						location.assign('/manage/dynasties/'+that.dynasty.id + '/poets');
+					}, alertError);
+				});
+			}
+		},
 		created: function () {
 			var that = this;
 			that.$resource('/api/dynasties/'+dynastyId+'.json').get().then(function (resp) {
@@ -65,7 +75,7 @@ $(function () {
 					<td v-text="p.poemCount"></td>
 					<td><a v-bind:href="'/manage/dynasties/poets/'+p.id+'/poems'"><i class="uk-icon-list"></i> 诗词列表</a></td>
 					<td><a v-bind:href="'/manage/dynasties/poets/'+p.id+'/edit'"><i class="uk-icon-pencil"></i> 编辑诗人</a></td>
-					<td><a v-bind:href="'/manage/dynasties/poets/'+p.id+'/delete'"><i class="uk-icon-trash"></i> 删除诗人</a></td>
+					<td><a v-on:click="deletePoet(p)" href="#0"><i class="uk-icon-trash"></i> 删除诗人</a></td>
 				</tr>
 			</tbody>
 		</table>
