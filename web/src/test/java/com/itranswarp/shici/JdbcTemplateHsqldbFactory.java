@@ -31,9 +31,9 @@ public class JdbcTemplateHsqldbFactory {
 			Statement stmt = conn.createStatement();
 			for (String sql : sqls) {
 				if (sql != null && !sql.trim().isEmpty()) {
-					log.info("Execute SQL: " + sql.trim());
-					// hsqldb do not support text, mediumtext:
-					stmt.executeUpdate(sql.trim().replace("MEDIUMTEXT", "longvarchar").replace("TEXT", "longvarchar"));
+					String s = toHsqldb(sql);
+					log.info("Execute SQL: " + s);
+					stmt.executeUpdate(s);
 				}
 			}
 			stmt.close();
@@ -42,6 +42,15 @@ public class JdbcTemplateHsqldbFactory {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	static String toHsqldb(String sql) {
+		// hsqldb do not support text, mediumtext:
+		sql = sql.trim().replace("MEDIUMTEXT", "longvarchar").replace("TEXT", "longvarchar");
+		sql = String.join("\n", Arrays.stream(sql.split("\n")).filter((line) -> {
+			return !line.trim().startsWith("INDEX ");
+		}).toArray(String[]::new));
+		return sql;
 	}
 
 	static int nextDbId() {
