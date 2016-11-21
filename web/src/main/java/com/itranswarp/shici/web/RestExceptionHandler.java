@@ -19,7 +19,7 @@ public class RestExceptionHandler {
 
 	final Log log = LogFactory.getLog(getClass());
 
-	@ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(Exception.class)
 	@ResponseBody
 	APIErrorInfo handleException(HttpServletRequest request, Exception e) throws Exception {

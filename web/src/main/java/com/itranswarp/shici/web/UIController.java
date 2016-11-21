@@ -84,7 +84,7 @@ public class UIController {
 		PoetBean poet = new PoetBean();
 		poet.dynastyId = dynastyId;
 		poet.name = "New Poet";
-		return new ModelAndView("manage/poet.html", MapUtil.createMap("action", "/api/poets", "poet", poet));
+		return new ModelAndView("manage/poet.html", MapUtil.createMap("action", "/api/poets.json", "poet", poet));
 	}
 
 	@RequestMapping(value = "/manage/dynasties/poets/{id}/edit", method = RequestMethod.GET)
