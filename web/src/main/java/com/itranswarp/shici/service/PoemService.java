@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,11 +124,15 @@ public class PoemService extends AbstractService {
 		poet.death = bean.death;
 	}
 
-	@RequestMapping(value = "/api/poets/{id}/delete", method = RequestMethod.POST)
+	@RequestMapping(value = "/api/poets/{id}", method = RequestMethod.DELETE)
 	public void deletePoet(@PathVariable("id") String poetId) {
 		// check:
 		assertEditorRole();
 		Poet poet = getPoet(poetId);
+		// check:
+		if (warpdb.from(Poem.class).where("poetId=?", poetId).limit(1).list().size() > 0) {
+			throw new PersistenceException("Cannot remove poet who has poems.");
+		}
 		// delete:
 		warpdb.remove(poet);
 	}
