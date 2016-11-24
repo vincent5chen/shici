@@ -1,0 +1,100 @@
+{% extends("_manage.html") %}
+
+{% block title %} 用户列表 {% endblock %}
+
+{% block head %}
+<script>
+
+var PAGE = {{ page }};
+
+$(function () {
+	var vm = new Vue({
+		el: '#vm',
+		data: {
+			users: [],
+			page: null
+		},
+		methods: {
+			getRoleName: function (role) {
+				switch (role) {
+				case 0:
+					return '管理员';
+				case 100:
+					return '编辑';
+				case 10000:
+					return '普通用户';
+				default:
+					return '未知';
+				}
+			},
+			getGenderIcon: function (gender) {
+				if (gender === 'male') {
+					return 'uk-icon-mars';
+				}
+				if (gender === 'female') {
+					return 'uk-icon-venus';
+				}
+				return 'uk-icon-genderless';
+			}
+		},
+		created: function () {
+			var that = this;
+			that.$resource('/api/users.json?page='+PAGE).get().then(function (resp) {
+				resp.json().then(function (r) {
+					that.page = r.page;
+					that.users = r.results;
+					UIkit.pagination('#pagination', {
+						items: that.page.totalItems,
+						itemsOnPage: that.page.itemsPerPage,
+						pages: that.page.totalPages,
+						displayedPages: 5,
+						edges: 5,
+						currentPage: that.page.pageInde - 1
+					});
+				});
+			}, alertError);
+		}
+	});
+});
+
+</script>
+{% endblock %}
+
+{% block main %}
+	<div id="vm">
+		<ul class="uk-breadcrumb">
+    		<li class="uk-active">所有用户</li>
+		</ul>
+
+		<table class="uk-table uk-table-hover">
+			<thead>
+				<tr>
+					<th width="10%">头像</th>
+					<th width="auto">名称</th>
+					<th width="5%">性别</th>
+					<th width="10%">邮件</th>
+					<th width="10%">角色</th>
+					<th width="10%">锁定</th>
+					<th width="10%"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-show="page===null">
+					<td colspan="6">Loading...</td>
+				</tr>
+				<tr v-for="u in users">
+					<td>
+						<img v-bind:src="u.imageUrl">
+					</td>
+					<td v-text="u.name"></td>
+					<td><i v-bind:class="[ getGenderIcon(u.gender) ]"></i></td>
+					<td v-text="u.email"></td>
+					<td v-text="getRoleName(u.role)"></td>
+					<td v-text="u.lockedUntil"></td>
+					<td><a v-on:click="lock(u)" href="#0"><i class="uk-icon-lock"></i> 锁定用户</a></td>
+				</tr>
+			</tbody>
+		</table>
+		<p id="pagination"></p>
+	</div>
+{% endblock %}

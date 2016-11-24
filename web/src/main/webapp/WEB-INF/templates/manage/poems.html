@@ -17,9 +17,7 @@ $(function () {
 			poet: {
 				name: 'Loading'
 			},
-			poems: [],
-			page: {
-			}
+			poems: []
 		},
 		methods: {
 			getFormName: function (form) {
@@ -51,10 +49,9 @@ $(function () {
 					that.$resource('/api/dynasties/'+that.poet.dynastyId+'.json').get().then(function (resp) {
 						resp.json().then(function (r) {
 							that.dynasty = r;
-							that.$resource('/api/poets/'+poetId+'/poems.json').get().then(function (resp) {
+							that.$resource('/api/poets/'+poetId+'/poems/all.json').get().then(function (resp) {
 								resp.json().then(function (r) {
 									that.poems = r.results;
-									that.page = r.page;
 								});
 							}, alertError);
 						});
@@ -88,7 +85,7 @@ $(function () {
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-show="page.pageIndex===undefined">
+				<tr v-show="poems.length===0">
 					<td colspan="6">Loading...</td>
 				</tr>
 				<tr v-for="p in poems">

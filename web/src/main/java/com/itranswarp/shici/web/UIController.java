@@ -62,12 +62,14 @@ public class UIController {
 		return null;
 	}
 
-	// management:
+	// management /////////////////////////////////////////////////////////////
 
 	@RequestMapping(value = "/manage/", method = RequestMethod.GET)
 	public ModelAndView manage() {
 		return new ModelAndView("redirect:/manage/dynasties");
 	}
+
+	// manage dynasties, poets, poems /////////////////////////////////////////
 
 	@RequestMapping(value = "/manage/dynasties", method = RequestMethod.GET)
 	public ModelAndView manageDynasties() {
@@ -102,8 +104,7 @@ public class UIController {
 	public ModelAndView manageAddPoem(@PathVariable("id") String poetId) {
 		PoemBean poem = new PoemBean();
 		poem.poetId = poetId;
-		return new ModelAndView("manage/poem.html",
-				MapUtil.createMap("action", "/api/poets/" + poetId + "/poems", "poem", poem));
+		return new ModelAndView("manage/poem.html", MapUtil.createMap("action", "/api/poems", "poem", poem));
 	}
 
 	@RequestMapping(value = "/manage/dynasties/poets/poems/{id}/edit", method = RequestMethod.GET)
@@ -120,6 +121,8 @@ public class UIController {
 		return new ModelAndView("manage/poem.html", MapUtil.createMap("action", "/api/poems/" + poemId, "poem", poem));
 	}
 
+	// manage categories //////////////////////////////////////////////////////
+
 	@RequestMapping(value = "/manage/categories", method = RequestMethod.GET)
 	public ModelAndView manageCategories() {
 		return new ModelAndView("manage/categories.html");
@@ -130,4 +133,15 @@ public class UIController {
 		return new ModelAndView("manage/categorypoems.html", "categoryId", categoryId);
 	}
 
+	// manage featured ////////////////////////////////////////////////////////
+
+	// manage users ///////////////////////////////////////////////////////////
+
+	@RequestMapping(value = "/manage/users", method = RequestMethod.GET)
+	public ModelAndView manageUsers(@RequestParam(name = "page", defaultValue = "1") int page) {
+		if (page < 1) {
+			throw new IllegalArgumentException("page");
+		}
+		return new ModelAndView("manage/users.html", "page", page);
+	}
 }

@@ -150,6 +150,13 @@ public class PoemService extends AbstractService {
 		return warpdb.from(Poem.class).where("poetId=?", poetId).orderBy("name").list(pageIndex, 20);
 	}
 
+	@RequestMapping(value = "/api/poets/{id}/poems/all", method = RequestMethod.GET)
+	public Map<String, List<Poem>> getAllPoems(@PathVariable("id") String poetId) {
+		// check:
+		assertEditorRole();
+		return MapUtil.createMap("results", warpdb.from(Poem.class).where("poetId=?", poetId).orderBy("name").list());
+	}
+
 	@RequestMapping(value = "/api/poems", method = RequestMethod.POST)
 	public Poem createPoem(@RequestBody PoemBean bean) {
 		// check:
