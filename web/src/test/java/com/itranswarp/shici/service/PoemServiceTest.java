@@ -18,6 +18,7 @@ import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
 import com.itranswarp.shici.context.UserContext;
 import com.itranswarp.shici.exception.APIArgumentException;
+import com.itranswarp.shici.exception.APIEntityConflictException;
 import com.itranswarp.shici.exception.APIPermissionException;
 import com.itranswarp.shici.model.Category;
 import com.itranswarp.shici.model.Dynasty;
@@ -783,6 +784,19 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 	public void testDeleteCategoryFailedWithoutPermission() {
 		try (UserContext ctx = new UserContext(this.normalUser)) {
 			poemService.deleteCategory(null);
+		}
+	}
+
+	@Test(expected = APIEntityConflictException.class)
+	public void testDeleteNonEmptyCategoryFailed() {
+		try (UserContext ctx = new UserContext(this.editorUser)) {
+			Poet poet1 = poemService.createPoet(newPoetBean(getTangDynasty().id, "李白"));
+			Poem poem1a = poemService.createPoem(newPoemBean(poet1.id, "赠汪伦", "李白乘舟将欲行，忽闻岸上踏歌声。"));
+			Poem poem1b = poemService.createPoem(newPoemBean(poet1.id, "送孟浩然之广陵", "故人西辞黄鹤楼，烟花三月下扬州。"));
+			Category cat = poemService.createCategory(newCategoryBean("唐诗三百首"));
+			poemService.updatePoemsOfCategory(cat.id, Arrays.asList(newCategoryPoemBean("七律", poem1a.id, poem1b.id)));
+			// delete:
+			poemService.deleteCategory(cat.id);
 		}
 	}
 
