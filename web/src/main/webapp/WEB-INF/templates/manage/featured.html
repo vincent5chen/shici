@@ -1,0 +1,96 @@
+{% extends("_manage.html") %}
+
+{% block title %} 精选 - 诗词列表 {% endblock %}
+
+{% block head %}
+<script>
+
+$(function () {
+	var vm = new Vue({
+		el: '#vm',
+		data: {
+			featured_poems: []
+		},
+		methods: {
+			getFormName: function (form) {
+				switch (form) {
+				case 54:
+					return '五绝';
+				case 58:
+					return '五律';
+				case 74:
+					return '七绝';
+				case 78:
+					return '七律';
+				case 9:
+					return '词';
+				case 8:
+					return '曲';
+				case 15:
+					return '赋';
+				default:
+					return '未知';
+				}
+			},
+			bindDatePicker: function (id) {
+				var $i = $('#' + id);
+				if (!$i.attr('date-binded')) {
+					UIkit.datepicker('#'+id);
+					$('#'+id).attr('date-binded', 'true');
+				}
+			}
+		},
+		created: function () {
+			var that = this;
+			that.$resource('/api/featured/poems.json').get().then(function (resp) {
+				resp.json().then(function (r) {
+					that.featured_poems = r.results;
+				});
+			}, alertError);
+		}
+	});
+});
+
+</script>
+{% endblock %}
+
+{% block main %}
+	<div id="vm">
+		<ul class="uk-breadcrumb">
+    		<li class="uk-active">精选(<span v-text="featured_poems.length"></span>)</li>
+		</ul>
+
+		<table class="uk-table uk-table-hover">
+			<thead>
+				<tr>
+					<th width="15%">图片</th>
+					<th width="20%">名称</th>
+					<th width="auto">内容</th>
+					<th width="10%">格式</th>
+					<th width="10%">日期</th>
+					<th width="10%"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-show="featured_poems.length===0">
+					<td colspan="6">Loading...</td>
+				</tr>
+				<tr v-for="fp in featured_poems">
+					<td>
+						<img v-if="fp.poem.imageId!==''" v-bind:src="'/resources/'+fp.poem.imageId">
+					</td>
+					<td><span v-text="fp.poem.name"></span></td>
+					<td v-text="fp.poem.content.length <= 32 ? fp.poem.content : fp.poem.content.substring(0, 32) + '...'"></td>
+					<td v-text="getFormName(fp.poem.form)"></td>
+					<td>
+						<form class="uk-form">
+							<input v-model="fp.pubDate" v-bind:id="'date-'+fp.poem.id" v-on:focus="bindDatePicker('date-'+fp.poem.id)" type="text" maxlength="10" style="width:100%">
+						</form>
+					</td>
+					<td><a v-on:click="deleteFeatured(fp.poem)" href="#0"><i class="uk-icon-plus"></i> 移除诗词</a></td>
+				</tr>
+			</tbody>
+		</table>
+		<p><a class="uk-button" href="#0"><i class="uk-icon-plus"></i> 添加诗词</a></p>
+	</div>
+{% endblock %}

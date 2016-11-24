@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.itranswarp.shici.bean.CategoryBean;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
+import com.itranswarp.shici.model.Category;
 import com.itranswarp.shici.model.Poem;
 import com.itranswarp.shici.model.Poet;
 import com.itranswarp.shici.service.PoemService;
@@ -123,12 +125,33 @@ public class UIController {
 		return new ModelAndView("manage/categories.html");
 	}
 
+	@RequestMapping(value = "/manage/categories/add", method = RequestMethod.GET)
+	public ModelAndView manageAddCategory() {
+		CategoryBean category = new CategoryBean();
+		category.name = "New Category";
+		category.description = "";
+		return new ModelAndView("manage/category.html",
+				MapUtil.createMap("action", "/api/categories", "category", category));
+	}
+
+	@RequestMapping(value = "/manage/categories/{id}/edit", method = RequestMethod.GET)
+	public ModelAndView manageEditCategory(@PathVariable("id") String categoryId) {
+		Category category = poemService.getCategory(categoryId);
+		return new ModelAndView("manage/category.html",
+				MapUtil.createMap("action", "/api/categories/" + categoryId, "category", category));
+	}
+
 	@RequestMapping(value = "/manage/categories/{id}/poems", method = RequestMethod.GET)
 	public ModelAndView manageCategoryPoems(@PathVariable("id") String categoryId) {
 		return new ModelAndView("manage/categorypoems.html", "categoryId", categoryId);
 	}
 
 	// manage featured ////////////////////////////////////////////////////////
+
+	@RequestMapping(value = "/manage/featured", method = RequestMethod.GET)
+	public ModelAndView manageFeaturedPoems() {
+		return new ModelAndView("manage/featured.html");
+	}
 
 	// manage users ///////////////////////////////////////////////////////////
 
