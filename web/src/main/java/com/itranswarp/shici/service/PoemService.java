@@ -25,6 +25,7 @@ import com.itranswarp.shici.bean.FeaturedBean;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
 import com.itranswarp.shici.exception.APIArgumentException;
+import com.itranswarp.shici.exception.APIEntityConflictException;
 import com.itranswarp.shici.json.LocalDateDeserializer;
 import com.itranswarp.shici.json.LocalDateSerializer;
 import com.itranswarp.shici.model.BaseEntity;
@@ -341,10 +342,16 @@ public class PoemService extends AbstractService {
 		return category;
 	}
 
-	public void deleteCategory(String categoryId) {
+	@RequestMapping(value = "/api/categories/{id}", method = RequestMethod.DELETE)
+	public void deleteCategory(@PathVariable("id") String categoryId) {
 		// check:
 		assertEditorRole();
 		Category category = getCategory(categoryId);
+		// check if has poem:
+		List<CategoryPoem> cps = warpdb.from(CategoryPoem.class).where("categoryId=?", category.id).limit(1).list();
+		if (!cps.isEmpty()) {
+			throw new APIEntityConflictException("Category", "Cannot remove non-empty category.");
+		}
 		warpdb.remove(category);
 	}
 
