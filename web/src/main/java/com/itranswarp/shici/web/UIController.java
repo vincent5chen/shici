@@ -29,14 +29,9 @@ public class UIController {
 	@Autowired
 	ResourceService resourceService;
 
-	@RequestMapping(value = "/debug/manage/{name}", method = RequestMethod.GET)
-	public ModelAndView debug(@PathVariable("name") String name) {
-		return new ModelAndView("/manage/" + name + ".html");
-	}
-
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public ModelAndView index() {
-		return null;
+		return new ModelAndView("index.html");
 	}
 
 	@RequestMapping(value = "/search", method = RequestMethod.GET)
