@@ -2,15 +2,50 @@
 
 {% block title %} 首页 {% endblock %}
 
+{% block head %}
+
+<style>
+div.x-vertical {
+	display: block;
+	writing-mode:tb-rl;
+	width: 2em;
+	font-size:4em;
+	letter-spacing: 0.3em;
+	float:right;
+}
+</style>
+
+{% endblock %}
+
 {% block main %}
 
 <div class="uk-grid">
 	<div class="uk-width-1-2">
 		Hello <a href="#">World</a>
-	</div>
-	<div class="uk-width-1-2">
 		<h1>World</h1>
 		<h2>李白</h2>
+	</div>
+	<div class="uk-width-1-1">
+		<div style="height:120px"></div>
+		<div class="x-vertical">赠汪伦</div>
+		<div class="x-vertical">李白</div>
+		<div class="x-vertical">李白乘舟将欲行，</div>
+		<div class="x-vertical">忽闻岸上踏歌声。</div>
+		<div class="x-vertical">桃花潭水深千尺，</div>
+		<div class="x-vertical">不及汪伦送我情。</div>
+	</div>
+	<div class="uk-width-1-1" style="overflow-x:scroll">
+		<div class="x-vertical">登高</div>
+		<div class="x-vertical">杜甫</div>
+		<div class="x-vertical">风急天高猿啸哀，</div>
+		<div class="x-vertical">渚清沙白鸟飞回。</div>
+		<div class="x-vertical">无边落木萧萧下，</div>
+		<div class="x-vertical">不尽长江滚滚来。</div>
+		<div class="x-vertical">万里悲秋常作客，</div>
+		<div class="x-vertical">百年多病独登台。</div>
+		<div class="x-vertical">艰难苦恨繁霜鬓，</div>
+		<div class="x-vertical">潦倒新停浊酒杯。</div>
+		<div style="clear:both"></div>
 	</div>
 </div>
 

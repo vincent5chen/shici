@@ -11,6 +11,16 @@ $(function () {
 		data: {
 			categories: []
 		},
+		methods: {
+			deleteCategory: function (c) {
+				var that = this;
+				UIkit.modal.confirm('确认要删除诗集“'+c.name+'”？', function () {
+					that.$resource('/api/categories/'+c.id+'.json').delete().then(function (resp) {
+						location.assign('/manage/categories');
+					}, alertError);
+				});
+			}
+		},
 		created: function () {
 			var that = this;
 			that.$resource('/api/categories.json').get().then(function (resp) {
@@ -52,7 +62,7 @@ $(function () {
 					<td v-text="c.displayOrder"></td>
 					<td><a v-bind:href="'/manage/categories/'+c.id+'/poems'"><i class="uk-icon-list"></i> 诗词列表</a></td>
 					<td><a v-bind:href="'/manage/categories/'+c.id+'/edit'"><i class="uk-icon-pencil"></i> 编辑诗集</a></td>
-					<td><a v-bind:href="'/manage/categories/'+c.id+'/delete'"><i class="uk-icon-trash"></i> 删除诗集</a></td>
+					<td><a v-on:click="deleteCategory(c)" href="#0"><i class="uk-icon-trash"></i> 删除诗集</a></td>
 				</tr>
 			</tbody>
 		</table>
