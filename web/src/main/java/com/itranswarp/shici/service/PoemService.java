@@ -463,8 +463,13 @@ public class PoemService extends AbstractService {
 		return tfps;
 	}
 
+	/**
+	 * Add or update a poem as featured.
+	 * 
+	 * @param bean
+	 */
 	@RequestMapping(value = "/api/featured", method = RequestMethod.POST)
-	public void setPoemAsFeatured(@RequestBody FeaturedBean bean) {
+	public FeaturedPoem setPoemAsFeatured(@RequestBody FeaturedBean bean) {
 		// check:
 		assertEditorRole();
 		bean.validate();
@@ -474,15 +479,18 @@ public class PoemService extends AbstractService {
 		}
 		FeaturedPoem fp = warpdb.from(FeaturedPoem.class).where("poemId=?", poem.id).first();
 		if (fp != null) {
-			throw new APIArgumentException("poemId", "Poem already set featured.");
+			fp.pubDate = bean.pubDate;
+			warpdb.update(fp);
+		} else {
+			fp = new FeaturedPoem();
+			fp.poemId = bean.poemId;
+			fp.pubDate = bean.pubDate;
+			warpdb.save(fp);
 		}
-		fp = new FeaturedPoem();
-		fp.poemId = bean.poemId;
-		fp.pubDate = bean.pubDate;
-		warpdb.save(fp);
+		return fp;
 	}
 
-	@RequestMapping(value = "/api/featured/{poemId}/delete", method = RequestMethod.POST)
+	@RequestMapping(value = "/api/featured/{poemId}", method = RequestMethod.DELETE)
 	public void setPoemAsUnfeatured(@PathVariable("poemId") String poemId) {
 		// check:
 		assertEditorRole();

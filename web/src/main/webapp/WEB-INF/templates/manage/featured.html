@@ -5,6 +5,24 @@
 {% block head %}
 <script>
 
+function dateChanged(input) {
+	var
+		i, fp,
+		vm = window.vm,
+		$i = $(input),
+		id = $i.attr('id');
+	for (i=0; i<vm.featured_poems.length; i++) {
+		fp = vm.featured_poems[i];
+		if (fp.poem.id === id) {
+			if (fp.pubDate !== $i.val()) {
+				fp.pubDate = $i.val();
+				fp.changed = true;
+			}
+			break;
+		}
+	}
+}
+
 $(function () {
 	var vm = new Vue({
 		el: '#vm',
@@ -38,17 +56,38 @@ $(function () {
 					UIkit.datepicker('#'+id);
 					$('#'+id).attr('date-binded', 'true');
 				}
+			},
+			updateFeaturedPoem: function (fp) {
+				var that = this;
+				that.$resource('/api/featured').save({
+					poemId: fp.poem.id,
+					pubDate: fp.pubDate
+				}).then(function (resp) {
+					fp.changed = false;
+				}, alertError);
+			},
+			removeFeaturedPoem: function (fp) {
+				var that = this;
+				UIkit.modal.confirm('确认要移除精选诗词“'+fp.poem.name+'”？', function () {
+					that.$resource('/api/featured/'+fp.poem.id+'.json').delete().then(function (resp) {
+						location.assign('/manage/featured');
+					}, alertError);
+				});
 			}
 		},
 		created: function () {
 			var that = this;
 			that.$resource('/api/featured/poems.json').get().then(function (resp) {
 				resp.json().then(function (r) {
+					r.results.map((fp) => {
+						fp.changed = false;
+					});
 					that.featured_poems = r.results;
 				});
 			}, alertError);
 		}
 	});
+	window.vm = vm;
 });
 
 </script>
@@ -84,13 +123,16 @@ $(function () {
 					<td v-text="getFormName(fp.poem.form)"></td>
 					<td>
 						<form class="uk-form">
-							<input v-model="fp.pubDate" v-bind:id="'date-'+fp.poem.id" v-on:focus="bindDatePicker('date-'+fp.poem.id)" type="text" maxlength="10" style="width:100%">
+							<input onchange="dateChanged(this)" v-bind:value="fp.pubDate" v-bind:id="fp.poem.id" v-on:focus="bindDatePicker(fp.poem.id)" type="text" maxlength="10" style="width:100%">
 						</form>
+						<p><button v-show="fp.changed === true" v-on:click="updateFeaturedPoem(fp)" class="uk-button uk-button-primary uk-button-small">保存</button></p>
 					</td>
-					<td><a v-on:click="deleteFeatured(fp.poem)" href="#0"><i class="uk-icon-plus"></i> 移除诗词</a></td>
+					<td>
+						<p><a v-on:click="removeFeaturedPoem(fp)" href="#0"><i class="uk-icon-ban"></i> 移除诗词</a></p>
+						<p><a v-bind:href="'/manage/dynasties/poets/poems/'+fp.poem.id+'/edit'" target="_blank"><i class="uk-icon-pencil"></i> 编辑诗词</a></p>
+					</td>
 				</tr>
 			</tbody>
 		</table>
-		<p><a class="uk-button" href="#0"><i class="uk-icon-plus"></i> 添加诗词</a></p>
 	</div>
 {% endblock %}

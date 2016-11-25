@@ -28,7 +28,7 @@ public class FeaturedPoem extends BaseEntity {
 	public String poemId;
 
 	@Convert(converter = LocalDateConverter.class)
-	@Column(columnDefinition = "date", nullable = false, updatable = false)
+	@Column(columnDefinition = "date", nullable = false)
 	@JsonSerialize(using = LocalDateSerializer.class)
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	public LocalDate pubDate;
