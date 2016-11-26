@@ -1,5 +1,28 @@
 // main.js
 
+function formatLine(s) {
+    if (s.length == 0) {
+        return '';
+    }
+    if (s.length > 10) {
+        var n = s.indexOf('，');
+        if (n > 0) {
+            return '<p>' + s.substring(0, n + 1) + '</p>' + formatLine(s.substring(n + 1));
+        }
+    }
+    return '<p>' + s + '</p>';
+}
+
+function formatPoem(s) {
+    s = s.replace(/。/g, '。\n').replace(/！/g, '！\n').replace(/？/g, '？\n');
+    var arr = [];
+    var ss = s.split('\n');
+    for (var i=0; i<ss.length; i++) {
+        arr.push(formatLine(ss[i]));
+    }
+    return arr.join('');
+}
+
 // patch:
 if (! window.console) {
     window.console = {

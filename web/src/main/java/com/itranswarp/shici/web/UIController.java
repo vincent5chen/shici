@@ -16,11 +16,13 @@ import com.itranswarp.shici.bean.CategoryBean;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
 import com.itranswarp.shici.model.Category;
+import com.itranswarp.shici.model.Dynasty;
 import com.itranswarp.shici.model.Poem;
 import com.itranswarp.shici.model.Poet;
 import com.itranswarp.shici.service.PoemService;
 import com.itranswarp.shici.service.ResourceService;
 import com.itranswarp.shici.util.MapUtil;
+import com.itranswarp.warpdb.PagedResults;
 
 @Controller
 public class UIController {
@@ -39,26 +41,34 @@ public class UIController {
 				poemService.getFeaturedPoem(LocalDate.now())));
 	}
 
-	@RequestMapping(value = "/search", method = RequestMethod.GET)
-	public ModelAndView search(@RequestParam("q") String q) {
-		return null;
-	}
-
 	@RequestMapping(value = "/dynasty/{id}", method = RequestMethod.GET)
 	public ModelAndView poets(@PathVariable("id") String dynastyId) {
-		return null;
+		return new ModelAndView("dynasty.html", MapUtil.createMap("dynasties", poemService.getDynasties(), "dynasty",
+				poemService.getDynasty(dynastyId), "poets", poemService.getPoets(dynastyId)));
 	}
 
 	@RequestMapping(value = "/poet/{id}", method = RequestMethod.GET)
-	public ModelAndView poems(@PathVariable("id") String poetId,
+	public ModelAndView poet(@PathVariable("id") String poetId,
 			@RequestParam(value = "page", defaultValue = "1") int pageIndex) {
-		return null;
+		if (pageIndex < 1 || pageIndex > 1000) {
+			throw new IllegalArgumentException("page");
+		}
+		Poet poet = poemService.getPoet(poetId);
+		PagedResults<Poem> results = poemService.getPoems(poetId, pageIndex);
+		return new ModelAndView("poet.html", MapUtil.createMap("dynasties", poemService.getDynasties(), "dynasty",
+				poemService.getDynasty(poet.dynastyId), "poet", poet, "poems", results.results, "page", results.page));
 	}
 
 	@RequestMapping(value = "/poem/{id}", method = RequestMethod.GET)
 	public ModelAndView poem(@PathVariable("id") String poemId) {
 		Poem poem = poemService.getPoem(poemId);
 		Poet poet = poemService.getPoet(poem.poetId);
+		return new ModelAndView("poem.html", MapUtil.createMap("dynasties", poemService.getDynasties(), "dynasty",
+				poemService.getDynasty(poet.dynastyId), "poet", poet, "poem", poem));
+	}
+
+	@RequestMapping(value = "/search", method = RequestMethod.GET)
+	public ModelAndView search(@RequestParam("q") String q) {
 		return null;
 	}
 

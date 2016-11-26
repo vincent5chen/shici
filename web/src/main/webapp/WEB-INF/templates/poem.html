@@ -1,19 +1,8 @@
 {% extends("_base.html") %}
 
-{% block title %} 首页 {% endblock %}
+{% block title %} {{ poem.name }} - {{ poet.name }} {% endblock %}
 
 {% block head %}
-
-<style>
-div.x-vertical {
-	display: block;
-	writing-mode:tb-rl;
-	width: 2em;
-	font-size:4em;
-	letter-spacing: 0.3em;
-	float:right;
-}
-</style>
 
 <script>
 
@@ -38,7 +27,11 @@ $(function () {
 	正在浏览：
 	<a href="/" class="x-nav">首页</a>
 	»
-	<span class="x-nav">每日精选</span>
+	<a href="/dynasty/{{ dynasty.id }}" class="x-nav">{{ dynasty.name }}</a>
+	»
+	<a href="/poet/{{ poet.id }}" class="x-nav">{{ poet.name }}</a>
+	»
+	<span class="x-nav">{{ poem.name }}</span>
 {% endblock %}
 
 {% block main %}
@@ -52,9 +45,11 @@ $(function () {
 <div class="uk-grid">
 	<div class="uk-width-1-1">
 		<div class="x-poem">
+			{% if poem.imageId != '' %}
 			<div class="x-cover-container" style="background-image: url(/resources/{{ poem.imageId }})">
 				<div class="x-cover"></div>
 			</div>
+			{% endif %}
 			<div class="x-name" style="font-size:2em; line-height: 2em;"></div>
 			<div class="x-content" style="font-size:2em; line-height: 2em;"></div>
 			<div class="x-appreciation"></div>

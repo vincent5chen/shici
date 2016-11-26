@@ -23,8 +23,17 @@
 
 // customize variables.less
 
-@global-link-color:                             #0593d3;
-@global-link-hover-color:                       darken(@global-link-color, 8%);
+@base-body-background:                          #fffaf0;
+@base-body-color:                               #444;
+
+@global-link-color:                             #ad2222;
+@global-link-hover-color:                       darken(@global-link-color, 10%);
+
+@base-link-hover-text-decoration:               none;
+
+.hook-base-link-hover() {
+	text-shadow: 1px 1px 5px lighten(@global-link-hover-color, 50%);
+}
 
 // customize button.less
 

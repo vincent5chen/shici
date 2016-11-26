@@ -1,0 +1,34 @@
+{% extends("_base.html") %}
+
+{% block title %} {{ dynasty.name }} {% endblock %}
+
+{% block head %}
+
+<script>
+
+</script>
+
+{% endblock %}
+
+{% block nav %}
+	正在浏览：
+	<a href="/" class="x-nav">首页</a>
+	»
+	<a href="/dynasty/{{ dynasty.id }}" class="x-nav">{{ dynasty.name }}</a>
+	»
+	<span class="x-nav">{{ poet.name }}</span>
+{% endblock %}
+
+{% block main %}
+
+<div class="uk-grid">
+	<div class="uk-width-1-1">
+		<div id="poems">
+		{% for p in poems %}
+			<div class="x-name"><a href="/poem/{{ p.id }}">{{ p.name }}</a></div>
+		{% endfor %}
+		</div>
+	</div>
+</div>
+
+{% endblock %}
