@@ -46,7 +46,7 @@ $(function () {
 					<td colspan="5">Loading...</td>
 				</tr>
 				<tr v-for="d in dynasties">
-					<td><span v-text="d.name"></span></td>
+					<td><a v-text="d.name" v-bind:href="'/dynasty/'+d.id" target="_blank"></a></td>
 					<td v-text="d.displayOrder"></td>
 					<td>
 						<span v-text="d.poetCount"></span>

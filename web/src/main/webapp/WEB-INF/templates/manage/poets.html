@@ -69,7 +69,7 @@ $(function () {
 					<td colspan="7">Loading...</td>
 				</tr>
 				<tr v-for="p in poets">
-					<td><span v-text="p.name"></span></td>
+					<td><a v-text="p.name" v-bind:href="'/poet/'+p.id" target="_blank"></a></td>
 					<td v-text="p.birth"></td>
 					<td v-text="p.death"></td>
 					<td v-text="p.poemCount"></td>

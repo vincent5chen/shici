@@ -107,6 +107,32 @@ $(function() {
     });
 });
 
+$.postJSON = function (url, data, callback) {
+	$.ajax({
+		type: 'POST',
+		url: url,
+		data: JSON.stringify(data || {}),
+		contentType: 'application/json'
+	}).done(function (r) {
+		if (r && r.error) {
+			return callback(r);
+		}
+		return callback(null, r);
+	}).fail(function (jqXHR, textStatus) {
+		var err = {
+			error: 'http_bad_response',
+			field: '' + jqXHR.status,
+			message: '网络好像出问题了 (HTTP ' + jqXHR.status + ')'
+		};
+		try {
+			err = JSON.parse(jqXHR.responseText);
+		} catch (e) {
+			console.log(e);
+		}
+		return callback(err);
+	});
+};
+
 // JS Template:
 
 function Template(tpl) {

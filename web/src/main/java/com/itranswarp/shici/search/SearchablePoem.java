@@ -9,17 +9,17 @@ import com.itranswarp.shici.model.Poem;
 public class SearchablePoem {
 
 	@SearchableId
-	public String poemId;
+	public String id;
 
 	@SearchableField
 	public String poetId;
 	@SearchableField
 	public String dynastyId;
+	@SearchableField
+	public String imageId;
 
 	@SearchableField
 	public long form;
-	@SearchableField
-	public long rating;
 
 	@SearchableField(boost = 5)
 	public String name;
@@ -41,11 +41,11 @@ public class SearchablePoem {
 
 	public SearchablePoem(Poem poem) {
 		this.form = poem.form;
-		this.rating = poem.imageId.isEmpty() ? 0 : 1;
 
-		this.poemId = poem.id;
+		this.id = poem.id;
 		this.poetId = poem.poetId;
 		this.dynastyId = poem.dynastyId;
+		this.imageId = poem.imageId;
 
 		this.name = poem.name;
 		this.nameCht = poem.nameCht;

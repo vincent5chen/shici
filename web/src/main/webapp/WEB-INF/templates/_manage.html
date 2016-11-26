@@ -8,6 +8,7 @@
     <script type="text/javascript" src="/static/js/underscore.min.js"></script>
     <script type="text/javascript" src="/static/js/uikit.min.js"></script>
     <script type="text/javascript" src="/static/js/uikit/datepicker.js"></script>
+    <script type="text/javascript" src="/static/js/uikit/pagination.js"></script>
     <script type="text/javascript" src="/static/js/vue.js"></script>
     <script type="text/javascript" src="/static/js/vue-resource.min.js"></script>
     <script type="text/javascript" src="/static/js/main.js"></script>
@@ -26,12 +27,90 @@ function alertError(resp) {
 	UIkit.modal.alert(resp && resp.message || resp.error || resp);
 }
 
+function submitSearch(form) {
+	var
+		$form = $(form),
+		q = $form.find('input[name=q]').val().trim();
+	if (q !== '') {
+		$form.submit();
+	}
+	return false;
+}
+
+function addPoemToFeatured(poem) {
+	window.addToFeaturedModal.setPoem(poem);
+	window.addToFeaturedModal.callback = function () {
+		$.postJSON('/api/featured.json', {
+			poemId: poem.id,
+			pubDate: $('#modalFeatured').find('.x-pubdate').val()
+		}, function (err, r) {
+			if (err) {
+				UIkit.modal.alert(err.message || err);
+			} else {
+				UIkit.modal.alert("Add OK!");
+				window.addToFeaturedModal.hide();
+			}
+		});
+	};
+	window.addToFeaturedModal.show();
+}
+
+$(function () {
+	// init add-to-featured modal:
+	var $modalFeatured = $('#modalFeatured');
+	var modalFeatured = UIkit.modal('#modalFeatured', {
+		bgclose: false,
+		center: true
+	});
+	modalFeatured.callback = function (pubDate) {
+		console.log('set pub date: ' + pubDate);
+	};
+	modalFeatured.setPoem = function (p) {
+		$modalFeatured.find('.x-name').text(p.name);
+		$modalFeatured.find('.x-content').text(p.content.length <= 32 ? p.content : p.content.substring(0, 32) + '...');
+		$modalFeatured.find('.x-pubdate').val('');
+	};
+	window.addToFeaturedModal = modalFeatured;
+	$modalFeatured.find('.x-ok').click(function() {
+		window.addToFeaturedModal.callback.call(null, $modalFeatured.find('.x-pubdate').val());
+	});
+});
     </script>
 
     {% block head %}<!-- block head  -->{% endblock %}
 </head>
 
 <body>
+	<!-- add to featured -->
+	<div id="modalFeatured" class="uk-modal">
+		<div class="uk-modal-dialog">
+			<button type="button" class="uk-modal-close uk-close"></button>
+			<div class="uk-modal-header">
+				<h2>加入精选</h2>
+			</div>
+			<p>把“<span class="x-name"></span>”添加到精选：</p>
+			<p><span class="x-content"></span></p>
+			<form class="uk-form">
+				<fieldset>
+					<div class="uk-form-row">
+						<label class="uk-form-label">日期</label>
+						<div class="uk-form-controls">
+							<input type="text" maxlength="10" class="x-pubdate uk-width-2-3" data-uk-datepicker>
+						</div>
+					</div>
+					<div class="uk-form-row">
+						<div class="uk-form-controls">
+							<button type="button" class="x-ok uk-button uk-button-primary">添加</button>
+						</div>
+					</div>
+				</fieldset>
+			</form>
+			<div class="uk-modal-footer uk-text-right">
+				<button type="button" class="uk-button uk-modal-close">关闭</button>
+			</div>
+		</div>
+	</div>
+
     <div id="header" class="uk-navbar uk-navbar-attached" style="position:fixed;left:0;right:0;top:0;">
         <div class="uk-container uk-container-center">
             <div class="uk-navbar uk-navbar-attached">
@@ -43,8 +122,11 @@ function alertError(resp) {
                 	<li><a href="/manage/users">用户</a></li>
                 </ul>
                 <div class="uk-navbar-content">
-                    <form class="uk-form uk-margin-remove uk-display-inline-block">
-                    	<input type="text" placeholder="Search">
+                    <form action="/manage/search" onsubmit="return submitSearch(this)" class="uk-form uk-margin-remove uk-display-inline-block">
+						<div class="uk-form-icon">
+							<i class="uk-icon-search"></i>
+							<input type="text" name="q" placeholder="搜索诗词" value="{{ q }}" style="border-radius: 15px; padding: 4px 12px;">
+						</div>
                     </form>
                 </div>
         		<div class="uk-navbar-flip">
@@ -57,7 +139,6 @@ function alertError(resp) {
     </div>
     <div style="height: 65px"></div>
     <!-- // header -->
-
 
     <div id="main" class="uk-container uk-container-center">
         {% block main %}
@@ -80,96 +161,6 @@ function alertError(resp) {
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
-					<tr>
-						<td>xxx</td>
-						<td>xxx</td>
-						<td>xxx</td>
-					</tr>
 					<tr>
 						<td>xxx</td>
 						<td>xxx</td>

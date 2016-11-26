@@ -162,4 +162,11 @@ public class UIController {
 		}
 		return new ModelAndView("manage/users.html", "page", page);
 	}
+
+	// manage search //////////////////////////////////////////////////////////
+
+	@RequestMapping(value = "/manage/search", method = RequestMethod.GET)
+	public ModelAndView manageSearch(@RequestParam(name = "q") String q) {
+		return new ModelAndView("manage/search.html", "q", q);
+	}
 }

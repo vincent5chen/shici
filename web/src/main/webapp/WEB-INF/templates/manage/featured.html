@@ -3,6 +3,19 @@
 {% block title %} 精选 - 诗词列表 {% endblock %}
 
 {% block head %}
+
+<style>
+tr.x-missing {
+	border-bottom: 2px solid #f00;
+}
+tr.x-today {
+	background-color: #ddd;
+}
+tr.x-today:hover {
+	background-color: #ccc !important;
+}
+</style>
+
 <script>
 
 function dateChanged(input) {
@@ -27,9 +40,19 @@ $(function () {
 	var vm = new Vue({
 		el: '#vm',
 		data: {
+			TODAY: new Date().toISOString().substring(0, 10),
 			featured_poems: []
 		},
 		methods: {
+			isMissing: function (pid) {
+				var
+					$tr = $('#tr-' + pid),
+					$next = $tr.next();
+				if ($next.length === 1) {
+					return 86400000 < new Date($tr.find('input').val()) - new Date($next.find('input').val());
+				}
+				return false;
+			},
 			getFormName: function (form) {
 				switch (form) {
 				case 54:
@@ -53,7 +76,9 @@ $(function () {
 			bindDatePicker: function (id) {
 				var $i = $('#' + id);
 				if (!$i.attr('date-binded')) {
-					UIkit.datepicker('#'+id);
+					UIkit.datepicker('#'+id, {
+						pos: 'bottom'
+					});
 					$('#'+id).attr('date-binded', 'true');
 				}
 			},
@@ -64,6 +89,9 @@ $(function () {
 					pubDate: fp.pubDate
 				}).then(function (resp) {
 					fp.changed = false;
+					that.featured_poems.sort((fp1, fp2) => {
+						return fp1.pubDate > fp2.pubDate ? -1 : 1;
+					});
 				}, alertError);
 			},
 			removeFeaturedPoem: function (fp) {
@@ -83,6 +111,11 @@ $(function () {
 						fp.changed = false;
 					});
 					that.featured_poems = r.results;
+					setTimeout(() => {
+						that.featured_poems.sort((fp1, fp2) => {
+							return fp1.pubDate > fp2.pubDate ? -1 : 1;
+						});
+					}, 300);
 				});
 			}, alertError);
 		}
@@ -114,11 +147,15 @@ $(function () {
 				<tr v-show="featured_poems.length===0">
 					<td colspan="6">Loading...</td>
 				</tr>
-				<tr v-for="fp in featured_poems">
+				<tr v-for="fp in featured_poems" v-bind:id="'tr-'+fp.poem.id" v-bind:class="{'x-missing': isMissing(fp.poem.id), 'x-today': fp.pubDate===TODAY }">
 					<td>
 						<img v-if="fp.poem.imageId!==''" v-bind:src="'/resources/'+fp.poem.imageId">
 					</td>
-					<td><span v-text="fp.poem.name"></span></td>
+					<td>
+						<a v-text="fp.poem.name" v-bind:href="'/poem/'+fp.poem.id" target="_blank"></a>
+						<br>
+						<span v-text="fp.poem.id" class="uk-text-muted"></span>
+					</td>
 					<td v-text="fp.poem.content.length <= 32 ? fp.poem.content : fp.poem.content.substring(0, 32) + '...'"></td>
 					<td v-text="getFormName(fp.poem.form)"></td>
 					<td>
