@@ -1,5 +1,7 @@
 package com.itranswarp.shici.web;
 
+import java.time.LocalDate;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,8 @@ public class UIController {
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public ModelAndView index() {
-		return new ModelAndView("index.html");
+		return new ModelAndView("index.html", MapUtil.createMap("dynasties", poemService.getDynasties(), "poem",
+				poemService.getFeaturedPoem(LocalDate.now())));
 	}
 
 	@RequestMapping(value = "/search", method = RequestMethod.GET)

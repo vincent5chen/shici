@@ -125,7 +125,7 @@ public class ValidateUtil {
 		if (appreciation == null) {
 			return "";
 		}
-		appreciation = normalizeChinese(appreciation);
+		appreciation = normalizeChinese(appreciation, true);
 		if (appreciation.length() > 1000) {
 			throw new APIArgumentException("appreciation");
 		}
@@ -265,13 +265,19 @@ public class ValidateUtil {
 			{ '\u25aa', '\u00b7' }, { '\u25ab', '\u00b7' }, { '\u2022', '\u00b7' } };
 
 	public static String normalizeChinese(String s) {
+		return normalizeChinese(s, false);
+	}
+
+	public static String normalizeChinese(String s, boolean keepDigits) {
 		if (s == null) {
 			return "";
 		}
 		StringBuilder sb = new StringBuilder(s.length());
 		for (int i = 0; i < s.length(); i++) {
 			String ch = s.substring(i, i + 1);
-			if (!SHOULD_REMOVE.contains(ch)) {
+			if (keepDigits && ch.charAt(0) >= '0' && ch.charAt(0) <= '9') {
+				sb.append(ch);
+			} else if (!SHOULD_REMOVE.contains(ch)) {
 				sb.append(ch);
 			}
 		}
