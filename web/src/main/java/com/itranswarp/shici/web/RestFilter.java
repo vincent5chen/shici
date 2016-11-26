@@ -31,9 +31,9 @@ public class RestFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
 		if (request.getHeader("Host").startsWith("localhost")) {
-			log.info("Sleep 0.5 second in localhost mode...");
+			log.info("Sleep 0.3 second in localhost mode...");
 			try {
-				Thread.sleep(500);
+				Thread.sleep(300);
 			} catch (InterruptedException e) {
 			}
 		}
