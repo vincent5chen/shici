@@ -9,6 +9,7 @@ import com.itranswarp.shici.DatabaseTestBase;
 import com.itranswarp.shici.TestHelper;
 import com.itranswarp.shici.bean.CategoryBean;
 import com.itranswarp.shici.bean.CategoryPoemBean;
+import com.itranswarp.shici.bean.CategoryPoemBeans;
 import com.itranswarp.shici.bean.FeaturedBean;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
@@ -98,6 +99,12 @@ public abstract class AbstractServiceTestBase extends DatabaseTestBase {
 		bean.name = name;
 		bean.description = "简介：" + name;
 		return bean;
+	}
+
+	protected CategoryPoemBeans newCategoryPoemBeans(CategoryPoemBean... beans) {
+		CategoryPoemBeans cpbeans = new CategoryPoemBeans();
+		cpbeans.categoryPoems = Arrays.asList(beans);
+		return cpbeans;
 	}
 
 	protected CategoryPoemBean newCategoryPoemBean(String sectionName, String... poemIds) {

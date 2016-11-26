@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.itranswarp.shici.bean.CategoryBean;
 import com.itranswarp.shici.bean.CategoryPoemBean;
+import com.itranswarp.shici.bean.CategoryPoemBeans;
 import com.itranswarp.shici.bean.FeaturedBean;
 import com.itranswarp.shici.bean.PoemBean;
 import com.itranswarp.shici.bean.PoetBean;
@@ -223,11 +224,18 @@ public class PoemService extends AbstractService {
 		poem.appreciationCht = hanziService.toCht(bean.appreciation);
 	}
 
-	@RequestMapping(value = "/api/poems/{id}/delete", method = RequestMethod.POST)
+	@RequestMapping(value = "/api/poems/{id}", method = RequestMethod.DELETE)
 	public void deletePoem(@PathVariable("id") String poemId) {
 		// check:
 		assertEditorRole();
 		Poem poem = getPoem(poemId);
+		// check if featured or categories:
+		if (isFeaturedPoem(poemId)) {
+			throw new APIEntityConflictException("Poem", "cannot delete as featured.");
+		}
+		if (isCategoryPoem(poemId)) {
+			throw new APIEntityConflictException("Poem", "cannot delete as categoried.");
+		}
 		// delete:
 		warpdb.remove(poem);
 		updatePoemCountOfPoet(poem.poetId);
@@ -355,6 +363,10 @@ public class PoemService extends AbstractService {
 		warpdb.remove(category);
 	}
 
+	boolean isCategoryPoem(String poemId) {
+		return warpdb.from(CategoryPoem.class).where("poemId=?", poemId).first() != null;
+	}
+
 	@RequestMapping(value = "/api/categories/{id}/poems", method = RequestMethod.GET)
 	public Map<String, List<TheCategoryPoem>> restGetPoemsOfCategory(@PathVariable("id") String categoryId) {
 		List<TheCategoryPoem> list = getPoemsOfCategory(categoryId);
@@ -399,21 +411,18 @@ public class PoemService extends AbstractService {
 	}
 
 	@RequestMapping(value = "/api/categories/{id}/poems", method = RequestMethod.POST)
-	public void updatePoemsOfCategory(@PathVariable("id") String categoryId,
-			@RequestBody List<CategoryPoemBean> beans) {
+	public Category updatePoemsOfCategory(@PathVariable("id") String categoryId, @RequestBody CategoryPoemBeans beans) {
 		// check:
 		assertEditorRole();
 		if (beans == null) {
 			throw new APIArgumentException("body is empty");
 		}
-		for (CategoryPoemBean bean : beans) {
-			bean.validate();
-		}
+		beans.validate();
 		Category category = getCategory(categoryId);
 		// set:
 		warpdb.update("delete from CategoryPoem where categoryId=?", categoryId);
 		long n = 0;
-		for (CategoryPoemBean bean : beans) {
+		for (CategoryPoemBean bean : beans.categoryPoems) {
 			List<CategoryPoem> list = new ArrayList<>(bean.ids.size());
 			for (String poemId : bean.ids) {
 				CategoryPoem cp = new CategoryPoem();
@@ -428,6 +437,7 @@ public class PoemService extends AbstractService {
 			warpdb.save(list.toArray(new CategoryPoem[list.size()]));
 		}
 		warpdb.update(category); // update version!
+		return category;
 	}
 
 	// featured ///////////////////////////////////////////////////////////////
@@ -438,7 +448,7 @@ public class PoemService extends AbstractService {
 	}
 
 	public Poem getFeaturedPoem(LocalDate targetDate) {
-		FeaturedPoem fp = warpdb.from(FeaturedPoem.class).where("pubDate<=?", targetDate).orderBy("pubDate desc")
+		FeaturedPoem fp = warpdb.from(FeaturedPoem.class).where("pubDate<=?", targetDate).orderBy("pubDate").desc()
 				.first();
 		if (fp == null) {
 			throw new EntityNotFoundException(Poem.class.getSimpleName());
@@ -452,7 +462,7 @@ public class PoemService extends AbstractService {
 	}
 
 	public List<TheFeaturedPoem> getFeaturedPoems() {
-		List<FeaturedPoem> fps = warpdb.list("select * from FeaturedPoem order by pubDate desc");
+		List<FeaturedPoem> fps = warpdb.from(FeaturedPoem.class).orderBy("pubDate").desc().list();
 		List<TheFeaturedPoem> tfps = new ArrayList<>(fps.size());
 		for (FeaturedPoem fp : fps) {
 			TheFeaturedPoem tfp = new TheFeaturedPoem();
@@ -488,6 +498,10 @@ public class PoemService extends AbstractService {
 			warpdb.save(fp);
 		}
 		return fp;
+	}
+
+	boolean isFeaturedPoem(String poemId) {
+		return warpdb.from(FeaturedPoem.class).where("poemId=?", poemId).first() != null;
 	}
 
 	@RequestMapping(value = "/api/featured/{poemId}", method = RequestMethod.DELETE)

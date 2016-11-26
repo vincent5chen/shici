@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
@@ -621,8 +620,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 		}
 	}
 
-	@Test(expected = APIArgumentException.class)
-	public void testSetAsFeaturedFailedForPoemAlreadyFeatured() throws IOException {
+	public void testSetAsFeaturedUpdatePubDate() throws IOException {
 		try (UserContext context = new UserContext(super.editorUser)) {
 			Poet poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean poemBean = newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者");
@@ -750,8 +748,8 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 			Poem poem2a = poemService.createPoem(newPoemBean(poet2.id, "登幽州台歌", "前不见古人，后不见来者"));
 			Poem poem2b = poemService.createPoem(newPoemBean(poet2.id, "送客", "故人洞庭去，杨柳春风生。"));
 			Category cat = poemService.createCategory(newCategoryBean("唐诗三百首"));
-			poemService.updatePoemsOfCategory(cat.id, Arrays.asList(newCategoryPoemBean("七律", poem1a.id, poem1b.id),
-					newCategoryPoemBean("五律", poem2a.id, poem2b.id)));
+			poemService.updatePoemsOfCategory(cat.id, newCategoryPoemBeans(
+					newCategoryPoemBean("七律", poem1a.id, poem1b.id), newCategoryPoemBean("五律", poem2a.id, poem2b.id)));
 			// get:
 			List<TheCategoryPoem> list = poemService.getPoemsOfCategory(cat.id);
 			assertEquals(2, list.size());
@@ -794,7 +792,8 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 			Poem poem1a = poemService.createPoem(newPoemBean(poet1.id, "赠汪伦", "李白乘舟将欲行，忽闻岸上踏歌声。"));
 			Poem poem1b = poemService.createPoem(newPoemBean(poet1.id, "送孟浩然之广陵", "故人西辞黄鹤楼，烟花三月下扬州。"));
 			Category cat = poemService.createCategory(newCategoryBean("唐诗三百首"));
-			poemService.updatePoemsOfCategory(cat.id, Arrays.asList(newCategoryPoemBean("七律", poem1a.id, poem1b.id)));
+			poemService.updatePoemsOfCategory(cat.id,
+					newCategoryPoemBeans(newCategoryPoemBean("七律", poem1a.id, poem1b.id)));
 			// delete:
 			poemService.deleteCategory(cat.id);
 		}
