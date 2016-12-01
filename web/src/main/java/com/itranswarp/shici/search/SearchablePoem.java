@@ -21,14 +21,14 @@ public class SearchablePoem {
 	@SearchableField
 	public long form;
 
-	@SearchableField(boost = 5)
+	@SearchableField(boost = 1.5f)
 	public String name;
-	@SearchableField(boost = 5)
+	@SearchableField(boost = 1.5f)
 	public String nameCht;
 
-	@SearchableField(boost = 3)
+	@SearchableField
 	public String poetName;
-	@SearchableField(boost = 3)
+	@SearchableField
 	public String poetNameCht;
 
 	@SearchableField
