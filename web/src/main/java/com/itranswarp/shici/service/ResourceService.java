@@ -7,9 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.itranswarp.shici.model.Resource;
@@ -17,7 +16,7 @@ import com.itranswarp.shici.model.Resource;
 @Controller
 public class ResourceService extends AbstractService {
 
-	@RequestMapping(value = "/resources/{id}", method = RequestMethod.GET)
+	@GetMapping("/resources/{id}")
 	public ModelAndView images(@PathVariable("id") String imageId, HttpServletResponse response) throws IOException {
 		Resource r = warpdb.fetch(Resource.class, imageId);
 		if (r == null) {

@@ -7,9 +7,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,8 +19,8 @@ import com.itranswarp.shici.model.Job;
 import com.itranswarp.shici.model.JobHistory;
 import com.itranswarp.shici.util.IdUtils;
 import com.itranswarp.shici.util.JsonUtil;
-import com.itranswarp.shici.util.MapUtil; 
-import com.itranswarp.warpdb.PagedResults; 
+import com.itranswarp.shici.util.MapUtil;
+import com.itranswarp.warpdb.PagedResults;
 
 /**
  * Services for async jobs.
@@ -31,7 +30,7 @@ import com.itranswarp.warpdb.PagedResults;
 @RestController
 public class JobService extends AbstractService {
 
-	@RequestMapping(value = "/api/jobs", method = RequestMethod.GET)
+	@GetMapping("/api/jobs")
 	public PagedResults<Job> getJobs(@RequestParam(value = "status", defaultValue = "") String status,
 			@RequestParam(value = "page", defaultValue = "1") int page) {
 		if (status.isEmpty()) {
@@ -42,7 +41,7 @@ public class JobService extends AbstractService {
 		}
 	}
 
-	@RequestMapping(value = "/api/jobs/{id}/histories", method = RequestMethod.GET)
+	@GetMapping("/api/jobs/{id}/histories")
 	public Map<String, List<JobHistory>> restGetJobHistories(@PathVariable(value = "id") String jobId) {
 		return MapUtil.createMap("results", getJobHistories(jobId));
 	}

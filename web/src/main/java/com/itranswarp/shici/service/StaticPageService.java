@@ -3,10 +3,10 @@ package com.itranswarp.shici.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.itranswarp.shici.bean.StaticPageBean;
@@ -38,19 +38,19 @@ public class StaticPageService extends AbstractService {
 		return warpdb.from(StaticPage.class).orderBy("alias").list();
 	}
 
-	@RequestMapping(value = "/api/staticpages", method = RequestMethod.GET)
+	@GetMapping("/api/staticpages")
 	public Map<String, List<StaticPage>> restGetStaticPages() {
 		assertEditorRole();
 		return MapUtil.createMap("results", getStaticPages());
 	}
 
-	@RequestMapping(value = "/api/staticpages/{id}", method = RequestMethod.GET)
+	@GetMapping("/api/staticpages/{id}")
 	public StaticPage restGetStaticPage(@PathVariable(value = "id") String spId) {
 		assertEditorRole();
 		return getStaticPage(spId);
 	}
 
-	@RequestMapping(value = "/api/staticpages", method = RequestMethod.POST)
+	@PostMapping(value = "/api/staticpages")
 	public StaticPage restCreateStaticPage(@RequestBody StaticPageBean bean) {
 		assertEditorRole();
 		bean.validate();
@@ -67,7 +67,7 @@ public class StaticPageService extends AbstractService {
 		return sp;
 	}
 
-	@RequestMapping(value = "/api/staticpages/{id}", method = RequestMethod.POST)
+	@PostMapping("/api/staticpages/{id}")
 	public StaticPage restUpdateStaticPage(@PathVariable("id") String id, @RequestBody StaticPageBean bean) {
 		assertEditorRole();
 		bean.validate();
@@ -86,7 +86,7 @@ public class StaticPageService extends AbstractService {
 		return sp;
 	}
 
-	@RequestMapping(value = "/api/staticpages/{id}/delete", method = RequestMethod.POST)
+	@PostMapping("/api/staticpages/{id}/delete")
 	public StaticPage restDeleteStaticPage(@PathVariable("id") String id) {
 		assertEditorRole();
 		StaticPage sp = getStaticPage(id);

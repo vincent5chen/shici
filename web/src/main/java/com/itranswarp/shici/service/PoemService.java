@@ -10,10 +10,11 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,12 +52,12 @@ public class PoemService extends AbstractService {
 
 	// dynasty ////////////////////////////////////////////////////////////////
 
-	@RequestMapping(value = "/api/dynasties", method = RequestMethod.GET)
+	@GetMapping("/api/dynasties")
 	public Map<String, List<Dynasty>> restGetDynasties() {
 		return MapUtil.createMap("results", getDynasties());
 	}
 
-	@RequestMapping(value = "/api/dynasties/{id}", method = RequestMethod.GET)
+	@GetMapping("/api/dynasties/{id}")
 	public Dynasty restGetDynasty(@PathVariable("id") String dynastyId) {
 		return getDynasty(dynastyId);
 	}
@@ -76,7 +77,7 @@ public class PoemService extends AbstractService {
 
 	// poet ///////////////////////////////////////////////////////////////////
 
-	@RequestMapping(value = "/api/dynasties/{id}/poets", method = RequestMethod.GET)
+	@GetMapping("/api/dynasties/{id}/poets")
 	public Map<String, List<Poet>> restGetPoets(@PathVariable("id") String dynastyId) {
 		return MapUtil.createMap("results", getPoets(dynastyId));
 	}
@@ -85,12 +86,12 @@ public class PoemService extends AbstractService {
 		return warpdb.from(Poet.class).where("dynastyId=?", dynastyId).orderBy("name").list();
 	}
 
-	@RequestMapping(value = "/api/poets/{id}", method = RequestMethod.GET)
+	@GetMapping("/api/poets/{id}")
 	public Poet getPoet(@PathVariable("id") String poetId) {
 		return warpdb.get(Poet.class, poetId);
 	}
 
-	@RequestMapping(value = "/api/poets", method = RequestMethod.POST)
+	@PostMapping("/api/poets")
 	public Poet createPoet(@RequestBody PoetBean bean) {
 		// check:
 		assertEditorRole();
@@ -103,7 +104,7 @@ public class PoemService extends AbstractService {
 		return poet;
 	}
 
-	@RequestMapping(value = "/api/poets/{id}", method = RequestMethod.POST)
+	@PostMapping("/api/poets/{id}")
 	public Poet updatePoet(@PathVariable("id") String poetId, @RequestBody PoetBean bean) {
 		// check:
 		assertEditorRole();
@@ -126,7 +127,7 @@ public class PoemService extends AbstractService {
 		poet.death = bean.death;
 	}
 
-	@RequestMapping(value = "/api/poets/{id}", method = RequestMethod.DELETE)
+	@DeleteMapping("/api/poets/{id}")
 	public void deletePoet(@PathVariable("id") String poetId) {
 		// check:
 		assertEditorRole();
@@ -141,25 +142,25 @@ public class PoemService extends AbstractService {
 
 	// poem ///////////////////////////////////////////////////////////////////
 
-	@RequestMapping(value = "/api/poems/{id}", method = RequestMethod.GET)
+	@GetMapping("/api/poems/{id}")
 	public Poem getPoem(@PathVariable("id") String poemId) {
 		return warpdb.get(Poem.class, poemId);
 	}
 
-	@RequestMapping(value = "/api/poets/{id}/poems", method = RequestMethod.GET)
+	@GetMapping("/api/poets/{id}/poems")
 	public PagedResults<Poem> getPoems(@PathVariable("id") String poetId,
 			@RequestParam(value = "page", defaultValue = "1") int pageIndex) {
 		return warpdb.from(Poem.class).where("poetId=?", poetId).orderBy("name").list(pageIndex, 20);
 	}
 
-	@RequestMapping(value = "/api/poets/{id}/poems/all", method = RequestMethod.GET)
+	@GetMapping("/api/poets/{id}/poems/all")
 	public Map<String, List<Poem>> getAllPoems(@PathVariable("id") String poetId) {
 		// check:
 		assertEditorRole();
 		return MapUtil.createMap("results", warpdb.from(Poem.class).where("poetId=?", poetId).orderBy("name").list());
 	}
 
-	@RequestMapping(value = "/api/poems", method = RequestMethod.POST)
+	@PostMapping("/api/poems")
 	public Poem createPoem(@RequestBody PoemBean bean) {
 		// check:
 		assertEditorRole();
@@ -181,7 +182,7 @@ public class PoemService extends AbstractService {
 		return poem;
 	}
 
-	@RequestMapping(value = "/api/poems/{id}", method = RequestMethod.POST)
+	@PostMapping("/api/poems/{id}")
 	public Poem updatePoem(@PathVariable("id") String poemId, @RequestBody PoemBean bean) {
 		// check:
 		assertEditorRole();
@@ -224,7 +225,7 @@ public class PoemService extends AbstractService {
 		poem.appreciationCht = hanziService.toCht(bean.appreciation);
 	}
 
-	@RequestMapping(value = "/api/poems/{id}", method = RequestMethod.DELETE)
+	@DeleteMapping("/api/poems/{id}")
 	public void deletePoem(@PathVariable("id") String poemId) {
 		// check:
 		assertEditorRole();
@@ -292,12 +293,12 @@ public class PoemService extends AbstractService {
 
 	// category ///////////////////////////////////////////////////////////////
 
-	@RequestMapping(value = "/api/categories", method = RequestMethod.GET)
+	@GetMapping("/api/categories")
 	public Map<String, List<Category>> restGetCategories() {
 		return MapUtil.createMap("results", getCategories());
 	}
 
-	@RequestMapping(value = "/api/categories/{id}", method = RequestMethod.GET)
+	@GetMapping("/api/categories/{id}")
 	public Category restGetCategory(@PathVariable("id") String categoryId) {
 		return getCategory(categoryId);
 	}
@@ -315,7 +316,7 @@ public class PoemService extends AbstractService {
 		throw new EntityNotFoundException("Category");
 	}
 
-	@RequestMapping(value = "/api/categories", method = RequestMethod.POST)
+	@PostMapping("/api/categories")
 	public Category createCategory(@RequestBody CategoryBean bean) {
 		// check:
 		assertEditorRole();
@@ -335,7 +336,7 @@ public class PoemService extends AbstractService {
 		return category;
 	}
 
-	@RequestMapping(value = "/api/categories/{id}", method = RequestMethod.POST)
+	@PostMapping("/api/categories/{id}")
 	public Category updateCategory(@PathVariable("id") String categoryId, @RequestBody CategoryBean bean) {
 		// check:
 		assertEditorRole();
@@ -350,7 +351,7 @@ public class PoemService extends AbstractService {
 		return category;
 	}
 
-	@RequestMapping(value = "/api/categories/{id}", method = RequestMethod.DELETE)
+	@DeleteMapping("/api/categories/{id}")
 	public void deleteCategory(@PathVariable("id") String categoryId) {
 		// check:
 		assertEditorRole();
@@ -367,7 +368,7 @@ public class PoemService extends AbstractService {
 		return warpdb.from(CategoryPoem.class).where("poemId=?", poemId).first() != null;
 	}
 
-	@RequestMapping(value = "/api/categories/{id}/poems", method = RequestMethod.GET)
+	@GetMapping("/api/categories/{id}/poems")
 	public Map<String, List<TheCategoryPoem>> restGetPoemsOfCategory(@PathVariable("id") String categoryId) {
 		List<TheCategoryPoem> list = getPoemsOfCategory(categoryId);
 		return MapUtil.createMap("results", list);
@@ -410,7 +411,7 @@ public class PoemService extends AbstractService {
 		return list;
 	}
 
-	@RequestMapping(value = "/api/categories/{id}/poems", method = RequestMethod.POST)
+	@PostMapping("/api/categories/{id}/poems")
 	public Category updatePoemsOfCategory(@PathVariable("id") String categoryId, @RequestBody CategoryPoemBeans beans) {
 		// check:
 		assertEditorRole();
@@ -442,7 +443,7 @@ public class PoemService extends AbstractService {
 
 	// featured ///////////////////////////////////////////////////////////////
 
-	@RequestMapping(value = "/api/featured/poem", method = RequestMethod.GET)
+	@GetMapping("/api/featured/poem")
 	public Poem restGetFeaturedPoem() {
 		return getFeaturedPoem(LocalDate.now());
 	}
@@ -456,7 +457,7 @@ public class PoemService extends AbstractService {
 		return getPoem(fp.poemId);
 	}
 
-	@RequestMapping(value = "/api/featured/poems", method = RequestMethod.GET)
+	@GetMapping("/api/featured/poems")
 	public Map<String, List<TheFeaturedPoem>> restGetFeaturedPoems() {
 		return MapUtil.createMap("results", getFeaturedPoems());
 	}
@@ -478,7 +479,7 @@ public class PoemService extends AbstractService {
 	 * 
 	 * @param bean
 	 */
-	@RequestMapping(value = "/api/featured", method = RequestMethod.POST)
+	@PostMapping("/api/featured")
 	public FeaturedPoem setPoemAsFeatured(@RequestBody FeaturedBean bean) {
 		// check:
 		assertEditorRole();
@@ -504,7 +505,7 @@ public class PoemService extends AbstractService {
 		return warpdb.from(FeaturedPoem.class).where("poemId=?", poemId).first() != null;
 	}
 
-	@RequestMapping(value = "/api/featured/{poemId}", method = RequestMethod.DELETE)
+	@DeleteMapping("/api/featured/{poemId}")
 	public void setPoemAsUnfeatured(@PathVariable("poemId") String poemId) {
 		// check:
 		assertEditorRole();

@@ -10,9 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.itranswarp.shici.auth.CookieAuth;
@@ -48,7 +47,7 @@ public class OAuthService extends AbstractService {
 		}
 	}
 
-	@RequestMapping(value = "/auth/from/{provider}", method = RequestMethod.GET)
+	@GetMapping("/auth/from/{provider}")
 	public void authFrom(@PathVariable("provider") String providerName, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		OAuthProvider provider = providerMap.get(providerName);
@@ -68,7 +67,7 @@ public class OAuthService extends AbstractService {
 		response.sendRedirect(redirect);
 	}
 
-	@RequestMapping(value = "/auth/callback/{provider}", method = RequestMethod.GET)
+	@GetMapping("/auth/callback/{provider}")
 	public void authCallback(final @PathVariable("provider") String providerName,
 			@RequestParam(value = "error", defaultValue = "") String error, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
@@ -96,6 +95,7 @@ public class OAuthService extends AbstractService {
 			log.info("First time to sign in: " + oa.name);
 			user = new User();
 			user.id = IdUtils.next();
+			user.role = User.Role.USER;
 			user.email = user.id + "#" + providerName;
 			user.name = oa.name;
 			user.gender = "";
@@ -140,7 +140,7 @@ public class OAuthService extends AbstractService {
 		}
 	}
 
-	@RequestMapping(value = "/auth/signout", method = RequestMethod.GET)
+	@GetMapping("/auth/signout")
 	public void signout(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		cookieAuthHelper.deleteSessionCookie(response);
 		response.sendRedirect(getReferer(request));
