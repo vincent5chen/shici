@@ -163,21 +163,20 @@ var isDesktop = (function() {
 })();
 
 window.onAuthCallback = function (user) {
-    var modal = $.UIkit.modal('#modal-signin');
-    modal.hide();
     g_user = {
         id: user.id,
         name: user.name,
         image: user.image_url
     };
+    location.reload();
     // update user info:
-    $('.x-user-name').text(g_user.name);
+    //$('.x-user-name').text(g_user.name);
     // update css:
-    $('#x-doc-style').text('.x-display-if-signin {}\n.x-display-if-not-signin { display: none; }');
+    //$('#x-doc-style').text('.x-display-if-signin {}\n.x-display-if-not-signin { display: none; }');
     // reload if neccessary:
-    if (window.refreshAfterSignIn) {
-    	location.reload();
-    }
+    //if (window.refreshAfterSignIn) {
+    //	location.reload();
+    //}
 };
 
 function authFrom(provider) {

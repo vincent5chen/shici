@@ -2,6 +2,9 @@
 <html>
 <head>
     <meta charset="utf-8" />
+    <meta name="apple-itunes-app" content="app-id=539302164" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
     <title>{% block title %} TITLE {% endblock %} - 中华诗词</title>
     <link rel="stylesheet" href="/static/css/main.css" />
     <link rel="stylesheet" href="/static/css/animate.min.css" />
@@ -100,7 +103,11 @@ $(function () {
 				<h1 id="brand">中华诗词</h1>
 			</div>
 			<div class="uk-width-1-2">
-				<a href="/" class="uk-float-right"><i class="uk-icon-weibo"></i> 微博登录</a>
+			{% if user is null %}
+				<a href="#0" onclick="authFrom('weibo')" class="uk-float-right"><i class="uk-icon-weibo"></i> 微博登录</a>
+			{% else %}
+			    <span class="uk-float-right">欢迎你，{{ user.name }}！ <a href="/auth/signout"><i class="uk-icon-sign-out"></i> 登出</a></span>
+			{% endif %}
 			</div>
 		</div>
 
