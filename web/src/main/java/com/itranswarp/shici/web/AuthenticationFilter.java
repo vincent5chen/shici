@@ -65,9 +65,6 @@ public class AuthenticationFilter implements Filter {
 			}
 			return;
 		}
-		// FIXME
-		user = User.SYSTEM;
-		// END FIXME
 		if (user == null || user.role > User.Role.EDITOR) {
 			if (request.getRequestURI().startsWith("/manage/")) {
 				response.sendRedirect("/auth/signin");
