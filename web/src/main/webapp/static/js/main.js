@@ -8,7 +8,7 @@ function formatLine(s) {
 }
 
 function formatPoem(s) {
-    s = s.replace(/。/g, '。\n').replace(/，/g, '，\n').replace(/！/g, '！\n').replace(/？/g, '？\n');
+    s = s.replace(/。/g, '。\n').replace(/，/g, '，\n').replace(/；/g, '；\n').replace(/！/g, '！\n').replace(/？/g, '？\n');
     var arr = [];
     var ss = s.split('\n');
     for (var i=0; i<ss.length; i++) {
