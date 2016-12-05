@@ -22,6 +22,17 @@
 	display: none;
 }
 
+#q {
+	padding-bottom: 6px;
+	border: none;
+	border-bottom: 1px solid #ad2222;
+	background-color: transparent;
+}
+
+#q:focus {
+	outline: none;
+}
+
 .x-nav {
 	margin-left: 10px;
 	margin-right: 10px;
@@ -117,11 +128,19 @@ $(function () {
 		</div>
 
 		<div class="uk-grid">
-			<div class="uk-width-1-1">
+			<div class="uk-width-4-5">
 				朝代：
 				{% for d in dynasties %}
 					<a href="/dynasty/{{ d.id }}" class="x-nav">{{ d.name }}</a>
 				{% endfor %}
+			</div>
+			<div class="uk-width-1-5">
+				<form action="/search" onsubmit="return checkSearchQuery()">
+					<div class="uk-form-icon">
+						<i class="uk-icon-search"></i>
+						<input id="q" name="q" type="text" maxlength="10" value="{{ q }}">
+					</div>
+				</form>
 			</div>
 		</div>
 

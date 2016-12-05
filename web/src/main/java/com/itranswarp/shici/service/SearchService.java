@@ -1,5 +1,7 @@
 package com.itranswarp.shici.service;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +23,9 @@ public class SearchService extends AbstractService {
 		if (queryString == null || queryString.trim().isEmpty()) {
 			throw new APIArgumentException("q");
 		}
-		return searcher.search(queryString.trim());
+		SearchResults<SearchablePoem> r = searcher.search(queryString.trim());
+		return r != null ? r : EMPTY;
 	}
 
+	final SearchResults<SearchablePoem> EMPTY = new SearchResults<>(0, Collections.emptyList());
 }
