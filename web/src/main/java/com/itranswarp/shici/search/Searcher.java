@@ -61,7 +61,7 @@ public class Searcher {
 		if (client == null) {
 			return EMPTY;
 		}
-		return client.search(SearchablePoem.class, words, 1.0f);
+		return client.search(SearchablePoem.class, words, true, 1.0f);
 	}
 
 	public void index(SearchablePoem poem) {

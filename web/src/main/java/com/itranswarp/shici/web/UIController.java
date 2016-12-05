@@ -69,7 +69,7 @@ public class UIController {
 
 	@GetMapping("/search")
 	public ModelAndView search(@RequestParam("q") String q) {
-		return null;
+		return createMV("search.html", "q", q);
 	}
 
 	// management /////////////////////////////////////////////////////////////

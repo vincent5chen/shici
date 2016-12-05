@@ -17,6 +17,11 @@ function formatPoem(s) {
     return arr.join('');
 }
 
+function checkSearchQuery() {
+    var q = $('#q').val().trim();
+    return q.length > 0;
+}
+
 // patch:
 if (! window.console) {
     window.console = {
