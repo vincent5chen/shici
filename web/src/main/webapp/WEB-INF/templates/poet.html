@@ -23,9 +23,9 @@
 
 <div class="uk-grid">
 	<div class="uk-width-1-1">
-		<div id="poems">
+		<div id="poems" class="x-poem-list">
 		{% for p in poems %}
-			<div class="x-name"><a href="/poem/{{ p.id }}">{{ p.name }}</a></div>
+			<div class="x-name"><a href="/poem/{{ p.id }}">{{ p.name }}</a>&nbsp;&nbsp;&nbsp;{{ p.content }}</div>
 		{% endfor %}
 		</div>
 	</div>

@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,14 +38,15 @@ public class UIController {
 
 	@GetMapping("/")
 	public ModelAndView index() {
-		return createMV("index.html", MapUtil.createMap("dynasties", poemService.getDynasties(), "poem",
-				poemService.getFeaturedPoem(LocalDate.now())));
+		Poem poem = poemService.getFeaturedPoem(LocalDate.now());
+		Poet poet = poemService.getPoet(poem.poetId);
+		return createMV("index.html", MapUtil.createMap("poem", poem, "poet", poet));
 	}
 
 	@GetMapping("/dynasty/{id}")
 	public ModelAndView poets(@PathVariable("id") String dynastyId) {
-		return createMV("dynasty.html", MapUtil.createMap("dynasties", poemService.getDynasties(), "dynasty",
-				poemService.getDynasty(dynastyId), "poets", poemService.getPoets(dynastyId)));
+		return createMV("dynasty.html", MapUtil.createMap("dynasty", poemService.getDynasty(dynastyId), "poets",
+				poemService.getPoets(dynastyId)));
 	}
 
 	@GetMapping("/poet/{id}")
@@ -55,16 +57,16 @@ public class UIController {
 		}
 		Poet poet = poemService.getPoet(poetId);
 		PagedResults<Poem> results = poemService.getPoems(poetId, pageIndex);
-		return createMV("poet.html", MapUtil.createMap("dynasties", poemService.getDynasties(), "dynasty",
-				poemService.getDynasty(poet.dynastyId), "poet", poet, "poems", results.results, "page", results.page));
+		return createMV("poet.html", MapUtil.createMap("dynasty", poemService.getDynasty(poet.dynastyId), "poet", poet,
+				"poems", results.results, "page", results.page));
 	}
 
 	@GetMapping("/poem/{id}")
 	public ModelAndView poem(@PathVariable("id") String poemId) {
 		Poem poem = poemService.getPoem(poemId);
 		Poet poet = poemService.getPoet(poem.poetId);
-		return createMV("poem.html", MapUtil.createMap("dynasties", poemService.getDynasties(), "dynasty",
-				poemService.getDynasty(poet.dynastyId), "poet", poet, "poem", poem));
+		return createMV("poem.html",
+				MapUtil.createMap("dynasty", poemService.getDynasty(poet.dynastyId), "poet", poet, "poem", poem));
 	}
 
 	@GetMapping("/search")
@@ -185,19 +187,21 @@ public class UIController {
 	// enhance ModelAndView:
 
 	ModelAndView createMV(String viewName) {
-		return bindUser(new ModelAndView(viewName));
+		return bindModel(new ModelAndView(viewName));
 	}
 
 	ModelAndView createMV(String viewName, String modelName, Object modelObject) {
-		return bindUser(new ModelAndView(viewName, modelName, modelObject));
+		return bindModel(new ModelAndView(viewName, modelName, modelObject));
 	}
 
 	ModelAndView createMV(String viewName, Map<String, ?> model) {
-		return bindUser(new ModelAndView(viewName, model));
+		return bindModel(new ModelAndView(viewName, model));
 	}
 
-	ModelAndView bindUser(ModelAndView mv) {
-		mv.getModelMap().put("user", UserContext.getCurrentUser());
+	ModelAndView bindModel(ModelAndView mv) {
+		ModelMap mm = mv.getModelMap();
+		mm.put("user", UserContext.getCurrentUser());
+		mm.put("dynasties", poemService.getDynasties());
 		return mv;
 	}
 }

@@ -9,14 +9,31 @@
 var q = $(document.createElement('div')).html('{{ q }}').text();
 
 $(function () {
-	$.getJSON('/search.json', {q: q}, function (data) {
-		var hits = data.hits;
-		var poems = data.results;
-		
+	$.getJSON('/api/search.json', {q: q}, function (data) {
+		var
+			i, p, s, arr = [],
+			hits = data.hits,
+			poems = data.results,
+			$title = $('#search-results').find('.search-results-title'),
+			$list = $('#search-results').find('.search-results-list');
+		if (hits === 0) {
+			$title.text('很抱歉，没有找到符合条件的诗词。请减少关键词数量，或者换一个关键词再试试。');
+		} else {
+			$title.text('找到约'+hits+'首诗词，显示前'+(hits<20?hits:20)+'首诗词：');
+			for (i=0; i<poems.length; i++) {
+				p = poems[i];
+				s = '<div>' +
+					'<a href="/poem/' + p.id + '">' + p.name + '</a>' + ' - ' +
+					'<a href="/poet/' + p.poetId + '">' + p.poetName + '</a>' + '&nbsp;&nbsp;&nbsp;' +
+					p.content + '</div>';
+				arr.push(s);
+			}
+			$list.html(arr.join(''));
+		}
 	}).fail(function() {
-		$('.search-error').show();
+		$('#search-error').show();
 	}).always(function () {
-		$('.search-loading').hide();
+		$('#search-loading').hide();
 	});
 });
 
@@ -35,11 +52,11 @@ $(function () {
 
 <div class="uk-grid">
 	<div class="uk-width-1-1">
-		<div class="search-loading"><i class="uk-icon-spinner uk-icon-spin"></i> 正在搜索……</div>
-		<div class="search-error" style="display:none">很抱歉，暂时无法搜索，请稍后再试。</div>
-		<div class="search-results">
+		<div id="search-loading"><i class="uk-icon-spinner uk-icon-spin"></i> 正在搜索……</div>
+		<div id="search-error" style="display:none">很抱歉，暂时无法搜索，请稍后再试。</div>
+		<div id="search-results">
 			<div class="search-results-title"></div>
-			<div class="search-results-list"></div>
+			<div class="search-results-list x-poem-list"></div>
 		</div>
 		<div id="poems">
 		{% for p in poems %}
