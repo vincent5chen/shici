@@ -16,6 +16,60 @@
 
 // customized less ////////////////////////////////////////////////////////////
 
+#q {
+	padding-bottom: 6px;
+	border: none;
+	border-bottom: 1px solid #ad2222;
+	background-color: transparent;
+	&:focus {
+		outline: none;
+	}
+}
+
+div.x-poem {
+
+	> div.x-cover-container {
+		width: 640px;
+		height: 360px;
+		margin: 25px 0;
+
+		> div.x-cover {
+			width: 640px;
+			height: 360px;
+			box-shadow: 0 0 10px 10px rgba(255, 250, 240, 1) inset;
+		}
+	}
+
+	> div.x-name {
+		font-size: 36px;
+		line-height: 48px;
+		margin-bottom: 20px;
+	}
+
+	> div.x-poet {
+		font-size: 24px;
+		line-height: 36px;
+		margin-bottom: 15px;
+	}
+
+	> div.x-content {
+		font-size: 24px;
+		line-height: 36px;
+	}
+
+	> div.x-hr {
+		font-size: 20px;
+		margin: 16px 0 20px 0;
+	}
+
+	> div.x-appreciation {
+		font-size: 24px;
+		line-height: 36px;
+	}
+}
+
+
+
 // override uikit /////////////////////////////////////////////////////////////
 
 @base-body-font-family:                         STSong, SimSun, NSimSun;
