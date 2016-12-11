@@ -319,6 +319,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 			poet = poemService.createPoet(newPoetBean(getTangDynasty().id, "陈子昂"));
 			PoemBean bean = newPoemBean(poet.id, " 登●幽 州 臺[1]歌", "前不(2)見 古人，\n后不见③来者 \t\n  \u3000");
 			bean.tags = "  唐诗，\t古诗；唐代 古代,诗词";
+			bean.appreciation = "赏析：登·幽州台歌\n";
 			poem = poemService.createPoem(bean);
 		}
 		Poem p = poemService.getPoem(poem.id);
@@ -450,6 +451,7 @@ public class PoemServiceTest extends AbstractServiceTestBase {
 			poem = poemService.createPoem(newPoemBean(poet.id, "登幽州台歌", "前不见古人，后不见来者"));
 			PoemBean bean = newPoemBean(poet.id, " 幽州 {1}台歌", "前不见，\n\n后不见");
 			bean.tags = " 古诗, 唐代";
+			bean.appreciation = "赏析：\n\n幽州台歌";
 			poemService.updatePoem(poem.id, bean);
 		}
 		// check:
