@@ -16,10 +16,43 @@
 
 // customized less ////////////////////////////////////////////////////////////
 
+div.bg-top {
+	min-width: @utility-container-max-width;
+    height: 200px;
+    background-image: url(/static/image/bg-top.png);
+    background-position: top center;
+    background-repeat: repeat-x;
+    
+    a.logo {
+        background-image: url(/static/image/logo.png);
+        background-repeat: no-repeat;
+        display: block;
+        width: 218px;
+        height: 60px;
+        margin-top: 50px;
+        margin-bottom: 20px;
+        &:hover {
+            opacity: 0.75;
+        }
+    }
+}
+
+div.bg-bottom {
+	min-width: @utility-container-max-width;
+    height: 80px;
+    background-image: url(/static/image/bg-bottom.png);
+    background-position: bottom center;
+    background-repeat: repeat-x;
+    
+    div.copy {
+        margin-top: 20px;
+    }
+}
+
 #q {
 	padding-bottom: 6px;
 	border: none;
-	border-bottom: 1px solid #ad2222;
+	border-bottom: 1px solid @global-link-color;
 	background-color: transparent;
 	&:focus {
 		outline: none;
@@ -36,7 +69,7 @@ div.x-poem {
 		> div.x-cover {
 			width: 640px;
 			height: 360px;
-			box-shadow: 0 0 10px 10px rgba(255, 250, 240, 1) inset;
+			box-shadow: 0 0 10px 10px #fff inset;
 		}
 	}
 
@@ -77,10 +110,10 @@ div.x-poem {
 
 // customize variables.less
 
-@base-body-background:                          #fffaf0;
+@base-body-background:                          #fff;
 @base-body-color:                               #444;
 
-@global-link-color:                             #ad2222;
+@global-link-color:                             #d20e16;
 @global-link-hover-color:                       darken(@global-link-color, 10%);
 
 @base-link-hover-text-decoration:               none;

@@ -94,21 +94,22 @@ $(function () {
     {% block head %}<!-- block head  -->{% endblock %}
 </head>
 
-<body style="font-size: 16px; padding: 20px 0;">
-	<div id="main" class="uk-container uk-container-center">
-		<div class="uk-grid" style="margin-top: 10px; margin-bottom: 30px;">
-			<div class="uk-width-1-2">
-				<h1 id="brand"><a href="/">中华诗词</a></h1>
+<body style="font-size: 16px;">
+	<div class="bg-top">
+		<div class="uk-container uk-container-center">
+			<div class="uk-width-1-1">
+				<a href="/" class="logo"></a>
 			</div>
-			<div class="uk-width-1-2">
-			{% if user is null %}
+			<div class="uk-width-1-1">
+				{% if user is null %}
 				<a href="#0" onclick="authFrom('weibo')" class="uk-float-right"><i class="uk-icon-weibo"></i> 微博登录</a>
-			{% else %}
-			    <span class="uk-float-right">欢迎你，{{ user.name }}！ <a href="/auth/signout"><i class="uk-icon-sign-out"></i> 登出</a></span>
-			{% endif %}
+				{% else %}
+			    <span>欢迎你，{{ user.name }}！ <a href="/auth/signout"><i class="uk-icon-sign-out"></i> 登出</a></span>
+				{% endif %}
 			</div>
 		</div>
-
+	</div>
+	<div id="main" class="uk-container uk-container-center">
 		<div class="uk-grid">
 			<div class="uk-width-4-5">
 				朝代：
@@ -159,15 +160,16 @@ $(function () {
             <div class="uk-width-1-3">
             	<p>【微信公众号】<p>
             	<p>关注中华诗词微信公众号，每天清晨为您推送精选诗词。</p>
-            	<p><div style="width: 180px; height: 247px; background-image: url(/static/image/weixin.png); background-repeat: no-repeat;"></div></p>
+            	<p><div style="width: 200px; height: 200px; background-image: url(/static/image/weixin.png); background-repeat: no-repeat;"></div></p>
             </div>
 	    </div>
 
-	    <div class="uk-grid">
-            <div class="uk-width-1-1 uk-text-center">
-            	<p>中华诗词&copy;2014-2017 <a href="/" target="_blank">www.shi-ci.com</a></p>
-            </div>
-	    </div>
+    </div>
+
+    <div class="bg-bottom">
+        <div class="uk-container uk-container-center">
+			<div class="copy">中华诗词&copy;2014-2017 <a href="/" target="_blank">www.shi-ci.com</a></div>
+		</div>
     </div>
 </body>
 </html>
