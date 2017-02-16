@@ -29,7 +29,7 @@
 			</Policies>
 			<DefaultRolloverStrategy max="20" />
 		</RollingFile>
-		<RollingFile name="error" bufferedIO="true"
+		<RollingFile name="err" bufferedIO="true"
 			fileName="${file.err.filename}" filePattern="${file.err.pattern}">
 			<PatternLayout pattern="${log.pattern}" />
 			<Policies>
