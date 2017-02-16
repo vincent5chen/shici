@@ -73,8 +73,7 @@
 		</property>
 	</bean>
 
-	<bean id="pebbleEngine" class="com.itranswarp.shici.web.view.PebbleEngineEx"
-		init-method="init">
+	<bean id="pebbleEngine" class="com.itranswarp.shici.web.view.PebbleEngineFactory">
 		<property name="loader">
 			<bean class="com.mitchellbosecke.pebble.spring.PebbleTemplateLoader">
 				<property name="charset" value="utf-8" />

@@ -42,7 +42,7 @@
 		<junit.version>4.12</junit.version>
 		<log4j.version>2.6.2</log4j.version>
 		<mysql.connector.version>5.1.40</mysql.connector.version>
-		<pebble.version>1.6.0</pebble.version>
+		<pebble.version>2.3.0</pebble.version>
 		<spring.version>4.3.6.RELEASE</spring.version>
 		<spymemcached.version>2.12.0</spymemcached.version>
 		<warpdb.version>2.4</warpdb.version>
@@ -169,14 +169,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.mitchellbosecke</groupId>
-			<artifactId>pebble-spring3</artifactId>
+			<artifactId>pebble-spring4</artifactId>
 			<version>${pebble.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-webmvc</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
