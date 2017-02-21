@@ -1,0 +1,86 @@
+# docker-compose for shici
+
+version: "2"
+
+services:
+
+  shici-openvpn:
+    image: kylemanna/openvpn:2.0.0
+    container_name: shici-openvpn
+    hostname: openvpn
+    networks:
+      shicinet:
+        ipv4_address: 172.25.1.99
+    ports:
+      - "1194:1194/udp"
+    volumes:
+      - ./openvpn/data:/etc/openvpn
+    cap_add:
+      - NET_ADMIN
+
+  shici-nginx:
+    image: nginx:1.11
+    container_name: shici-nginx
+    hostname: nginx
+    networks:
+      shicinet:
+        ipv4_address: 172.25.1.100
+#    volumes:
+#      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+
+  shici-mysql:
+    image: mysql:5.7
+    container_name: shici-mysql
+    hostname: mysql
+    command: mysqld --innodb_buffer_pool_size=16M --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    networks:
+      shicinet:
+        ipv4_address: 172.25.1.101
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: shici
+
+  shici-es:
+    image: elasticsearch:5.2
+    container_name: shici-es
+    hostname: es
+    command: elasticsearch
+    networks:
+      shicinet:
+        ipv4_address: 172.25.1.102
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+    environment:
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
+
+  shici-memcached:
+    image: memcached:1.4.34
+    container_name: shici-memcached
+    hostname: memcached
+    command: memcached -m 16
+    networks:
+      shicinet:
+        ipv4_address: 172.25.1.103
+
+  shici-app:
+    image: shici:1.0-SNAPSHOT
+    container_name: shici-app
+    hostname: shici
+    networks:
+      shicinet:
+        ipv4_address: 172.25.1.200
+    volumes:
+      - ./app/log:/var/log/shici
+      - /tmp
+    environment:
+      JAVA_OPTIONS: -Xms128m -Xmx360m
+      template_cache: 20
+
+networks:
+  shicinet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
