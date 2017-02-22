@@ -97,19 +97,23 @@ $(function () {
 <body style="font-size: 16px;">
 	<div class="bg-top">
 		<div class="uk-container uk-container-center">
-			<div class="uk-width-1-1">
-				<a href="/" class="logo"></a>
+			<div class="uk-grid">
+				<div class="uk-width-1-1">
+					<a href="/" class="logo"></a>
+				</div>
 			</div>
+		</div>
+	</div>
+	<div id="main" class="uk-container uk-container-center">
+		<div class="uk-grid">
 			<div class="uk-width-1-1">
 				{% if user is null %}
-				<a href="#0" onclick="authFrom('weibo')" class="uk-float-right"><i class="uk-icon-weibo"></i> 微博登录</a>
+				<a href="#0" onclick="authFrom('weibo')"><i class="uk-icon-weibo"></i> 微博登录</a>
 				{% else %}
 			    <span>欢迎你，{{ user.name }}！ <a href="/auth/signout"><i class="uk-icon-sign-out"></i> 登出</a></span>
 				{% endif %}
 			</div>
 		</div>
-	</div>
-	<div id="main" class="uk-container uk-container-center">
 		<div class="uk-grid">
 			<div class="uk-width-4-5">
 				朝代：
