@@ -1,3 +1,13 @@
+# Docker.gitignore #
+
+docker/app/log
+docker/elasticsearch/data
+docker/mysql/data
+docker/nginx/cache
+docker/nginx/log
+docker/nginx/root
+docker/.env
+
 # Java.gitignore ##############################################################
 
 *.class
