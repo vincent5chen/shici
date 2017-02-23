@@ -1,6 +1,8 @@
 package com.itranswarp.shici.web;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -57,8 +59,32 @@ public class UIController {
 		}
 		Poet poet = poemService.getPoet(poetId);
 		PagedResults<Poem> results = poemService.getPoems(poetId, pageIndex);
-		return createMV("poet.html", MapUtil.createMap("dynasty", poemService.getDynasty(poet.dynastyId), "poet", poet,
-				"poems", results.results, "page", results.page));
+		return createMV("poet.html",
+				MapUtil.createMap("dynasty", poemService.getDynasty(poet.dynastyId), "poet", poet, "poems",
+						results.results, "pageIndex", pageIndex, "pageList",
+						createPageList(results.page.totalPages, pageIndex)));
+	}
+
+	List<Integer> createPageList(int total, int current) {
+		List<Integer> list = new ArrayList<>(15);
+		int start = (current - 5) < 1 ? 1 : (current - 5);
+		int end = (current + 5) > total ? total : (current + 5);
+		if (start > 1) {
+			list.add(1);
+		}
+		if (start > 2) {
+			list.add(null);
+		}
+		for (int i = start; i <= end; i++) {
+			list.add(i);
+		}
+		if (end < (total - 1)) {
+			list.add(null);
+		}
+		if (end < total) {
+			list.add(total);
+		}
+		return list;
 	}
 
 	@GetMapping("/poem/{id}")

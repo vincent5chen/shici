@@ -5,7 +5,6 @@
 {% block head %}
 
 <script>
-
 </script>
 
 {% endblock %}
@@ -26,6 +25,18 @@
 		<div id="poems" class="x-poem-list">
 		{% for p in poems %}
 			<div class="x-name"><a href="/poem/{{ p.id }}">{{ p.name }}</a>&nbsp;&nbsp;&nbsp;{{ p.content }}</div>
+		{% endfor %}
+		</div>
+		<div id="page" class="x-page">
+		{% for i in pageList %}
+			{% if i==null %}
+				<span>...</span>
+			{% endif %}
+			{% if i==pageIndex %}
+				<span>{{ i }}</span>
+			{% else %}
+				<a href="?page={{ i }}">{{ i }}</a>
+			{% endif %}
 		{% endfor %}
 		</div>
 	</div>

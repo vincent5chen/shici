@@ -1,0 +1,49 @@
+
+<script>
+$(function () {
+	var
+		$poem = $('#poem'),
+		name = $poem.find('.x-name').text(),
+		poetId = $poem.find('.x-poet-id').text(),
+		poetName = $poem.find('.x-poet').text(),
+		content = $poem.find('.x-content').text(),
+		appreciation = $poem.find('.x-appreciation').text(),
+		$display = $('div.x-poem');
+	$display.find('.x-name').text(name);
+	$display.find('.x-poet a').attr('href', '/poet/' + poetId);
+	$display.find('.x-poet a').text(poetName);
+	$display.find('.x-content').html(formatPoem(content));
+	if (appreciation) {
+		$display.find('.x-appreciation p.x-appr').text(appreciation);
+		$display.find('.x-appreciation').show();
+	}
+});
+</script>
+
+<div id="poem" style="display:none">
+	<div class="x-name">{{ poem.name }}</div>
+	<div class="x-poet-id">{{ poet.id }}</div>
+	<div class="x-poet">{{ poet.name }}</div>
+	<div class="x-content">{{ poem.content }}</div>
+	<div class="x-appreciation">{{ poem.appreciation }}</div>
+</div>
+
+<div class="uk-grid">
+	<div class="uk-width-1-1">
+		<div class="x-poem">
+			{% if poem.imageId != '' %}
+			<div class="x-cover-container" style="background-image: url(/resources/{{ poem.imageId }})">
+				<div class="x-cover"></div>
+			</div>
+			{% endif %}
+			<div class="x-name"></div>
+			<div class="x-poet"><a href="#"></a></div>
+			<div class="x-content"></div>
+			<div class="x-appreciation" style="display:none">
+				<p>&nbsp;<p>
+				<p>「赏析」<p>
+				<p class="x-appr"></p>
+			</div>
+		</div>
+	</div>
+</div>

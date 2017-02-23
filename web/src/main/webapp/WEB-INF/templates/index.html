@@ -15,25 +15,6 @@ div.x-vertical {
 }
 </style>
 
-<script>
-
-$(function () {
-	var
-		$poem = $('#poem'),
-		name = $poem.find('.x-name').text(),
-		poetName = $poem.find('.x-poet').text(),
-		content = $poem.find('.x-content').text(),
-		appreciation = $poem.find('.x-appreciation').text(),
-		$display = $('div.x-poem');
-	$display.find('.x-name').text(name);
-	$display.find('.x-poet').text(poetName);
-	$display.find('.x-content').html(formatPoem(content));
-	$display.find('.x-appreciation').text(appreciation);
-	//startAnimate();
-});
-
-</script>
-
 {% endblock %}
 
 {% block nav %}
@@ -45,26 +26,6 @@ $(function () {
 
 {% block main %}
 
-<div id="poem">
-	<div class="x-name">{{ poem.name }}</div>
-	<div class="x-poet">{{ poet.name }}</div>
-	<div class="x-content">{{ poem.content }}</div>
-	<div class="x-appreciation">{{ poem.appreciation }}</div>
-</div>
-
-<div class="uk-grid">
-	<div class="uk-width-1-1">
-		<div class="x-poem">
-			<div class="x-cover-container" style="background-image: url(/resources/{{ poem.imageId }})">
-				<div class="x-cover"></div>
-			</div>
-			<div class="x-name"></div>
-			<div class="x-poet"></div>
-			<div class="x-content"></div>
-			<div class="x-hr">┄┄┄┄┄┄┄┄┄┄</div>
-			<div class="x-appreciation"></div>
-		</div>
-	</div>
-</div>
+{% include "_inc_display_poem.html" %}
 
 {% endblock %}
