@@ -60,15 +60,6 @@ services:
     environment:
       ES_JAVA_OPTS: -Xms256m -Xmx256m
 
-  shici-memcached:
-    image: memcached:1.4.34
-    container_name: shici-memcached
-    hostname: memcached
-    command: memcached -m 16
-    networks:
-      shicinet:
-        ipv4_address: 172.25.1.103
-
   shici-app:
     image: shici:1.0-SNAPSHOT
     container_name: shici-app
