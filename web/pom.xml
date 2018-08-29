@@ -1,10 +1,19 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.itranswarp</groupId>
 	<artifactId>shici</artifactId>
-	<version>1.0-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<version>1.0</version>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.0.4.RELEASE</version>
+		<relativePath />
+	</parent>
+
 	<name>Zhong Hua Shi Ci Project</name>
 
 	<licenses>
@@ -17,6 +26,7 @@
 	<properties>
 		<!-- source encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<java.version>1.8</java.version>
@@ -24,211 +34,78 @@
 		<!-- project version -->
 		<project.version>1.0</project.version>
 
-		<!-- maven time format -->
-		<maven.build.timestamp.format>yyyyMMdd_HHmmss</maven.build.timestamp.format>
-
-		<!-- artifact version -->
-		<c3p0.version>0.9.1.2</c3p0.version>
-		<commons.logging.version>1.1</commons.logging.version>
-		<eswrapper.version>1.3</eswrapper.version>
-		<hibernate.entitymanager.version>4.3.10.Final</hibernate.entitymanager.version>
-		<hsqldb.version>2.3.3</hsqldb.version>
-		<jackson.version>2.6.0</jackson.version>
-		<javax.annotation.version>1.2</javax.annotation.version>
-		<javax.mail.version>1.4.7</javax.mail.version>
-		<javax.servlet.version>3.1.0</javax.servlet.version>
-		<jedis.version>2.8.0</jedis.version>
-		<jetty.version>9.4.1.v20170120</jetty.version>
-		<junit.version>4.12</junit.version>
-		<log4j.version>2.6.2</log4j.version>
-		<mysql.connector.version>5.1.40</mysql.connector.version>
-		<pebble.version>2.3.0</pebble.version>
-		<spotify.docker.version>0.4.13</spotify.docker.version>
-		<spring.version>4.3.6.RELEASE</spring.version>
-		<spymemcached.version>2.12.0</spymemcached.version>
-		<warpdb.version>2.4</warpdb.version>
-		<wxapi.version>1.2</wxapi.version>
+		<!-- 3rd-party library version -->
+		<lucene.version>7.4.0</lucene.version>
+		<pebble.version>3.0.2</pebble.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging-api</artifactId>
-			<version>${commons.logging.version}</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-			<version>${log4j.version}</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>${log4j.version}</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-jcl</artifactId>
-			<version>${log4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>${javax.mail.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.itranswarp</groupId>
-			<artifactId>es-wrapper</artifactId>
-			<version>${eswrapper.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.itranswarp</groupId>
-			<artifactId>warpdb</artifactId>
-			<version>${warpdb.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.itranswarp.openweixin</groupId>
-			<artifactId>wxapi</artifactId>
-			<version>${wxapi.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>c3p0</groupId>
-			<artifactId>c3p0</artifactId>
-			<version>${c3p0.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.spy</groupId>
-			<artifactId>spymemcached</artifactId>
-			<version>${spymemcached.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql.connector.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-			<version>${javax.annotation.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
-			<version>${jedis.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context-support</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jdbc</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>${javax.servlet.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>${spring.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.mitchellbosecke</groupId>
-			<artifactId>pebble-spring4</artifactId>
+			<groupId>io.pebbletemplates</groupId>
+			<artifactId>pebble-spring-boot-2-starter</artifactId>
 			<version>${pebble.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<version>${jetty.version}</version>
-			<scope>provided</scope>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>${lucene.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-runner</artifactId>
-			<version>${jetty.version}</version>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queries</artifactId>
+			<version>${lucene.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
-			<version>${jetty.version}</version>
-			<scope>provided</scope>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queryparser</artifactId>
+			<version>${lucene.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-memory</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+
+		<!-- junit5 -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- devtools: optional -->
 		<dependency>
-			<groupId>com.itranswarp</groupId>
-			<artifactId>warpdb</artifactId>
-			<type>test-jar</type>
-			<version>${warpdb.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-			<version>${hibernate.entitymanager.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<version>${hsqldb.version}</version>
-			<scope>test</scope>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
 	<build>
+		<finalName>shici</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.lesscss</groupId>
 				<artifactId>lesscss-maven-plugin</artifactId>
 				<version>1.7.0.1.1</version>
 				<configuration>
-					<sourceDirectory>${project.basedir}/src/main/webapp/static/less</sourceDirectory>
-					<outputDirectory>${project.basedir}/src/main/webapp/static/css</outputDirectory>
+					<sourceDirectory>${project.basedir}/src/main/resources/less</sourceDirectory>
+					<outputDirectory>${project.basedir}/src/main/resources/static/css</outputDirectory>
 					<compress>false</compress>
 					<includes>
-						<include>main.less</include>
+						<include>shici.less</include>
 					</includes>
 				</configuration>
 				<executions>
@@ -240,43 +117,10 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<archiveClasses>true</archiveClasses>
-					<archive>
-						<manifest>
-							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-						</manifest>
-						<manifestEntries>
-							<App-Version>${project.version}</App-Version>
-							<App-Build>${maven.build.timestamp}</App-Build>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>${spotify.docker.version}</version>
-				<configuration>
-					<imageName>${project.artifactId}</imageName>
-					<imageTags>
-						<imageTag>${project.version}</imageTag>
-					</imageTags>
-					<!-- Dockerfile文件所在目录 -->
-					<dockerDirectory>docker</dockerDirectory>
-					<resources>
-						<resource>
-							<targetPath>/</targetPath>
-							<directory>${project.build.directory}</directory>
-							<include>${project.build.finalName}.war</include>
-						</resource>
-					</resources>
-					<!-- 给Dockerfile传递jarfile参数 -->
-					<buildArgs>
-						<warfile>${project.build.finalName}.war</warfile>
-					</buildArgs>
+					<excludeDevtools>true</excludeDevtools>
 				</configuration>
 			</plugin>
 		</plugins>
