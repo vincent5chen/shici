@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{% block title %} TITLE {% endblock %} - 中华诗词</title>
+
+	<link rel="stylesheet" href="/static/css/shici.css" />
+
+	<script src="/static/js/jquery.min.js"></script>
+	<script src="/static/js/uikit.min.js"></script>
+	<script src="/static/js/components/autocomplete.js"></script>
+	<script src="/static/js/qrcode.min.js"></script>
+	<script src="/static/js/shici.js"></script>
+
+	{% block import %} <!-- import here --> {% endblock %}
+	{% block style %} <!-- css style here --> {% endblock %}
+	{% block script %} <script> </script> {% endblock %}
+
+</head>
+<body style="margin-bottom: 100px;">
+	<div id="header" style="padding-top: 30px;">
+		<div class="uk-container uk-container-center">
+			<div class="uk-grid">
+				<div class="uk-width-2-10">
+					<h1><a href="/">中华诗词</a></h1>
+				</div>
+				<div class="uk-width-6-10 uk-margin-top">
+					<ul id="dynasties" class="uk-subnav">
+					{% for d in dynasties %}
+						<li id="dynasty-{{ d.id }}"><a href="/dynasty/{{ d.id }}">{{ d.name }}</a></li>
+					{% endfor %}
+					</ul>
+				</div>
+				<div class="uk-width-2-10 uk-margin-top">
+					<form action="/search" class="uk-form">
+						<div class="uk-autocomplete uk-form-icon" data-uk-autocomplete="{source: '/api/suggest', minLength: 1, param: 'q', method: 'get'}">
+							<i class="uk-icon-search"></i>
+							<input id="q" name="q" type="text" maxlength="12">
+							<script type="text/autocomplete">
+								<ul class="uk-nav uk-nav-autocomplete uk-autocomplete-results">
+								{% set theItems = '{{~items}}<li data-value="{{ $item }}"><a href="/search?q={{ $item }}">{{ $item }}</a></li>{{/items}}' %}
+								{{ theItems | raw }}
+								</ul>
+							</script>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<hr>
+	</div>
+
+	<div id="main" style="padding: 20px 0;">
+		<div class="uk-container uk-container-center">
+		{% block main %}
+			<div class="uk-grid">
+				<div class="uk-width-1-1">
+					<h1>中华诗词</h1>
+				</div>
+			</div>
+		{% endblock %}
+		</div>
+	</div>
+
+	<div id="footer" style="position:fixed; left: 0; right: 0; bottom: 0; height: 100px; background-color: #fff;">
+		<hr>
+		<div class="uk-container uk-container-center uk-text-small" style="padding-bottom: 30px">
+			<div class="uk-grid">
+				<div class="uk-width-1-6">
+					<p>中华诗词&copy;2018</p>
+				</div>
+				<div class="uk-width-4-6">
+					<p>中华诗词收录了上至先秦，下至当代共计六万余首诗词，完全免费并开放所有诗词内容和程序源代码，您可自由复制、修改、传播诗词内容和程序源码。如果您发现收录的诗词存在错误，请直接<a target="_blank" href="https://github.com/michaelliao/shici/wiki/%E7%BA%A0%E9%94%99">提交您的修改请求</a>。</p>
+				</div>
+				<div class="uk-width-1-6">
+					<p>
+						<a target="_blank" href="https://github.com/michaelliao/shici" class="uk-icon-button uk-icon-github"></a>
+						<a target="_blank" href="https://itunes.apple.com/cn/app/id539302164" class="uk-icon-button uk-icon-apple"></a>
+						<a target="_blank" href="https://weibo.com/liaoxuefeng" class="uk-icon-button uk-icon-weibo"></a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

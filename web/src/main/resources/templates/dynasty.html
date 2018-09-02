@@ -1,0 +1,37 @@
+{% extends("_base.html") %}
+
+{% block title %}
+    {{ dynasty.name }}
+{% endblock %}
+
+{% block script %}
+
+<script>
+
+$(function () {
+	$('#dynasty-{{ dynasty.id }}').addClass('uk-active');
+});
+
+</script>
+
+{% endblock %}
+
+{% block main %}
+
+<div class="uk-grid">
+	<div class="uk-width-1-1">
+		<ul class="uk-breadcrumb">
+			<li><a href="/">首页</a></li>
+			<li class="uk-active"><span>{{ dynasty.name }}</span></li>
+		</ul>
+		<h3>诗人列表</h3>
+		{% for poet in poets %}
+		<div class="poem-preview">
+			<a href="/poet/{{ poet.id }}">{{ poet.name }}</a>
+			{{ poet.profile }}
+		</div>
+		{% endfor %}
+	</div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends("_base.html") %}
+
+{% block title %}
+    搜索“{{ q }}”
+{% endblock %}
+
+{% block script %}
+<script>
+
+$(function () {
+	$('#q').val('{{ q }}');
+});
+
+</script>
+{% endblock %}
+
+{% block main %}
+
+<div class="uk-grid">
+	<div class="uk-width-1-1">
+		<ul class="uk-breadcrumb">
+			<li><a href="/">首页</a></li>
+			<li class="uk-active"><span>搜索“{{ q }}”</span></li>
+		</ul>
+		{% for poem in poems %}
+		<div class="poem-preview">
+			<a href="/poem/{{ poem.id }}">{{ poem.name }}</a>
+			-
+			<a href="/poet/{{ poem.poet.id }}">{{ poem.poet.name }}</a>
+			-
+			{{ poem.content }}
+		</div>
+		{% endfor %}
+	</div>
+</div>
+
+{% endblock %}
