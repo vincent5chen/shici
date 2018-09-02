@@ -1,2 +1,0 @@
-V	270103012952Z		01	unknown	/CN=local.transwarp.xyz
-V	270103013037Z		02	unknown	/CN=localvpn
