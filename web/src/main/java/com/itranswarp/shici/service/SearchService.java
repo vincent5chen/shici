@@ -71,22 +71,28 @@ public class SearchService {
 		builder.add(new QueryParser("name", this.analyzer).parse(q), Occur.SHOULD);
 		builder.add(new QueryParser("poetName", this.analyzer).parse(q), Occur.SHOULD);
 		builder.add(new QueryParser("content", this.analyzer).parse(q), Occur.SHOULD);
-		return search(q, builder.build(), 25);
+		return search(builder.build(), 25);
 	}
 
 	public Hit[] search(String q) {
 		logger.info("search {}...", q);
 		String[] ss = q.split("[\\s\\;\\,\\.\\?\\？\\，\\、\\。\\；]+");
+		if (ss.length == 0) {
+			return EMPTY_HITS;
+		}
 		if (ss.length > 5) {
 			ss = Arrays.copyOf(ss, 5);
 		}
-		Query query = buildMultiFieldQuery(q);
-		return search(q, query, 25);
+		BooleanQuery.Builder builder = new BooleanQuery.Builder();
+		for (String s : ss) {
+			builder.add(buildMultiFieldQuery(s), Occur.SHOULD);
+		}
+		return search(builder.build(), 25);
 	}
 
 	static final Hit[] EMPTY_HITS = new Hit[0];
 
-	Hit[] search(String q, Query query, int max) {
+	Hit[] search(Query query, int max) {
 		try (IndexReader reader = DirectoryReader.open(this.index)) {
 			IndexSearcher searcher = new IndexSearcher(reader);
 			TopDocs docs = searcher.search(query, max);
@@ -99,7 +105,6 @@ public class SearchService {
 				Document d = searcher.doc(docId);
 				hits[i] = new Hit(Long.parseLong(d.get("id")), docs.scoreDocs[i].score);
 			}
-			logger.info("{} hits on search {}.", hits.length, q);
 			return hits;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -121,15 +126,7 @@ public class SearchService {
 		if (s.length() == 1) {
 			return new TermQuery(new Term(field, s));
 		}
-		if (s.length() < 4) {
-			return new PhraseQuery(field, chars(s));
-		}
-		BooleanQuery.Builder builder = new BooleanQuery.Builder();
-		String[] terms = chars(s);
-		for (String term : terms) {
-			builder.add(new TermQuery(new Term(field, term)), Occur.SHOULD);
-		}
-		return builder.build();
+		return new PhraseQuery(field, chars(s));
 	}
 
 	String[] chars(String s) {
@@ -183,7 +180,7 @@ public class SearchService {
 		builder.add(new PhraseQuery("poetName", chars(q)), Occur.SHOULD);
 		builder.add(new PhraseQuery("content", chars(q)), Occur.SHOULD);
 		Query query = builder.build();
-		Hit[] hits = search(q, query, 10);
+		Hit[] hits = search(query, 20);
 		String[] words = Arrays.stream(hits).map(hit -> {
 			Poem poem = poemService.getPoem(hit.id);
 			String s = null;
@@ -197,7 +194,7 @@ public class SearchService {
 			}
 			s = suggest(q, poem.getContent());
 			return s;
-		}).filter(s -> s != null && !s.equals(q)).distinct().toArray(String[]::new);
+		}).filter(s -> s != null && !s.equals(q)).distinct().limit(10).toArray(String[]::new);
 		Arrays.stream(words).forEach(System.out::println);
 		return words;
 	}
