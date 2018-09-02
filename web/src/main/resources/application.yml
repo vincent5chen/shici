@@ -1,2 +1,8 @@
 server:
   port: 2018
+
+spring:
+  application:
+    name: shici
+  profiles:
+    active: ${PROFILES:native}
