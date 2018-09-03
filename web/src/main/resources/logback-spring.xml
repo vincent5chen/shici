@@ -20,7 +20,6 @@
 				<charset>utf8</charset>
 			</encoder>
 		</appender>
-
 		<root level="INFO">
 			<appender-ref ref="CONSOLE" />
 		</root>
@@ -28,7 +27,11 @@
 
 	<springProfile name="!native">
 		<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-			<file>/var/log/shici/shici.log</file>
+			<encoder>
+				<pattern>${CONSOLE_LOG_PATTERN}</pattern>
+				<charset>utf8</charset>
+			</encoder>
+			<file>/var/log/supervisor/shici-web.log</file>
 			<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
 				<fileNamePattern>/var/log/shici/shici.log.%i</fileNamePattern>
 			</rollingPolicy>
