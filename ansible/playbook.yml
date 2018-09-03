@@ -1,0 +1,96 @@
+# playbook: release for shici application
+
+---
+
+- hosts: shici
+  remote_user: ubuntu
+  sudo: yes
+  tasks:
+    # init vars:
+    - name: init var_timestamp by executing command
+      shell: date +%Y-%m-%d_%H_%M_%S
+      register: var_timestamp
+    - name: set var "timestamp"
+      set_fact:
+        timestamp: "{{ var_timestamp.stdout }}"
+    - name: print var "timestamp"
+      debug:
+        msg: "timestamp = {{ timestamp }}"
+    - name: init memory size
+      shell: grep MemTotal /proc/meminfo | awk '{print int($2/1024*0.75)}'
+      register: var_xmx
+    - name: set var "xmx"
+      set_fact:
+        xmx: "{{ var_xmx.stdout }}"
+    - name: print var "xmx"
+      debug:
+        msg: "xmx = {{ xmx }}"
+    # install jdk:
+    - name: install jdk
+      apt:
+        name: openjdk-8-jre-headless
+    # install jar:
+    - name: remove old deployed jars from /srv/shici-*.jar
+      shell: "ls -td -1 shici-* | tail -n +11"
+      args:
+        chdir: /srv
+      register: to_be_deleted
+    - name: will remove old deployed jars
+      debug: msg="{{ item }}"
+      with_items: "{{ to_be_deleted.stdout_lines }}"
+    - name: actually remove old deployed jars
+      file:
+        name: /srv/{{ item }}
+        state: absent
+      with_items: "{{ to_be_deleted.stdout_lines }}"
+    - name: make dir /srv/shici-{{ timestamp }}
+      file:
+        path: /srv/shici-{{ timestamp }}
+        state: directory
+    - name: copy {{ app.name }}.jar to /srv/shici-{{ timestamp }}.jar
+      copy:
+        src: ../web/target/shici.jar
+        dest: /srv/shici-{{ timestamp }}/shici.jar
+    - name: remove old symbol link /srv/shici
+      file:
+        path: /srv/shici
+        state: absent
+    - name: create symbol link /srv/shici -> /srv/shici-{{ timestamp }}
+      file:
+        src: /srv/shici-{{ timestamp }}
+        dest: /srv/shici
+        state: link
+    # nginx:
+    - name: make log dir /var/log/shici/
+      file:
+        path: /var/log/shici/
+        state: directory
+        owner: www-data
+        group: www-data
+    - name: install nginx
+      apt:
+        name: nginx
+    - name: generate nginx conf
+      template:
+        src: templates/nginx.conf
+        dest: /etc/nginx/sites-enabled/default
+    - name: reload nginx
+      service:
+        name: nginx
+        state: reloaded
+    # supervisor:
+    - name: install supervisor
+      apt:
+        name: supervisor
+    - name: generate supervisor conf
+      template:
+        src: templates/supervisor.conf
+        dest: /etc/supervisor/conf.d/generated.conf
+    - name: start supervisor if not running
+      service:
+        name: supervisor
+        state: started
+    - name: start shici app
+      supervisorctl:
+        name: shici
+        state: restarted
