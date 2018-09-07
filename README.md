@@ -10,3 +10,8 @@
 - 可使用自动化脚本打包并生成网站；
 - 提供REST API接口；
 - 提供全文搜索。
+
+# 下载
+
+下载地址：[release](https://github.com/michaelliao/shici/tree/master/release)
+
